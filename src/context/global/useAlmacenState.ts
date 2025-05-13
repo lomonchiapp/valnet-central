@@ -1,0 +1,46 @@
+import { create } from "zustand";
+import { onSnapshot, collection } from "firebase/firestore";
+import {database} from "@/firebase";
+import { Articulo, Inventario, Marca } from "@/types";
+
+// Este es el estado global de la aplicación
+// En este vamos a almacenar todos los datos
+interface AlmacenState {
+    inventarios: Inventario[]
+    articulos: Articulo[]
+    marcas: Marca[]
+    setArticulos: (articulos: Articulo[]) => void
+    setInventarios: (inventarios: Inventario[]) => void
+    subscribeToArticulos: () => () => void
+    subscribeToInventarios: () => () => void
+    subscribeToMarcas: () => () => void
+}
+
+
+
+export const useAlmacenState = create<AlmacenState>()((set) => ({
+    inventarios: [],
+    articulos: [],
+    marcas: [],
+    setArticulos: (articulos: Articulo[]) => set({ articulos }),
+    setInventarios: (inventarios: Inventario[]) => set({ inventarios }),
+    subscribeToArticulos: () => {
+        const unsubscribe = onSnapshot(collection(database, 'articulos'), (snapshot) => {
+            set({ articulos: snapshot.docs.map((doc) => doc.data() as Articulo) })
+        })
+        return unsubscribe
+    },
+    subscribeToInventarios: () => {
+        const unsubscribe = onSnapshot(collection(database, 'inventarios'), (snapshot) => {
+            set({ inventarios: snapshot.docs.map((doc) => doc.data() as Inventario) })
+        })
+        return unsubscribe
+    },
+    subscribeToMarcas: () => {
+        const unsubscribe = onSnapshot(collection(database, 'marcas'), (snapshot) => {
+            set({ marcas: snapshot.docs.map((doc) => doc.data() as Marca) })
+        })
+        return unsubscribe
+    },
+}))
+
