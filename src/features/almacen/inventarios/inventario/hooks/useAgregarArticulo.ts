@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { addDoc, collection, doc, serverTimestamp, updateDoc, query, where, getDocs } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, updateDoc, query, where, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { database, storage } from "@/firebase";
 import { TipoArticulo, Unidad } from "shared-types";
+import { TipoMovimiento } from "@/types/interfaces/almacen/movimiento";
+import { getAuthState } from "@/stores/authStore";
 
 export interface NuevoArticuloData {
   nombre: string;
@@ -62,6 +64,10 @@ export function useAgregarArticulo(inventarioId: string) {
         ...(data.wirelessKey && { wirelessKey: data.wirelessKey }),
       };
 
+      // Get current user ID from auth store
+      const { user } = getAuthState();
+      const userId = user?.id || "unknown";
+
       // Si es MATERIAL, buscar si ya existe uno con el mismo nombre en el mismo inventario
       if (data.tipo === TipoArticulo.MATERIAL && articuloPayload.nombre) {
         const articulosRef = collection(database, 'articulos');
@@ -93,6 +99,28 @@ export function useAgregarArticulo(inventarioId: string) {
           };
 
           await updateDoc(articuloExistenteDoc.ref, updateData);
+          
+          // Crear registro de movimiento para la entrada
+          const movimientoData = {
+            idinventario_origen: null,
+            idinventario_destino: inventarioId,
+            idarticulo: articuloExistenteDoc.id,
+            idusuario: userId,
+            cantidad: cantidadAAgregar,
+            tipo: TipoMovimiento.ENTRADA,
+            fecha: new Date(),
+            descripcion: `Entrada de ${cantidadAAgregar} ${articuloPayload.unidad} de ${articuloPayload.nombre}`,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          };
+          
+          const movimientoRef = await addDoc(collection(database, 'movimientos'), movimientoData);
+          
+          // Actualizar el documento recién creado para incluir su propio ID
+          await updateDoc(movimientoRef, {
+            id: movimientoRef.id,
+          });
+          
           return articuloExistenteDoc.id; // Devolver ID del artículo actualizado
         }
       }
@@ -102,6 +130,32 @@ export function useAgregarArticulo(inventarioId: string) {
         ...articuloPayload,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
+      });
+      
+      // Actualizar el documento recién creado para incluir su propio ID
+      await updateDoc(docRef, {
+        id: docRef.id,
+      });
+      
+      // Crear registro de movimiento para la entrada
+      const movimientoData = {
+        idinventario_origen: null,
+        idinventario_destino: inventarioId,
+        idarticulo: docRef.id,
+        idusuario: userId,
+        cantidad: articuloPayload.cantidad,
+        tipo: TipoMovimiento.ENTRADA,
+        fecha: new Date(),
+        descripcion: `Entrada inicial de ${articuloPayload.cantidad} ${articuloPayload.unidad} de ${articuloPayload.nombre}`,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
+      const movimientoRef = await addDoc(collection(database, 'movimientos'), movimientoData);
+      
+      // Actualizar el documento recién creado para incluir su propio ID
+      await updateDoc(movimientoRef, {
+        id: movimientoRef.id,
       });
       
       return docRef.id;

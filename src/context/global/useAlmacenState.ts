@@ -2,28 +2,42 @@ import { create } from "zustand";
 import { onSnapshot, collection } from "firebase/firestore";
 import {database} from "@/firebase";
 import { Articulo, Inventario, Marca } from "@/types";
+import { Ubicacion } from "@/types/interfaces/almacen/ubicacion";
+import { Movimiento } from "@/types/interfaces/almacen/movimiento";
+import { Proveedor } from "@/types/interfaces/almacen/proveedor";
 
 // Este es el estado global de la aplicación
 // En este vamos a almacenar todos los datos
 interface AlmacenState {
     inventarios: Inventario[]
+    movimientos: Movimiento[]
     articulos: Articulo[]
     marcas: Marca[]
+    ubicaciones: Ubicacion[]
+    proveedores: Proveedor[]
     setArticulos: (articulos: Articulo[]) => void
     setInventarios: (inventarios: Inventario[]) => void
+    setMovimientos: (movimientos: Movimiento[]) => void
+    setUbicaciones: (ubicaciones: Ubicacion[]) => void
     subscribeToArticulos: () => () => void
     subscribeToInventarios: () => () => void
     subscribeToMarcas: () => () => void
+    subscribeToUbicaciones: () => () => void
+    subscribeToMovimientos: () => () => void
+    subscribeToProveedores: () => () => void
 }
-
-
 
 export const useAlmacenState = create<AlmacenState>()((set) => ({
     inventarios: [],
     articulos: [],
+    movimientos: [],
     marcas: [],
+    ubicaciones: [],
+    proveedores: [],
     setArticulos: (articulos: Articulo[]) => set({ articulos }),
     setInventarios: (inventarios: Inventario[]) => set({ inventarios }),
+    setMovimientos: (movimientos: Movimiento[]) => set({ movimientos }),
+    setUbicaciones: (ubicaciones: Ubicacion[]) => set({ ubicaciones }),
     subscribeToArticulos: () => {
         const unsubscribe = onSnapshot(collection(database, 'articulos'), (snapshot) => {
             set({ articulos: snapshot.docs.map((doc) => doc.data() as Articulo) })
@@ -42,5 +56,23 @@ export const useAlmacenState = create<AlmacenState>()((set) => ({
         })
         return unsubscribe
     },
+    subscribeToUbicaciones: () => {
+        const unsubscribe = onSnapshot(collection(database, 'ubicaciones'), (snapshot) => {
+            set({ ubicaciones: snapshot.docs.map((doc) => doc.data() as Ubicacion) })
+        })
+        return unsubscribe
+    },
+    subscribeToMovimientos: () => {
+        const unsubscribe = onSnapshot(collection(database, 'movimientos'), (snapshot) => {
+            set({ movimientos: snapshot.docs.map((doc) => doc.data() as Movimiento) })
+        })
+        return unsubscribe
+    },
+    subscribeToProveedores: () => {
+        const unsubscribe = onSnapshot(collection(database, 'proveedores'), (snapshot) => {
+            set({ proveedores: snapshot.docs.map((doc) => doc.data() as Proveedor) })
+        })
+        return unsubscribe
+    }
 }))
 

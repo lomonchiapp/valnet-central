@@ -1,36 +1,28 @@
 import {
   IconChecklist,
+  IconGasStation,
   IconLayoutDashboard,
   IconMapPin,
   IconReceipt2,
+  IconReportMoney,
+  IconUser,
 } from '@tabler/icons-react'
-import { AudioWaveform, Command, GalleryVerticalEnd, HandshakeIcon } from 'lucide-react'
+import { HandshakeIcon, Ticket as TicketIcon } from 'lucide-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
-  user: {
-    name: 'Franklin Franco',
-    email: 'franklinfranco@gmail.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  teams: [
-    {
-      name: 'Shadcn Admin',
-      logo: Command,
-      plan: 'Vite + ShadcnUI',
-    },
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-  ],
+  
   navGroups: [
+    {
+      title: 'Dashboard',
+      items: [
+        {
+          title: 'Panel Principal',
+          url: '/',
+          icon: IconLayoutDashboard,
+        }
+      ],
+    },
     {
       title: 'Almacen',
       items: [
@@ -60,9 +52,14 @@ export const sidebarData: SidebarData = {
           icon: IconMapPin,
         },
         {
+          title: 'Combustible',
+          url: '/coordinacion/combustible',
+          icon: IconGasStation,
+        },
+        {
           title: 'Tickets',
           url: '/coordinacion/tickets',
-          icon: IconMapPin,
+          icon: TicketIcon,
         },
       ],
     },
@@ -71,8 +68,38 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Pre-Registros',
-          url: '/ventas/pre-registros',
+          url: '/ventas/pre-registros/todos',
           icon: IconChecklist,
+        },
+        {
+          title: 'Mis Ventas',
+          url: '/ventas/pre-registros',
+          icon: IconReportMoney,
+        }
+      ],
+    },
+    {
+      title: 'Valnet',
+      items: [
+        {
+          title: 'Clientes / Instalaciones',
+          url: '/instalaciones',
+          icon: IconMapPin,
+        },
+        {
+          title: 'Configurar WallNet',
+          url: '/valnet/wallnet/config',
+          icon: IconChecklist,
+        }
+      ],
+    },
+    {
+      title: 'Configuración',
+      items: [
+        {
+          title: 'Usuarios Valnet',
+          url: '/valnet/usuarios',
+          icon: IconUser,
         }
       ],
     },

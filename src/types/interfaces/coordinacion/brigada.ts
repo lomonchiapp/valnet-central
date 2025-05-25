@@ -8,7 +8,8 @@ export interface Coordenadas {
 export interface Brigada extends BaseModel {
     nombre: string
     matricula: string
-    inventarioId: string
-    coordenadas: Coordenadas
+    inventarioId?: string
+    coordenadas?: Coordenadas
+    kilometrajeActual?: number
 }
 

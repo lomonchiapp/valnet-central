@@ -2,7 +2,7 @@ import { create } from "zustand"
 
 interface AddNewState {
     //valnet
-    newUsuario: boolean
+    newUser: boolean
     newCliente: boolean
     //ventas
     newPreRegistro: boolean
@@ -12,7 +12,8 @@ interface AddNewState {
     newInventario: boolean
     newBrigada: boolean
     newTicket: boolean
-    setNewUsuario: (newUsuario: boolean) => void
+    newProveedor: boolean
+    setNewUser: (newUser: boolean) => void
     setNewCliente: (newCliente: boolean) => void
     setNewPreRegistro: (newPreRegistro: boolean) => void
     setNewPago: (newPago: boolean) => void
@@ -21,10 +22,11 @@ interface AddNewState {
     setNewInventario: (newInventario: boolean) => void
     setNewBrigada: (newBrigada: boolean) => void
     setNewTicket: (newTicket: boolean) => void
+    setNewProveedor: (newProveedor: boolean) => void
 }
 
 export const useAddNewState = create<AddNewState>()((set) => ({
-    newUsuario: false,
+    newUser: false,
     newCliente: false,
     newPreRegistro: false,
     newPago: false,
@@ -33,7 +35,9 @@ export const useAddNewState = create<AddNewState>()((set) => ({
     newInventario: false,
     newBrigada: false,
     newTicket: false,
-    setNewUsuario: (newUsuario: boolean) => set({ newUsuario }),
+    newProveedor: false,
+    setNewProveedor: (newProveedor: boolean) => set({ newProveedor }),
+    setNewUser: (newUser: boolean) => set({ newUser }),
     setNewCliente: (newCliente: boolean) => set({ newCliente }),
     setNewPreRegistro: (newPreRegistro: boolean) => set({ newPreRegistro }),
     setNewPago: (newPago: boolean) => set({ newPago }),

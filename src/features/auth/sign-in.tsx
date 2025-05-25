@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
+import { doc, updateDoc } from 'firebase/firestore'
+import { database } from '@/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FIREBASE_AUTH } from '@/firebase'
@@ -28,7 +30,10 @@ export default function SignIn() {
     setIsLoading(true)
 
     try {
-      await signInWithEmailAndPassword(FIREBASE_AUTH, email, password)
+      const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password)
+      // Actualizar status a 'Online' en Firestore
+      const { user } = userCredential
+      await updateDoc(doc(database, 'usuarios', user.uid), { status: 'Online' })
       // La redirección se manejará en el useEffect cuando el usuario se actualice
     } catch (error) {
       // eslint-disable-next-line no-console

@@ -1,10 +1,10 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { database } from '@/firebase'
-import { User } from '@/types'
+import { Usuario } from '@/types'
 
-export const getUser = async (uid: string): Promise<User | null> => {
+export const getUser = async (uid: string): Promise<Usuario | null> => {
   try {
-    const userRef = doc(database, 'users', uid)
+    const userRef = doc(database, 'usuarios', uid)
     const userSnap = await getDoc(userRef)
 
     if (!userSnap.exists()) {
@@ -14,14 +14,18 @@ export const getUser = async (uid: string): Promise<User | null> => {
     const userData = userSnap.data()
     return {
       id: userSnap.id,
-      name: userData.name,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
+      nombres: userData.nombres,
+      apellidos: userData.apellidos,
       email: userData.email,
-      phone: userData.phone,
+      cedula: userData.cedula,
+      status: userData.status,
+      telefono: userData.telefono,
+      direccion: userData.direccion,
+      fechaNacimiento: userData.fechaNacimiento,
       role: userData.role,
-      permissions: userData.permissions || []
-    } as User
+      createdAt: userData.createdAt,
+      updatedAt: userData.updatedAt,
+    } as Usuario
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error fetching user:', error)

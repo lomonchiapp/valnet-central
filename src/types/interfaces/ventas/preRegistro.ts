@@ -11,7 +11,7 @@ export interface PreRegistroMikrowisp {
     telefono: string //telefono del cliente [REQUERIDO]
     movil: string //movil del cliente [REQUERIDO]
     email: string //email del cliente [REQUERIDO]
-    notas: string
+    notas?: string // Notas adicionales [OPCIONAL]
     fecha_instalacion: string
 }
 
@@ -19,7 +19,12 @@ export interface PreRegistroMikrowisp {
 export interface PreRegistro extends PreRegistroMikrowisp, BaseModel {
     clienteReferencia: string
     fotoCedula: string
-    fotoContrato: string[]   
+    fotoContrato: string[]
+    fotosCedula?: string[] // Frontal y trasera
+    ubicacion?: { lat: number; lng: number }
+    // Propiedades adicionales
+    estado?: string
+    vendedorId?: string   
 }
 
 export function extractMikrowisp(preRegistro: PreRegistro): PreRegistroMikrowisp {

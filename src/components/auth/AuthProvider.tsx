@@ -4,7 +4,7 @@ import { FIREBASE_AUTH } from '@/firebase'
 import { useAuthStore } from '@/stores/authStore'
 import { LoadingScreen } from '../loading-screen'
 import { getUser } from '@/hooks/auth/getUser'
-import { RoleUsuario } from 'shared-types'
+import { RoleUsuario, StatusUsuario } from '@/types'
 interface Props {
   children: React.ReactNode
 }
@@ -25,10 +25,16 @@ export function AuthProvider({ children }: Props) {
             setUser({
               id: firebaseUser.uid,
               email: firebaseUser.email || '',
-              firstName: firebaseUser.displayName?.split(' ')[0] || '',
-              lastName: firebaseUser.displayName?.split(' ')[1] || '',
-              phone: firebaseUser.phoneNumber || '',
-              role: RoleUsuario.CLIENTE, // Rol por defecto
+              nombres: firebaseUser.displayName?.split(' ')[0] || '',
+              apellidos: firebaseUser.displayName?.split(' ')[1] || '',
+              telefono: firebaseUser.phoneNumber || '',
+              role: RoleUsuario.TECNICO, // Rol por defecto
+              cedula: '',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              direccion: '',
+              fechaNacimiento: '',
+              status: StatusUsuario.ONLINE,
             })
           }
         } else {

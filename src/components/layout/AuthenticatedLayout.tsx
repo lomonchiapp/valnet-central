@@ -5,6 +5,7 @@ import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
 import { cn } from '@/lib/utils'
 import Cookies from 'js-cookie'
+import { GlobalTopBar } from './GlobalTopBar'
 
 export default function AuthenticatedLayout() {
   const defaultOpen = Cookies.get('sidebar:state') !== 'false'
@@ -26,6 +27,10 @@ export default function AuthenticatedLayout() {
             'group-data-[scroll-locked=1]/body:has-[main.fixed-main]:h-svh'
           )}
         >
+          <div className="p-4">
+            <GlobalTopBar />
+          </div>
+          
           <Outlet />
         </div>
       </SidebarProvider>

@@ -23,10 +23,41 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useAuthStore } from '@/stores/authStore'
+import { signOut } from 'firebase/auth'
+import { doc, updateDoc } from 'firebase/firestore'
+import { FIREBASE_AUTH, database } from '@/firebase'
+import { useEffect } from 'react'
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { user } = useAuthStore()
+
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      if (user?.id) {
+        try {
+          await updateDoc(doc(database, 'usuarios', user.id), { status: 'Offline' })
+        } catch {
+          // Ignorar error de actualización de status al cerrar pestaña
+        }
+      }
+    }
+    const handleOffline = async () => {
+      if (user?.id) {
+        try {
+          await updateDoc(doc(database, 'usuarios', user.id), { status: 'Offline' })
+        } catch {
+          // Ignorar error de actualización de status al perder conexión
+        }
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [user])
 
   return (
     <SidebarMenu>
@@ -38,11 +69,11 @@ export function NavUser() {
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
               <Avatar className='h-8 w-8 rounded-lg'>
-                <AvatarImage alt={user?.firstName} />
+                <AvatarImage alt={user ? `${user.nombres} ${user.apellidos}` : ''} />
                 <AvatarFallback className='rounded-lg'>FF</AvatarFallback>
               </Avatar>
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>{user?.firstName}({user?.role})</span>
+                <span className='truncate font-semibold'>{user ? `${user.nombres} ${user.apellidos}` : ''} ({user?.role})</span>
                 <span className='truncate text-xs'>{user?.email}</span>
               </div>
               <ChevronsUpDown className='ml-auto size-4' />
@@ -57,11 +88,11 @@ export function NavUser() {
             <DropdownMenuLabel className='p-0 font-normal'>
               <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                 <Avatar className='h-8 w-8 rounded-lg'>
-                  <AvatarImage alt={user?.firstName} />
+                  <AvatarImage alt={user ? `${user.nombres} ${user.apellidos}` : ''} />
                   <AvatarFallback className='rounded-lg'>FF</AvatarFallback>
                 </Avatar>
                 <div className='grid flex-1 text-left text-sm leading-tight'>
-                  <span className='truncate font-semibold'>{user?.firstName}</span>
+                  <span className='truncate font-semibold'>{user ? `${user.nombres} ${user.apellidos}` : ''}</span>
                   <span className='truncate text-xs'>{user?.email}</span>
                 </div>
               </div>
@@ -89,7 +120,14 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={async () => {
+                if (user?.id) {
+                  await updateDoc(doc(database, 'usuarios', user.id), { status: 'Offline' })
+                }
+                await signOut(FIREBASE_AUTH)
+              }}
+            >
               <LogOut />
               Cerrar sesión
             </DropdownMenuItem>

@@ -1,6 +1,6 @@
 export * from './interfaces/baseModel'
 export * from './interfaces/valnet/cliente'
-export * from './interfaces/valnet/user'
+export * from './interfaces/valnet/usuario'
 export * from './interfaces/facturacion/pago'
 export * from './interfaces/facturacion/factura'
 export * from './interfaces/servicio/planInternet'

@@ -8,6 +8,15 @@ export default defineConfig({
   server: {
     port: 5174,
     host: '0.0.0.0',
+    open: true,
+    proxy: {
+      '/mikrowisp-api': {
+        target: 'http://38.57.232.66:3031',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/mikrowisp-api/, ''),
+        secure: false,
+      },
+    },
   },
   resolve: {
     alias: {

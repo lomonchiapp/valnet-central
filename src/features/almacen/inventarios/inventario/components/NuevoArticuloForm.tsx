@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TipoArticulo, Unidad, Articulo } from "shared-types";
+import { TipoArticulo, Unidad } from "@/types";
 import { Marca } from "@/types";
 import { useAgregarArticulo, NuevoArticuloData } from "../hooks/useAgregarArticulo";
 import { useState, useEffect, useCallback } from "react";
@@ -27,9 +27,10 @@ import { Upload, X, Cpu, Box, ChevronsUpDown, Check, PlusCircle, Search } from "
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { database } from "@/firebase";
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAlmacenState } from "@/context/global/useAlmacenState";
 import { NuevaMarcaForm } from "@/features/almacen/marcas/components/NuevaMarcaForm";
+import { NuevaUbicacionForm } from "./NuevaUbicacionForm";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -64,6 +65,7 @@ const STEPS = {
   DETALLES_MATERIAL: 2,
   DETALLES_EQUIPO_MARCA_MODELO: 3,
   DETALLES_EQUIPO_ESPECIFICOS: 4,
+  DETALLES_EQUIPOS_MULTIPLES: 5,
 };
 
 export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArticuloFormProps) {
@@ -74,30 +76,31 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
   const [isCheckingArticulo, setIsCheckingArticulo] = useState(false);
   const [currentStep, setCurrentStep] = useState(STEPS.SELECCION_TIPO);
   const [showNuevaMarcaForm, setShowNuevaMarcaForm] = useState(false);
-  const [marcaPendienteSeleccionId, setMarcaPendienteSeleccionId] = useState<string | null>(null);
+  const [showNuevaUbicacionForm, setShowNuevaUbicacionForm] = useState(false);
   const [openMarcaCombobox, setOpenMarcaCombobox] = useState(false);
   const [searchValueMarca, setSearchValueMarca] = useState("");
-  const [openModeloCombobox, setOpenModeloCombobox] = useState(false);
-  const [searchValueModelo, setSearchValueModelo] = useState("");
   const [filtroTablaArticulos, setFiltroTablaArticulos] = useState("");
-  const [articulosBaseEncontrados, setArticulosBaseEncontrados] = useState<Articulo[]>([]);
-  const [isSearchingArticulosBase, setIsSearchingArticulosBase] = useState(false);
   const [selectedArticuloBaseId, setSelectedArticuloBaseId] = useState<string | null>(null);
   const [mostrandoFormNuevoArticuloBase, setMostrandoFormNuevoArticuloBase] = useState(false);
   const [openMaterialNombreCombobox, setOpenMaterialNombreCombobox] = useState(false);
   const [searchValueMaterialNombre, setSearchValueMaterialNombre] = useState("");
+  const [multipleSNList, setMultipleSNList] = useState("");
+  const [isMultipleMode, setIsMultipleMode] = useState(false);
+  const [openUbicacionCombobox, setOpenUbicacionCombobox] = useState(false);
+  const [searchValueUbicacion, setSearchValueUbicacion] = useState("");
 
-  const { marcas, articulos, subscribeToMarcas, subscribeToArticulos } = useAlmacenState();
-  console.log("Marcas en NuevoArticuloForm:", marcas);
-
+  const { marcas, articulos, ubicaciones, subscribeToMarcas, subscribeToArticulos, subscribeToUbicaciones } = useAlmacenState();
+  
   useEffect(() => {
     const unsubMarcas = subscribeToMarcas();
     const unsubArticulos = subscribeToArticulos();
+    const unsubUbicaciones = subscribeToUbicaciones();
     return () => {
       unsubMarcas();
       unsubArticulos();
+      unsubUbicaciones();
     };
-  }, [subscribeToMarcas, subscribeToArticulos]);
+  }, [subscribeToMarcas, subscribeToArticulos, subscribeToUbicaciones]);
   
   const {
     control,
@@ -133,7 +136,8 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
   const tipoSeleccionado = watch("tipo");
   const nombreArticuloWatch = watch("nombre");
   const marcaSeleccionadaWatch = watch("marca");
-  const modeloWatch = watch("modelo");
+
+  const marcaSeleccionadaId = getValues("marca");
 
   const resetFormAndState = useCallback(() => {
     reset({
@@ -157,15 +161,11 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
       setImagePreview(null);
       setArticuloExistenteDetectado(null);
       setIsCheckingArticulo(false);
-      setArticulosBaseEncontrados([]);
-      setIsSearchingArticulosBase(false);
-      setSelectedArticuloBaseId(null);
-      setMarcaPendienteSeleccionId(null);
-      setOpenMarcaCombobox(false);
-      setSearchValueMarca("");
-      setOpenModeloCombobox(false);
-      setSearchValueModelo("");
       setFiltroTablaArticulos("");
+      setMultipleSNList("");
+      setIsMultipleMode(false);
+      setOpenUbicacionCombobox(false);
+      setSearchValueUbicacion("");
   }, [reset]);
 
   const handleCloseDialog = () => {
@@ -181,8 +181,6 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
   }, [open]);
 
   useEffect(() => {
-    // Cuando se cambia de marca, o se sale del modo de creación de nuevo tipo base,
-    // se resetea el estado de mostrandoFormNuevoArticuloBase
     if (currentStep !== STEPS.DETALLES_EQUIPO_MARCA_MODELO) {
       setMostrandoFormNuevoArticuloBase(false);
     }
@@ -220,13 +218,12 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                 nombre: docData.nombre,
                 cantidad: docData.cantidad,
                 costo: docData.costo,
-                unidad: docData.unidad,
+                unidad: docData.unidad ? (docData.unidad as Unidad) : undefined,
               });
             } else {
               setArticuloExistenteDetectado(null);
             }
-          } catch (error) {
-            console.error("Error buscando artículo existente:", error);
+          } catch {
             setArticuloExistenteDetectado(null);
           } finally {
             setIsCheckingArticulo(false);
@@ -287,18 +284,108 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
     }
   };
 
-  const onSubmitHandler: SubmitHandler<NuevoArticuloData> = async (data) => {
-    const formData: any = {
-      ...data,
-      imagen: selectedImage,
-    };
+  const generateMacFromSerial = (serial: string): string => {
+    if (serial.length < 12) {
+      return "00:00:00:00:00:00";
+    }
     
-    const nuevoArticuloId = await agregarArticulo(formData as NuevoArticuloData & { imagen?: File | null });
-    if (nuevoArticuloId) {
-      toast.success(articuloExistenteDetectado && data.tipo === TipoArticulo.MATERIAL ? "Material actualizado exitosamente" : "Artículo agregado exitosamente");
-      handleCloseDialog();
-    } else {
-      toast.error(`Error al agregar/actualizar el artículo: ${agregarError?.message || "Error desconocido"}`);
+    const cleanSerial = serial.replace(/[^0-9A-Fa-f]/g, '');
+    const last12 = cleanSerial.slice(-12).padStart(12, '0');
+    
+    return last12.match(/.{2}/g)?.join(':') || "00:00:00:00:00:00";
+  };
+  
+  const generateMacWithPrefix = (prefix: string, serial: string): string => {
+    const cleanPrefix = prefix.replace(/[^0-9A-Fa-f:]/g, '').replace(/:{2,}/g, ':');
+    const prefixParts = cleanPrefix.split(':').filter(p => p.length > 0);
+    
+    if (prefixParts.length === 0) {
+      return generateMacFromSerial(serial);
+    }
+    
+    const cleanSerial = serial.replace(/[^0-9A-Fa-f]/g, '');
+    const remainingParts = 6 - prefixParts.length;
+    
+    if (remainingParts <= 0) {
+      return prefixParts.slice(0, 6).join(':');
+    }
+    
+    const serialParts: string[] = [];
+    for (let i = 0; i < remainingParts; i++) {
+      const start = i * 2;
+      const part = cleanSerial.substring(start, start + 2).padStart(2, '0');
+      serialParts.push(part || '00');
+    }
+    
+    return [...prefixParts, ...serialParts].slice(0, 6).join(':');
+  };
+
+  const onSubmitHandler: SubmitHandler<NuevoArticuloData> = async (data) => {
+    try {
+      if (isMultipleMode && currentStep === STEPS.DETALLES_EQUIPOS_MULTIPLES) {
+        const seriales = parseMultipleSNList(multipleSNList);
+        if (seriales.length === 0) {
+          toast.error("No se pudo procesar ningún número de serie válido.");
+          return;
+        }
+        
+        const prefixMacElement = document.getElementById('prefixMac') as HTMLInputElement;
+        const prefixMac = prefixMacElement?.value || "";
+        
+        toast.info(`Registrando ${seriales.length} equipos...`);
+        let contadorExito = 0;
+        
+        for (const serial of seriales) {
+          const mac = prefixMac 
+            ? generateMacWithPrefix(prefixMac, serial) 
+            : generateMacFromSerial(serial);
+          
+          const equipoData: NuevoArticuloData = {
+            ...data,
+            serial: serial,
+            mac: mac,
+            cantidad: 1,
+            unidad: Unidad.UNIDAD,
+          };
+          
+          try {
+            const nuevoArticuloId = await agregarArticulo({
+              ...equipoData,
+              imagen: selectedImage
+            } as NuevoArticuloData & { imagen?: File | null });
+            
+            if (nuevoArticuloId) {
+              contadorExito++;
+            }
+          } catch {
+            // Capturamos el error pero no usamos console.log
+            // Podríamos agregar el error a un array de errores si quisiéramos mostrarlos después
+          }
+        }
+        
+        if (contadorExito > 0) {
+          toast.success(`Se registraron ${contadorExito} de ${seriales.length} equipos exitosamente`);
+          handleCloseDialog();
+        } else {
+          toast.error("No se pudo registrar ningún equipo");
+        }
+      } else {
+        // Comportamiento normal para un solo artículo
+        const formData = {
+          ...data,
+          imagen: selectedImage,
+        };
+        
+        const nuevoArticuloId = await agregarArticulo(formData as NuevoArticuloData & { imagen?: File | null });
+        if (nuevoArticuloId) {
+          toast.success(articuloExistenteDetectado && data.tipo === TipoArticulo.MATERIAL ? "Material actualizado exitosamente" : "Artículo agregado exitosamente");
+          handleCloseDialog();
+        } else {
+          toast.error(`Error al agregar/actualizar el artículo: ${agregarError?.message || "Error desconocido"}`);
+        }
+      }
+    } catch {
+      toast.error("Ocurrió un error al procesar el formulario");
     }
   };
 
@@ -329,13 +416,30 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
         fieldsToValidate = ['marca', 'modelo', 'nombre'];
         break;
       case STEPS.DETALLES_EQUIPO_ESPECIFICOS:
+        if (isMultipleMode) {
+          setCurrentStep(STEPS.DETALLES_EQUIPOS_MULTIPLES);
+          return;
+        }
         fieldsToValidate = ['serial', 'mac'];
+        break;
+      case STEPS.DETALLES_EQUIPOS_MULTIPLES:
+        if (multipleSNList.trim() === '') {
+          toast.error("Por favor, ingrese al menos un número de serie.");
+          return;
+        }
+        const seriales = parseMultipleSNList(multipleSNList);
+        if (seriales.length === 0) {
+          toast.error("No se pudo procesar ningún número de serie válido.");
+          return;
+        }
         break;
     }
     
     const isValidStep = await trigger(fieldsToValidate);
     if (isValidStep) {
-      if (currentStep === STEPS.DETALLES_MATERIAL || currentStep === STEPS.DETALLES_EQUIPO_ESPECIFICOS) {
+      if (currentStep === STEPS.DETALLES_MATERIAL || 
+          currentStep === STEPS.DETALLES_EQUIPO_ESPECIFICOS || 
+          currentStep === STEPS.DETALLES_EQUIPOS_MULTIPLES) {
          handleSubmit(onSubmitHandler)(); 
       } else {
         if (currentStep === STEPS.DETALLES_EQUIPO_MARCA_MODELO) {
@@ -355,20 +459,38 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
       if (prev === STEPS.DETALLES_EQUIPO_ESPECIFICOS) {
         return STEPS.DETALLES_EQUIPO_MARCA_MODELO;
       }
+      if (prev === STEPS.DETALLES_EQUIPOS_MULTIPLES) {
+        return STEPS.DETALLES_EQUIPO_ESPECIFICOS;
+      }
       return prev;
     });
   };
 
-  useEffect(() => {
-    if (marcaPendienteSeleccionId && marcas.find(m => m.id === marcaPendienteSeleccionId)) {
-      setValue("marca", marcaPendienteSeleccionId, { shouldValidate: true, shouldTouch: true });
-      trigger("nombre"); 
-      setMarcaPendienteSeleccionId(null);
-      toast.info(`Marca seleccionada: ${marcas.find(m => m.id === marcaPendienteSeleccionId)?.nombre}`);
-    }
-  }, [marcaPendienteSeleccionId, marcas, setValue, trigger]);
+  const parseMultipleSNList = (text: string): string[] => {
+    return text.split(/[\n,]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+  };
+
+
+  const handleUbicacionCreada = (ubicacionId: string, ubicacionNombre: string) => {
+    setValue("ubicacion", ubicacionId);
+    toast.success(`Ubicación "${ubicacionNombre}" seleccionada`);
+  };
 
   const renderStepContent = () => {
+    const seriales = parseMultipleSNList(multipleSNList);
+    const articulosDeMarcaFiltrados = marcaSeleccionadaId
+      ? articulos
+          .filter(a => 
+            a.marca === marcaSeleccionadaId && 
+            a.tipo === TipoArticulo.EQUIPO &&
+            ( (a.nombre && a.nombre.toLowerCase().includes(filtroTablaArticulos.toLowerCase())) ||
+              (a.modelo && a.modelo.toLowerCase().includes(filtroTablaArticulos.toLowerCase())) )
+          )
+          .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      : [];
+
     switch (currentStep) {
       case STEPS.SELECCION_TIPO:
         return (
@@ -421,103 +543,128 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                     minLength: { value: 3, message: "Mínimo 3 caracteres." }
                   }}
                   render={({ field }) => (
-                    <Popover open={openMaterialNombreCombobox} onOpenChange={setOpenMaterialNombreCombobox}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          aria-expanded={openMaterialNombreCombobox}
-                          className={`w-full justify-between ${errors.nombre ? "border-destructive" : ""}`}
-                          disabled={!!articuloExistenteDetectado || isLoading}
-                        >
-                          {field.value || "-- Escriba o seleccione un material --"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command
-                          filter={(value, search) => {
-                            // Si el valor es el del campo y coincide con la búsqueda, o si el item incluye la búsqueda
-                            if (value === search) return 1;
-                            return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
-                          }}
-                        >
-                          <CommandInput 
-                            placeholder="Buscar o crear material..."
-                            value={searchValueMaterialNombre}
-                            onValueChange={(search) => {
-                                setSearchValueMaterialNombre(search);
-                                if (!openMaterialNombreCombobox && search.length > 0) {
-                                    setOpenMaterialNombreCombobox(true);
-                                }
-                                // Actualizar el campo del formulario directamente al escribir en el input del combobox
-                                // Esto permite crear nuevos nombres directamente.
-                                field.onChange(search); 
-                            }}
+                    <div className="relative">
+                      <Popover open={openMaterialNombreCombobox} onOpenChange={setOpenMaterialNombreCombobox}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openMaterialNombreCombobox}
+                            className={`w-full justify-between ${errors.nombre ? "border-destructive" : ""} ${articuloExistenteDetectado ? 'bg-muted/60 cursor-not-allowed' : ''}`}
                             disabled={!!articuloExistenteDetectado || isLoading}
-                          />
-                          <CommandList>
-                            <CommandEmpty>
-                              {searchValueMaterialNombre.trim() === "" 
-                                ? "Escriba para buscar materiales existentes." 
-                                : `No se encontró el material "${searchValueMaterialNombre}". Puede crearlo con este nombre.`}
-                            </CommandEmpty>
-                            <CommandGroup heading={articulos.filter(a => a.idinventario === inventarioId && a.tipo === TipoArticulo.MATERIAL && a.nombre.toLowerCase().includes(searchValueMaterialNombre.toLowerCase())).length > 0 ? "Materiales Existentes" : undefined}>
-                              {articulos
-                                .filter(a => 
-                                  a.idinventario === inventarioId && 
-                                  a.tipo === TipoArticulo.MATERIAL &&
-                                  a.nombre.toLowerCase().includes(searchValueMaterialNombre.toLowerCase())
-                                )
-                                .sort((a,b) => a.nombre.localeCompare(b.nombre))
-                                .map((material) => {
-                                  if (!material || typeof material.id !== 'string' || material.id === "") return null;
-                                  return (
-                                    <CommandItem
-                                      key={material.id}
-                                      value={material.nombre} // Usar el nombre para el filtro del Command y para el onSelect
+                          >
+                            {field.value || "-- Escriba o seleccione un material --"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                          <Command
+                            filter={(value, search) => {
+                              if (value === search) return 1;
+                              return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+                            }}
+                          >
+                            <CommandInput 
+                              placeholder="Buscar o crear material..."
+                              value={searchValueMaterialNombre}
+                              onValueChange={(search) => {
+                                  setSearchValueMaterialNombre(search);
+                                  if (!openMaterialNombreCombobox && search.length > 0) {
+                                      setOpenMaterialNombreCombobox(true);
+                                  }
+                                  field.onChange(search); 
+                              }}
+                              disabled={!!articuloExistenteDetectado || isLoading}
+                            />
+                            <CommandList>
+                              <CommandEmpty>
+                                {searchValueMaterialNombre.trim() === "" 
+                                  ? "Escriba para buscar materiales existentes." 
+                                  : `No se encontró el material "${searchValueMaterialNombre}". Puede crearlo con este nombre.`}
+                              </CommandEmpty>
+                              <CommandGroup heading={articulos.filter(a => a.idinventario === inventarioId && a.tipo === TipoArticulo.MATERIAL && a.nombre.toLowerCase().includes(searchValueMaterialNombre.toLowerCase())).length > 0 ? "Materiales Existentes" : undefined}>
+                                {articulos
+                                  .filter(a => 
+                                    a.idinventario === inventarioId && 
+                                    a.tipo === TipoArticulo.MATERIAL &&
+                                    a.nombre.toLowerCase().includes(searchValueMaterialNombre.toLowerCase())
+                                  )
+                                  .sort((a,b) => a.nombre.localeCompare(b.nombre))
+                                  .map((material) => {
+                                    if (!material || typeof material.id !== 'string' || material.id === "") return null;
+                                    return (
+                                      <CommandItem
+                                        key={material.id}
+                                        value={material.nombre}
+                                        onSelect={(currentValue) => {
+                                          field.onChange(currentValue);
+                                          setSearchValueMaterialNombre(currentValue);
+                                          verificarArticuloExistenteDebounced(currentValue);
+                                          setOpenMaterialNombreCombobox(false);
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            field.value === material.nombre ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        {material.nombre} 
+                                        {material.descripcion && <span className="ml-2 text-xs text-muted-foreground">({material.descripcion.substring(0,30)}{material.descripcion.length > 30 ? '...' : ''})</span>}
+                                      </CommandItem>
+                                    );
+                                })}
+                              </CommandGroup>
+                               {searchValueMaterialNombre.trim().length >=3 && !articulos.some(a => a.idinventario === inventarioId && a.tipo === TipoArticulo.MATERIAL && a.nombre.toLowerCase() === searchValueMaterialNombre.toLowerCase().trim()) && (
+                                  <CommandItem
+                                      key="crear-nuevo"
+                                      value={searchValueMaterialNombre.trim()}
                                       onSelect={(currentValue) => {
-                                        // Cuando un item es seleccionado, currentValue es el 'value' del CommandItem (material.nombre)
-                                        field.onChange(currentValue); // Establece el nombre del formulario
-                                        setSearchValueMaterialNombre(currentValue); // Sincroniza el input de búsqueda
-                                        verificarArticuloExistenteDebounced(currentValue); // Dispara la verificación
-                                        setOpenMaterialNombreCombobox(false);
+                                          field.onChange(currentValue);
+                                          setSearchValueMaterialNombre(currentValue);
+                                          setArticuloExistenteDetectado(null);
+                                          setIsCheckingArticulo(false);
+                                          setOpenMaterialNombreCombobox(false);
+                                          toast.info(`Creando nuevo material: "${currentValue}"`);
                                       }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          field.value === material.nombre ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                      {material.nombre} 
-                                      {material.descripcion && <span className="ml-2 text-xs text-muted-foreground">({material.descripcion.substring(0,30)}{material.descripcion.length > 30 ? '...' : ''})</span>}
-                                    </CommandItem>
-                                  );
-                              })}
-                            </CommandGroup>
-                             {searchValueMaterialNombre.trim().length >=3 && !articulos.some(a => a.idinventario === inventarioId && a.tipo === TipoArticulo.MATERIAL && a.nombre.toLowerCase() === searchValueMaterialNombre.toLowerCase().trim()) && (
-                                <CommandItem
-                                    key="crear-nuevo"
-                                    value={searchValueMaterialNombre.trim()}
-                                    onSelect={(currentValue) => {
-                                        field.onChange(currentValue);
-                                        setSearchValueMaterialNombre(currentValue);
-                                        setArticuloExistenteDetectado(null); // Es un nombre nuevo, limpiar detección previa
-                                        setIsCheckingArticulo(false); // No hay nada que chequear aún de forma automática
-                                        setOpenMaterialNombreCombobox(false);
-                                        toast.info(`Creando nuevo material: "${currentValue}"`);
-                                    }}
-                                    className="text-sm text-muted-foreground italic"
-                                >
-                                  <PlusCircle className="mr-2 h-4 w-4" />
-                                  Crear nuevo material: "{searchValueMaterialNombre.trim()}"
-                                </CommandItem>
-                            )}
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
+                                      className="text-sm text-muted-foreground italic"
+                                  >
+                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                    Crear nuevo material: "{searchValueMaterialNombre.trim()}"
+                                  </CommandItem>
+                              )}
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      {articuloExistenteDetectado && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="absolute top-1/2 right-2 -translate-y-1/2 h-7 w-7 text-destructive border border-destructive bg-white hover:bg-destructive/10"
+                                onClick={() => {
+                                  setArticuloExistenteDetectado(null);
+                                  setIsCheckingArticulo(false);
+                                  setValue('nombre', '', { shouldValidate: true, shouldTouch: true });
+                                  setSearchValueMaterialNombre('');
+                                }}
+                                tabIndex={0}
+                                aria-label="Limpiar selección de material"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Limpiar selección de material
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
                   )}
                 />
                 {errors.nombre && <p className="text-xs text-destructive mt-1">{errors.nombre.message}</p>}
@@ -525,83 +672,105 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                   <p className="text-xs text-muted-foreground mt-1">Buscando si el material ya existe...</p>
                 )}
                 {articuloExistenteDetectado && (
-                  <div className="mt-2 p-3 border border-yellow-400 bg-yellow-50 rounded-md text-sm shadow">
-                    <p className="font-semibold text-yellow-700">¡Atención! Este material ya existe.</p>
-                    <ul className="list-disc list-inside text-yellow-600 mt-1">
-                      <li>ID: {articuloExistenteDetectado.id}</li>
-                      <li>Nombre: {articuloExistenteDetectado.nombre}</li>
-                      <li>Stock actual: {articuloExistenteDetectado.cantidad || 0} {articuloExistenteDetectado.unidad || ''}</li>
-                      <li>Costo unitario actual: {articuloExistenteDetectado.costo !== undefined ? articuloExistenteDetectado.costo : 'N/A'}</li>
-                    </ul>
-                    <p className="text-yellow-600 mt-1.5">
-                      Al guardar, se <span className="font-bold">sumará la cantidad</span> que ingrese a continuación al stock existente y se 
-                      <span className="font-bold">actualizarán los demás datos</span> (costo, unidad, descripción, etc.) con los nuevos valores del formulario.
-                    </p>
+                  <div className="mt-2 p-4 border-2 border-yellow-500 bg-yellow-100 rounded-md text-sm shadow flex items-start gap-3">
+                    <span className="mt-1 text-yellow-600">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" /></svg>
+                    </span>
+                    <div>
+                      <p className="font-semibold text-yellow-800 text-base mb-1">¡Atención! Este material ya existe en el inventario.</p>
+                      <ul className="list-disc list-inside text-yellow-700 mt-1">
+                        <li><b>ID:</b> {articuloExistenteDetectado.id}</li>
+                        <li><b>Nombre:</b> {articuloExistenteDetectado.nombre}</li>
+                        <li><b>Stock actual:</b> {articuloExistenteDetectado.cantidad || 0} {articuloExistenteDetectado.unidad || ''}</li>
+                        <li><b>Costo unitario actual:</b> {articuloExistenteDetectado.costo !== undefined ? articuloExistenteDetectado.costo : 'N/A'}</li>
+                      </ul>
+                      <p className="text-yellow-700 mt-2">
+                        Al guardar, se <span className="font-bold">sumará la cantidad</span> que ingrese al stock existente y se <span className="font-bold">actualizarán los demás datos</span> (costo, descripción, etc.) con los nuevos valores del formulario.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="cantidad">
-                  Cantidad a {articuloExistenteDetectado ? 'Agregar' : 'Registrar'} <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="cantidad"
-                  type="number"
-                  min={articuloExistenteDetectado ? 0 : 1}
-                  step="1" 
-                  placeholder={articuloExistenteDetectado ? "Ej: 5 (se sumarán al stock)" : "Ej: 10"}
-                  {...register("cantidad", {
-                    required: "La cantidad es obligatoria.",
-                    valueAsNumber: true,
-                    min: { value: articuloExistenteDetectado ? 0: 1, message: articuloExistenteDetectado ? "No puede ser negativo." : "Debe ser al menos 1." },
-                  })}
-                  className={errors.cantidad ? "border-destructive" : ""}
-                />
-                {errors.cantidad && <p className="text-xs text-destructive mt-1">{errors.cantidad.message}</p>}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="unidad">Unidad de Medida <span className="text-destructive">*</span></Label>
-                <Controller
-                  control={control}
-                  name="unidad"
-                  rules={{ required: "La unidad es obligatoria." }}
-                  render={({ field }) => (
-                    <Select 
-                        onValueChange={field.onChange} 
-                        value={field.value || (articuloExistenteDetectado?.unidad || Unidad.UNIDAD)}
-                    >
-                      <SelectTrigger id="unidad" className={`w-full ${errors.unidad ? "border-destructive" : ""}`}>
-                        <SelectValue placeholder="-- Seleccionar unidad --" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.values(Unidad).map(u => (
-                          <SelectItem key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1).toLowerCase()}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.unidad && <p className="text-xs text-destructive mt-1">{errors.unidad.message}</p>}
-              </div>
-
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="costo">Costo Unitario (Moneda Local) <span className="text-destructive">*</span></Label>
-                <Input
-                  id="costo"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="Ej: 25.50"
-                  {...register("costo", {
-                    required: "El costo es obligatorio.",
-                    valueAsNumber: true,
-                    min: { value: 0, message: "No puede ser negativo." },
-                  })}
-                  className={errors.costo ? "border-destructive" : ""}
-                />
-                {errors.costo && <p className="text-xs text-destructive mt-1">{errors.costo.message}</p>}
+              <div className="w-full flex flex-col gap-2 md:flex-row md:gap-4">
+                <div className="flex-1 flex flex-col">
+                  <Label htmlFor="cantidad" className="mb-1">Cantidad a {articuloExistenteDetectado ? 'Agregar' : 'Registrar'} <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="cantidad"
+                    type="number"
+                    min={articuloExistenteDetectado ? 0 : 1}
+                    max={9999}
+                    step="1"
+                    inputMode="numeric"
+                    className={`h-10 text-center ${errors.cantidad ? 'border-destructive' : ''}`}
+                    placeholder="0"
+                    {...register("cantidad", {
+                      required: "La cantidad es obligatoria.",
+                      valueAsNumber: true,
+                      min: { value: articuloExistenteDetectado ? 0: 1, message: articuloExistenteDetectado ? "No puede ser negativo." : "Debe ser al menos 1." },
+                    })}
+                  />
+                  {errors.cantidad && <p className="text-xs text-destructive mt-1">{errors.cantidad.message}</p>}
+                </div>
+                <div className="flex-1 flex flex-col">
+                  <Label htmlFor="unidad" className="mb-1">Unidad de Medida <span className="text-destructive">*</span></Label>
+                  <Controller
+                    control={control}
+                    name="unidad"
+                    rules={{ required: "La unidad es obligatoria." }}
+                    render={({ field }) => (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                value={field.value || (articuloExistenteDetectado?.unidad || Unidad.UNIDAD)}
+                                disabled={!!articuloExistenteDetectado}
+                              >
+                                <SelectTrigger id="unidad" className={`h-10 w-full ${errors.unidad ? "border-destructive" : ""} ${articuloExistenteDetectado ? 'bg-muted/60 cursor-not-allowed' : ''}`}>
+                                  <SelectValue placeholder="-- Seleccionar unidad --" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Object.values(Unidad).map(u => (
+                                    <SelectItem key={u} value={u}>{u.charAt(0).toUpperCase() + u.slice(1).toLowerCase()}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </TooltipTrigger>
+                          {!!articuloExistenteDetectado && (
+                            <TooltipContent>
+                              No se puede cambiar la unidad de medida de un material existente.
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  />
+                  {errors.unidad && <p className="text-xs text-destructive mt-1">{errors.unidad.message}</p>}
+                </div>
+                <div className="flex-1 flex flex-col">
+                  <Label htmlFor="costo" className="mb-1">Costo Unitario <span className="text-destructive">*</span></Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium pointer-events-none">RD$</span>
+                    <Input
+                      id="costo"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      className={`pl-12 h-10 ${errors.costo ? "border-destructive" : ""}`}
+                      {...register("costo", {
+                        required: "El costo es obligatorio.",
+                        valueAsNumber: true,
+                        min: { value: 0, message: "No puede ser negativo." },
+                      })}
+                    />
+                  </div>
+                  {errors.costo && <p className="text-xs text-destructive mt-1">{errors.costo.message}</p>}
+                </div>
               </div>
             </div>
             
@@ -616,28 +785,84 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                    <div className="space-y-1.5">
-                        <Label htmlFor="ubicacion">Ubicación en Almacén</Label>
-                        <Input
-                        id="ubicacion"
-                        placeholder="Ej: Estante B2, Caja 3"
-                        {...register("ubicacion")}
-                        />
-                    </div>
-                    <div className="space-y-1.5">
-                        <Label htmlFor="codigoBarras">Código de Barras</Label>
-                        <Input
-                        id="codigoBarras"
-                        placeholder="Ingrese o escanee código de barras"
-                        {...register("codigoBarras")}
-                        />
+                <div className="space-y-1.5">
+                    <Label htmlFor="ubicacion">Ubicación en Almacén</Label>
+                    <div className="flex gap-2">
+                      <Controller
+                        name="ubicacion"
+                        control={control}
+                        render={({ field }) => (
+                          <Popover open={openUbicacionCombobox} onOpenChange={setOpenUbicacionCombobox}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openUbicacionCombobox}
+                                className="w-full justify-between"
+                                disabled={isLoading}
+                              >
+                                {field.value
+                                  ? ubicaciones.find((u) => u.id === field.value)?.nombre || field.value
+                                  : "-- Seleccionar ubicación --"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                              <Command>
+                                <CommandInput 
+                                  placeholder="Buscar ubicación..." 
+                                  value={searchValueUbicacion}
+                                  onValueChange={setSearchValueUbicacion}
+                                />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    {searchValueUbicacion === "" ? "Escriba para buscar o cree una nueva." : `No se encontró la ubicación "${searchValueUbicacion}".`}
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {ubicaciones
+                                      .filter(u => u.nombre.toLowerCase().includes(searchValueUbicacion.toLowerCase()))
+                                      .sort((a,b) => a.nombre.localeCompare(b.nombre))
+                                      .map((u) => (
+                                        <CommandItem
+                                          key={u.id}
+                                          value={u.id}
+                                          onSelect={(currentValue) => {
+                                            field.onChange(currentValue === field.value ? "" : currentValue);
+                                            setOpenUbicacionCombobox(false);
+                                            setSearchValueUbicacion("");
+                                          }}
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "mr-2 h-4 w-4",
+                                              field.value === u.id ? "opacity-100" : "opacity-0"
+                                            )}
+                                          />
+                                          {u.nombre}
+                                        </CommandItem>
+                                      ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowNuevaUbicacionForm(true)} 
+                        disabled={isLoading}
+                      >
+                        Nueva Ubicación
+                      </Button>
                     </div>
                 </div>
+            </div>
 
-                <div className="space-y-1.5">
-                    <Label>Imagen del Material (Opcional)</Label>
-                    <div className="border-2 border-dashed rounded-lg p-6 text-center space-y-3 hover:border-primary transition-colors">
+            <div className="space-y-1.5">
+                <Label>Imagen del Material (Opcional)</Label>
+                <div className="border-2 border-dashed rounded-lg p-6 text-center space-y-3 hover:border-primary transition-colors">
                     {imagePreview ? (
                         <div className="relative group inline-block">
                         <img 
@@ -682,25 +907,12 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                         />
                         </div>
                     )}
-                    </div>
-                    {errors.imagenUrl && <p className="text-xs text-destructive mt-1">{errors.imagenUrl.message}</p>}
                 </div>
+                {errors.imagenUrl && <p className="text-xs text-destructive mt-1">{errors.imagenUrl.message}</p>}
             </div>
           </div>
         );
       case STEPS.DETALLES_EQUIPO_MARCA_MODELO:
-        const marcaSeleccionadaId = getValues("marca");
-        const articulosDeMarcaFiltrados = marcaSeleccionadaId
-          ? articulos
-              .filter(a => 
-                a.marca === marcaSeleccionadaId && 
-                a.tipo === TipoArticulo.EQUIPO &&
-                ( (a.nombre && a.nombre.toLowerCase().includes(filtroTablaArticulos.toLowerCase())) ||
-                  (a.modelo && a.modelo.toLowerCase().includes(filtroTablaArticulos.toLowerCase())) )
-              )
-              .sort((a, b) => a.nombre.localeCompare(b.nombre))
-          : [];
-        
         return (
           <div className="space-y-6">
             <div className="space-y-1.5">
@@ -804,17 +1016,12 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                     <Button 
                         variant="outline" 
                         size="sm" 
-                        onClick={() => { 
+                        onClick={(e) => { 
+                            e.preventDefault();
                             setMostrandoFormNuevoArticuloBase(!mostrandoFormNuevoArticuloBase); 
-                            if (!mostrandoFormNuevoArticuloBase) {
-                                // Limpiar campos que podrían usarse en el form de nuevo tipo base
-                                // para evitar que se pre-rellenen si el usuario estuvo editando antes.
-                                // Estos son campos del formulario principal que podrían tener otro uso
-                                // en el contexto de un "articulo base".
-                                // Por ahora, asumimos que el form de articulo base tendrá sus propios campos.
-                            }
                         }}
                         disabled={isLoading}
+                        type="button"
                     > 
                         {mostrandoFormNuevoArticuloBase ? (
                            <><X className="mr-2 h-4 w-4"/> Cancelar Nuevo</> 
@@ -825,11 +1032,90 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                 </div>
                 
                 {mostrandoFormNuevoArticuloBase ? (
-                  // Placeholder para el formulario de nuevo tipo de equipo
                   <div className="my-4 p-4 border rounded-md bg-muted/10">
                     <h3 className="text-lg font-semibold mb-3">Definir Nuevo Tipo de Equipo</h3>
-                    <p className="text-sm text-muted-foreground">Aquí irá el formulario para crear un nuevo tipo de equipo (Articulo Base) asociado a la marca seleccionada.</p>
-                    {/* TODO: Implementar el formulario aquí */}
+                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="nuevoNombreArticulo">Nombre del Equipo <span className="text-destructive">*</span></Label>
+                          <Input 
+                            id="nuevoNombreArticulo" 
+                            placeholder="Ej: Router Wifi, ONT, Switch 24 puertos"
+                            value={getValues("nombre")}
+                            onChange={(e) => setValue("nombre", e.target.value, { shouldValidate: true })}
+                            className={errors.nombre ? "border-destructive" : ""}
+                          />
+                          {errors.nombre && <p className="text-xs text-destructive">{errors.nombre.message}</p>}
+                          <p className="text-xs text-muted-foreground">Nombre genérico del tipo de equipo</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="nuevoModeloArticulo">Modelo <span className="text-destructive">*</span></Label>
+                          <Input 
+                            id="nuevoModeloArticulo" 
+                            placeholder="Ej: WR-841N, HG8145V5, SG350-28"
+                            value={getValues("modelo")}
+                            onChange={(e) => setValue("modelo", e.target.value, { shouldValidate: true })}
+                            className={errors.modelo ? "border-destructive" : ""}
+                          />
+                          {errors.modelo && <p className="text-xs text-destructive">{errors.modelo.message}</p>}
+                          <p className="text-xs text-muted-foreground">Modelo específico del fabricante</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="nuevoCostoArticulo">Costo Unitario (Moneda Local)</Label>
+                        <Input
+                          id="nuevoCostoArticulo"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Ej: 25.50"
+                          value={getValues("costo")}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                            setValue("costo", value);
+                          }}
+                        />
+                        <p className="text-xs text-muted-foreground">Precio de compra por unidad</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="nuevaDescripcionArticulo">Descripción (Opcional)</Label>
+                        <Textarea
+                          id="nuevaDescripcionArticulo"
+                          placeholder="Especificaciones técnicas, características, etc."
+                          value={getValues("descripcion") || ""}
+                          onChange={(e) => setValue("descripcion", e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+
+                      <div className="flex justify-end space-x-2 pt-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setMostrandoFormNuevoArticuloBase(false)}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button 
+                          type="button" 
+                          onClick={() => {
+                            if (!getValues("nombre") || !getValues("modelo")) {
+                              toast.error("Nombre y modelo son obligatorios");
+                              return;
+                            }
+                            
+                            toast.success(`Tipo de equipo "${getValues("nombre")} ${getValues("modelo")}" definido`);
+                            setMostrandoFormNuevoArticuloBase(false);
+                            nextStep();
+                          }}
+                        >
+                          Guardar y Continuar
+                        </Button>
+                      </div>
+                    </form>
                   </div>
                 ) : articulosDeMarcaFiltrados.length > 0 ? (
                   <div className="rounded-md border max-h-[300px] overflow-y-auto">
@@ -853,8 +1139,8 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                                 onClick={() => {
                                   setValue("nombre", articulo.nombre, { shouldTouch: true, shouldValidate: true });
                                   setValue("modelo", articulo.modelo || "", { shouldTouch: true, shouldValidate: true });
-                                  setValue("costo", articulo.costo || 0, { shouldTouch: true });
-                                  setValue("descripcion", articulo.descripcion || "", { shouldTouch: true });
+                                  setValue("costo", articulo.costo || 0, { shouldTouch: true, shouldValidate: true });
+                                  setValue("descripcion", articulo.descripcion || "", { shouldTouch: true, shouldValidate: true });
                                   setSelectedArticuloBaseId(articulo.id);
                                   toast.success(`"${articulo.nombre}" seleccionado.`);
                                   nextStep(); 
@@ -883,8 +1169,8 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                 open={showNuevaMarcaForm} 
                 onOpenChange={setShowNuevaMarcaForm} 
                 onMarcaCreada={(nuevaMarca: Marca) => { 
-                    setMarcaPendienteSeleccionId(nuevaMarca.id);
-                    setShowNuevaMarcaForm(false); 
+                    setValue("marca", nuevaMarca.id);
+                    toast.success(`Marca "${nuevaMarca.nombre}" seleccionada`);
                 }}
             />
           </div>
@@ -904,110 +1190,187 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-              {/* Número de Serie (S/N) */}
-              <div className="space-y-1.5">
-                <Label htmlFor="serial">Número de Serie (S/N) <span className="text-destructive">*</span></Label>
-                <Input
-                  id="serial"
-                  placeholder="Ingrese o escanee S/N"
-                  {...register("serial", {
-                    required: "El S/N es obligatorio para equipos.",
-                    minLength: {value: 3, message: "S/N debe tener al menos 3 caracteres"}
-                  })}
-                  className={errors.serial ? "border-destructive" : ""}
-                  disabled={isLoading}
-                />
-                {errors.serial && <p className="text-xs text-destructive mt-1">{errors.serial.message}</p>}
-              </div>
-
-              {/* Dirección MAC */}
-              <div className="space-y-1.5">
-                <Label htmlFor="mac">Dirección MAC <span className="text-destructive">*</span></Label>
-                <Input
-                  id="mac"
-                  placeholder="AA:BB:CC:DD:EE:FF"
-                  {...register("mac", {
-                    required: "La MAC es obligatoria para equipos.",
-                    pattern: { 
-                      value: /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$|^([0-9A-Fa-f]{12})$/,
-                      message: "Formato MAC inválido (ej: AA:BB:CC:DD:EE:FF o AABBCCDDEEFF)"
-                    }
-                  })}
-                  className={errors.mac ? "border-destructive" : ""}
-                  disabled={isLoading}
-                />
-                {errors.mac && <p className="text-xs text-destructive mt-1">{errors.mac.message}</p>}
-              </div>
-
-              {/* Clave Inalámbrica (Wireless Key) */}
-              <div className="space-y-1.5">
-                <Label htmlFor="wirelessKey">Clave Inalámbrica (Wireless Key)</Label>
-                <Input
-                  id="wirelessKey"
-                  placeholder="Clave de Wi-Fi si aplica"
-                  {...register("wirelessKey")}
-                  disabled={isLoading}
-                />
-              </div>
-
-              {/* Garantía (en meses) */}
-              <div className="space-y-1.5">
-                <Label htmlFor="garantia">Garantía (en meses)</Label>
-                <Input
-                  id="garantia"
-                  type="number"
-                  min="0"
-                  placeholder="Ej: 12"
-                  {...register("garantia", {
-                    valueAsNumber: true,
-                    min: { value: 0, message: "No puede ser negativo." },
-                  })}
-                  className={errors.garantia ? "border-destructive" : ""}
-                  disabled={isLoading}
-                />
-                {errors.garantia && <p className="text-xs text-destructive mt-1">{errors.garantia.message}</p>}
-              </div>
-
-              {/* Ubicación Específica de esta unidad */}
-               <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="ubicacion">Ubicación de esta Unidad (Opcional)</Label>
-                <Input
-                  id="ubicacion"
-                  placeholder="Ej: Bodega Cliente X, Instalado en Rack Y"
-                  {...register("ubicacion")} // Hereda de defaultValues o la definición base si se implementa
-                  disabled={isLoading}
-                />
-              </div>
-
-              {/* Código de Barras Específico */}
-              <div className="space-y-1.5">
-                <Label htmlFor="codigoBarras">Código de Barras de esta Unidad</Label>
-                <Input
-                  id="codigoBarras"
-                  placeholder="Ingrese o escanee código de barras"
-                  {...register("codigoBarras")}
-                  disabled={isLoading}
-                />
-              </div>
+            <div className="flex justify-between items-center my-4">
+              <h3 className="text-lg font-medium">Datos del Equipo</h3>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => setIsMultipleMode(!isMultipleMode)} 
+                className="flex items-center space-x-1"
+              >
+                {isMultipleMode ? (
+                  <>Modo Individual</>
+                ) : (
+                  <>Modo Múltiple (Escáner)</>
+                )}
+              </Button>
             </div>
 
-            {/* Descripción Específica de esta unidad */}
+            {isMultipleMode ? (
+              <div className="p-4 bg-primary/5 rounded border border-primary/20">
+                <p className="text-sm mb-3">
+                  Utilice este modo para agregar múltiples equipos del mismo tipo en una sola operación.
+                  Ideal para escanear varios números de serie con un lector de códigos de barras.
+                </p>
+                <Button 
+                  type="button" 
+                  onClick={() => setCurrentStep(STEPS.DETALLES_EQUIPOS_MULTIPLES)}
+                  className="w-full"
+                >
+                  Ir a Modo Múltiple
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="serial">Número de Serie (S/N) <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="serial"
+                    placeholder="Ingrese o escanee S/N"
+                    {...register("serial", {
+                      required: "El S/N es obligatorio para equipos.",
+                      minLength: {value: 3, message: "S/N debe tener al menos 3 caracteres"}
+                    })}
+                    className={errors.serial ? "border-destructive" : ""}
+                    disabled={isLoading}
+                  />
+                  {errors.serial && <p className="text-xs text-destructive mt-1">{errors.serial.message}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="mac">Dirección MAC <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="mac"
+                    placeholder="AA:BB:CC:DD:EE:FF"
+                    {...register("mac", {
+                      required: "La MAC es obligatoria para equipos.",
+                      pattern: { 
+                        value: /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$|^([0-9A-Fa-f]{12})$/,
+                        message: "Formato MAC inválido (ej: AA:BB:CC:DD:EE:FF o AABBCCDDEEFF)"
+                      }
+                    })}
+                    className={errors.mac ? "border-destructive" : ""}
+                    disabled={isLoading}
+                  />
+                  {errors.mac && <p className="text-xs text-destructive mt-1">{errors.mac.message}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="wirelessKey">Clave Inalámbrica (Wireless Key)</Label>
+                  <Input
+                    id="wirelessKey"
+                    placeholder="Clave de Wi-Fi si aplica"
+                    {...register("wirelessKey")}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="garantia">Garantía (en meses)</Label>
+                  <Input
+                    id="garantia"
+                    type="number"
+                    min="0"
+                    placeholder="Ej: 12"
+                    {...register("garantia", {
+                      valueAsNumber: true,
+                      min: { value: 0, message: "No puede ser negativo." },
+                    })}
+                    className={errors.garantia ? "border-destructive" : ""}
+                    disabled={isLoading}
+                  />
+                  {errors.garantia && <p className="text-xs text-destructive mt-1">{errors.garantia.message}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="ubicacion">Ubicación de esta Unidad (Opcional)</Label>
+                  <div className="flex gap-2">
+                    <Controller
+                      name="ubicacion"
+                      control={control}
+                      render={({ field }) => (
+                        <Popover open={openUbicacionCombobox} onOpenChange={setOpenUbicacionCombobox}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openUbicacionCombobox}
+                              className="w-full justify-between"
+                              disabled={isLoading}
+                            >
+                              {field.value
+                                ? ubicaciones.find((u) => u.id === field.value)?.nombre || field.value
+                                : "-- Seleccionar ubicación --"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                              <CommandInput 
+                                placeholder="Buscar ubicación..." 
+                                value={searchValueUbicacion}
+                                onValueChange={setSearchValueUbicacion}
+                              />
+                              <CommandList>
+                                <CommandEmpty>
+                                  {searchValueUbicacion === "" ? "Escriba para buscar o cree una nueva." : `No se encontró la ubicación "${searchValueUbicacion}".`}
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {ubicaciones
+                                    .filter(u => u.nombre.toLowerCase().includes(searchValueUbicacion.toLowerCase()))
+                                    .sort((a,b) => a.nombre.localeCompare(b.nombre))
+                                    .map((u) => (
+                                      <CommandItem
+                                        key={u.id}
+                                        value={u.id}
+                                        onSelect={(currentValue) => {
+                                          field.onChange(currentValue === field.value ? "" : currentValue);
+                                          setOpenUbicacionCombobox(false);
+                                          setSearchValueUbicacion("");
+                                        }}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            field.value === u.id ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        {u.nombre}
+                                      </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowNuevaUbicacionForm(true)} 
+                      disabled={isLoading}
+                    >
+                      Nueva Ubicación
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="space-y-1.5">
                 <Label htmlFor="descripcionUnidad">Descripción Específica de esta Unidad</Label>
                 <Textarea
                 id="descripcionUnidad"
                 placeholder="Notas sobre esta unidad en particular (ej: Rayón en carcasa, Configuración especial)"
-                {...register("descripcion")} // Usará el campo 'descripcion' general, podría necesitar uno nuevo si la desc base se mantiene
+                {...register("descripcion")}
                 rows={3}
                 disabled={isLoading}
                 />
             </div>
             
-            {/* Imagen Específica de esta unidad (Opcional) */}
             <div className="space-y-1.5">
                 <Label>Imagen de esta Unidad (Opcional)</Label>
-                {/* Copiar la lógica de carga de imagen del paso de Materiales si es necesario */}
                 <div className="border-2 border-dashed rounded-lg p-6 text-center space-y-3 hover:border-primary transition-colors">
                     {imagePreview ? (
                         <div className="relative group inline-block">
@@ -1024,7 +1387,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                                 variant="destructive" 
                                 size="icon" 
                                 className="absolute -top-2 -right-2 opacity-80 group-hover:opacity-100 transition-opacity rounded-full h-7 w-7" 
-                                onClick={removeImage} // removeImage ya existe y funciona con selectedImage/imagePreview
+                                onClick={removeImage}
                                 >
                                 <X className="h-4 w-4" />
                                 </Button>
@@ -1038,23 +1401,175 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                     ) : (
                         <div 
                         className="flex flex-col items-center justify-center space-y-2 cursor-pointer"
-                        onClick={() => document.getElementById('imagenFileEquipo')?.click()} // ID único para este input de archivo
+                        onClick={() => document.getElementById('imagenFileEquipo')?.click()}
                         >
                         <Upload className="h-10 w-10 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
                             Arrastra una imagen o <span className="text-primary font-medium">haz clic aquí</span> para seleccionar.
                         </p>
                         <Input
-                            id="imagenFileEquipo" // ID único
+                            id="imagenFileEquipo"
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={handleImageChange} // handleImageChange ya existe
+                            onChange={handleImageChange}
                         />
                         </div>
                     )}
                 </div>
                 {errors.imagenUrl && <p className="text-xs text-destructive mt-1">{errors.imagenUrl.message}</p>}
+            </div>
+          </div>
+        );
+      case STEPS.DETALLES_EQUIPOS_MULTIPLES:
+        return (
+          <div className="space-y-6">
+            <div className="mb-4 p-4 border rounded-md bg-muted/50">
+              <h4 className="font-medium text-lg mb-1">Resumen del Equipo Base:</h4>
+              <p className="text-sm text-muted-foreground">
+                <strong>Nombre:</strong> {getValues("nombre") || "N/A"}<br/>
+                <strong>Marca:</strong> {marcas.find(m => m.id === getValues("marca"))?.nombre || "N/A"} <br/>
+                <strong>Modelo:</strong> {getValues("modelo") || "N/A"}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="multipleSNList" className="text-lg font-medium">
+                  Lista de Números de Serie (S/N)
+                </Label>
+                <span className="text-sm text-muted-foreground">
+                  {seriales.length} equipos detectados
+                </span>
+              </div>
+              <div className="text-sm text-muted-foreground mb-2">
+                Escanee múltiples códigos o ingrese manualmente. Cada número de serie debe estar en una línea separada.
+                <br />
+                <strong>Tip:</strong> Configure su escáner para agregar un salto de línea después de cada código.
+              </div>
+              <Textarea
+                id="multipleSNList"
+                placeholder="Escanee o pegue múltiples números de serie, uno por línea
+Ejemplo:
+SN123456
+SN789012
+SN345678"
+                value={multipleSNList}
+                onChange={(e) => setMultipleSNList(e.target.value)}
+                rows={10}
+                className="font-mono text-sm"
+                autoFocus
+              />
+            </div>
+
+            {seriales.length > 0 && (
+              <div className="p-4 border rounded-md bg-muted/10">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium">Vista previa:</h4>
+                  <span className="text-sm text-primary font-medium">
+                    {seriales.length} equipos
+                  </span>
+                </div>
+                <div className="mt-2 max-h-40 overflow-y-auto text-sm">
+                  <ul className="list-disc list-inside space-y-1">
+                    {seriales.map((serial, idx) => (
+                      <li key={idx} className="flex justify-between items-center">
+                        <span className="font-mono">{serial}</span>
+                        <span className="text-xs text-muted-foreground">S/N #{idx + 1}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="ubicacion">Ubicación Común</Label>
+              <div className="flex gap-2">
+                <Controller
+                  name="ubicacion"
+                  control={control}
+                  render={({ field }) => (
+                    <Popover open={openUbicacionCombobox} onOpenChange={setOpenUbicacionCombobox}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={openUbicacionCombobox}
+                          className="w-full justify-between"
+                          disabled={isLoading}
+                        >
+                          {field.value
+                            ? ubicaciones.find((u) => u.id === field.value)?.nombre || field.value
+                            : "-- Seleccionar ubicación --"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command>
+                          <CommandInput 
+                            placeholder="Buscar ubicación..." 
+                            value={searchValueUbicacion}
+                            onValueChange={setSearchValueUbicacion}
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              {searchValueUbicacion === "" ? "Escriba para buscar o cree una nueva." : `No se encontró la ubicación "${searchValueUbicacion}".`}
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {ubicaciones
+                                .filter(u => u.nombre.toLowerCase().includes(searchValueUbicacion.toLowerCase()))
+                                .sort((a,b) => a.nombre.localeCompare(b.nombre))
+                                .map((u) => (
+                                  <CommandItem
+                                    key={u.id}
+                                    value={u.id}
+                                    onSelect={(currentValue) => {
+                                      field.onChange(currentValue === field.value ? "" : currentValue);
+                                      setOpenUbicacionCombobox(false);
+                                      setSearchValueUbicacion("");
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        field.value === u.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {u.nombre}
+                                  </CommandItem>
+                                ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowNuevaUbicacionForm(true)} 
+                  disabled={isLoading}
+                >
+                  Nueva Ubicación
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+              <h4 className="font-medium text-amber-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                Información Importante
+              </h4>
+              <ul className="mt-2 text-sm text-amber-700 list-disc list-inside space-y-1">
+                <li>Se creará un registro individual en el inventario para cada número de serie.</li>
+                <li>Todos compartirán la misma marca, modelo y datos generales.</li>
+                <li>Las MACs se generarán automáticamente si no se especifican.</li>
+                <li>Este proceso puede tardar unos segundos dependiendo de la cantidad de equipos.</li>
+              </ul>
             </div>
           </div>
         );
@@ -1064,14 +1579,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        handleCloseDialog();
-      } else {
-        setCurrentStep(STEPS.SELECCION_TIPO); 
-        onOpenChange(true);
-      }
-    }}>
+    <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[700px] md:max-w-[800px] lg:max-w-[900px] max-h-[95vh] overflow-y-auto p-6">
         <DialogHeader className="mb-4">
           <DialogTitle className="text-2xl">
@@ -1079,6 +1587,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
             {currentStep === STEPS.DETALLES_MATERIAL && `Agregar Material: ${getValues("nombre") || '...'}`}
             {currentStep === STEPS.DETALLES_EQUIPO_MARCA_MODELO && "Agregar Equipo: Marca y Modelo"}
             {currentStep === STEPS.DETALLES_EQUIPO_ESPECIFICOS && "Agregar Equipo: Detalles Específicos"}
+            {currentStep === STEPS.DETALLES_EQUIPOS_MULTIPLES && "Agregar Equipos Múltiples"}
           </DialogTitle>
         </DialogHeader>
         
@@ -1105,6 +1614,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                     (tipoSeleccionado === TipoArticulo.MATERIAL && !articuloExistenteDetectado && (!getValues("nombre") || getValues("cantidad") <= 0 || getValues("costo") < 0 || !getValues("unidad") )) ||
                     (tipoSeleccionado === TipoArticulo.EQUIPO && currentStep === STEPS.DETALLES_EQUIPO_ESPECIFICOS && (!getValues("serial") || !getValues("mac") || !!errors.serial || !!errors.mac))
                   }
+                  variant={articuloExistenteDetectado && tipoSeleccionado === TipoArticulo.MATERIAL ? "destructive" : "default"}
                 >
                   {isLoading ? (
                     <><span className="animate-spin mr-2"> yükleniyor...</span> Guardando...</> 
@@ -1121,6 +1631,21 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
           </DialogFooter>
         </form>
       </DialogContent>
+      
+      <NuevaMarcaForm 
+        open={showNuevaMarcaForm} 
+        onOpenChange={setShowNuevaMarcaForm}
+        onMarcaCreada={(nuevaMarca: Marca) => { 
+          setValue("marca", nuevaMarca.id);
+          toast.success(`Marca "${nuevaMarca.nombre}" seleccionada`);
+        }}
+      />
+      
+      <NuevaUbicacionForm
+        open={showNuevaUbicacionForm}
+        onOpenChange={setShowNuevaUbicacionForm}
+        onUbicacionCreada={handleUbicacionCreada}
+      />
     </Dialog>
   );
 } 

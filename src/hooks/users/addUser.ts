@@ -1,22 +1,14 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { FIREBASE_AUTH } from '@/firebase'
-import {addDoc, collection} from 'firebase/firestore'
+import { addDoc, collection } from 'firebase/firestore'
 import { database } from '@/firebase'
-import { UserRole } from '@/types/enums'
+import { User } from '@/types/interfaces/valnet/usuario'
 
-export const addUser = async (email: string, password: string, userData: {
-  firstName: string;
-  lastName: string;
-  phone: string;
-  role: UserRole;
-}) => {
+export const addUser = async (email: string, password: string, userData: Omit<User, 'id'>) => {
   const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password)
   const user = {
+    ...userData,
     email: userCredential.user.email,
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    phone: userData.phone,
-    role: userData.role,
     id: userCredential.user.uid,
   }
   const docRef = await addDoc(collection(database, 'users'), user)
