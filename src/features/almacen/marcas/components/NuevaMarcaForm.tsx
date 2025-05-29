@@ -56,7 +56,7 @@ export function NuevaMarcaForm({ open, onOpenChange, onMarcaCreada }: NuevaMarca
         id: docRef.id,
       });
 
-      const nuevaMarca: Omit<Marca, 'createdAt' | 'updatedAt'> & { createdAt?: any, updatedAt?: any, id?: string } = {
+      const nuevaMarca: Omit<Marca, 'createdAt' | 'updatedAt'> & { createdAt?: unknown, updatedAt?: unknown, id?: string } = {
         id: docRef.id, // El ID ya está aquí
         nombre: nombreMarcaNormalizado,
         // createdAt y updatedAt serán establecidos por Firestore y actualizados por la suscripción global.
@@ -68,8 +68,7 @@ export function NuevaMarcaForm({ open, onOpenChange, onMarcaCreada }: NuevaMarca
       }
       reset();
       onOpenChange(false);
-    } catch (error) {
-      console.error("Error creando marca:", error);
+    } catch {
       toast.error("Error al crear la marca. Intente nuevamente.");
     } finally {
       setIsLoading(false);

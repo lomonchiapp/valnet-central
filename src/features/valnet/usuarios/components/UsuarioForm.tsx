@@ -58,7 +58,7 @@ export const UsuarioForm = ({ usuario, onSubmit, isLoading, onCancel }: UsuarioF
         createdAt: usuario.createdAt ? new Date(usuario.createdAt) : new Date(),
       })
     }
-    // eslint-disable-next-line
+     
   }, [usuario])
 
   const handleChange = (field: keyof UsuarioFormState, value: string) => {

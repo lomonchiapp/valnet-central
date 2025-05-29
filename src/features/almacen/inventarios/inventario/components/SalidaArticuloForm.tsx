@@ -73,7 +73,6 @@ export function SalidaArticuloForm({
   // Validate articulo is complete and valid
   useEffect(() => {
     if (open && (!articulo || !articulo.id)) {
-      console.error("SalidaArticuloForm: articulo or articulo.id is missing", articulo);
       toast.error("Error: Artículo no válido");
       onOpenChange(false);
     }
@@ -110,8 +109,6 @@ export function SalidaArticuloForm({
   const esTransferencia = tipoMovimientoSeleccionado === TipoMovimiento.TRANSFERENCIA;
 
   const onSubmit: SubmitHandler<SalidaArticuloFormValues> = async (data) => {
-    console.log("Form submitted with data:", data);
-    
     // Check if articulo and articulo.id exist
     if (!articulo || !articulo.id) {
       toast.error("Error: No se ha seleccionado un artículo válido");
@@ -127,18 +124,14 @@ export function SalidaArticuloForm({
       ubicacionDestino: esTransferencia ? data.ubicacionDestino : undefined,
       usuarioId,
     };
-    console.log("Sending params:", params);
 
     let resultado;
     try {
       if (esTransferencia) {
-        console.log("Calling realizarTransferencia");
         resultado = await realizarTransferencia(params);
       } else {
-        console.log("Calling realizarSalida");
         resultado = await realizarSalida(params);
       }
-      console.log("Result:", resultado);
 
       if (resultado.success) {
         toast.success(resultado.message);
@@ -148,11 +141,9 @@ export function SalidaArticuloForm({
           onSalidaCompletada();
         }
       } else {
-        console.error("Error in transfer:", resultado.message);
         toast.error(resultado.message);
       }
     } catch (error) {
-      console.error("Exception caught:", error);
       toast.error("Error inesperado: " + (error instanceof Error ? error.message : "Desconocido"));
     }
   };
@@ -383,7 +374,6 @@ export function SalidaArticuloForm({
             <Button 
               type="submit" 
               disabled={isLoading}
-              onClick={() => console.log("Submit button clicked")}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {esTransferencia ? "Transferir" : "Registrar Salida"}

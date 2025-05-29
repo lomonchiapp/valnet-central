@@ -45,23 +45,17 @@ export function useSalidaArticulo() {
     setError(null)
 
     try {
-            //eslint-disable-next-line no-console
-      console.log('realizarSalida called with params:', params)
       // Verificar que el artículo existe y tiene suficiente cantidad
       const articuloRef = doc(database, 'articulos', params.articuloId)
       const articuloSnap = await getDoc(articuloRef)
 
       if (!articuloSnap.exists()) {
         const errorMsg = 'El artículo no existe'
-        // eslint-disable-next-line no-console
-        console.error(errorMsg)
         setError(errorMsg)
         return { success: false, message: errorMsg }
       }
 
       const articulo = articuloSnap.data() as Articulo
-      // eslint-disable-next-line no-console
-      console.log('Articulo encontrado:', articulo)
 
       // Para materiales verificar cantidad, para equipos verificar que el serial exista
       if (
@@ -69,8 +63,6 @@ export function useSalidaArticulo() {
         articulo.cantidad < params.cantidad
       ) {
         const errorMsg = `No hay suficiente cantidad disponible. Disponible: ${articulo.cantidad}`
-        // eslint-disable-next-line no-console
-        console.error(errorMsg)
         setError(errorMsg)
         return {
           success: false,
@@ -80,8 +72,6 @@ export function useSalidaArticulo() {
 
       // Para equipos, solo permitir transferencia de unidades completas (cantidad = 1)
       if (articulo.tipo === TipoArticulo.EQUIPO && params.cantidad !== 1) {
-        // eslint-disable-next-line no-console
-        console.error('Los equipos deben transferirse de uno en uno')
         setError('Los equipos deben transferirse de uno en uno')
         return {
           success: false,
@@ -208,8 +198,6 @@ export function useSalidaArticulo() {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Error desconocido'
-              //eslint-disable-next-line no-console
-      console.error('Error in realizarSalida:', errorMessage)
       setError(errorMessage)
       return { success: false, message: errorMessage }
     } finally {
@@ -223,13 +211,9 @@ export function useSalidaArticulo() {
   const realizarTransferencia = async (
     params: SalidaArticuloParams
   ): Promise<SalidaArticuloResult> => {
-    //eslint-disable-next-line no-console
-    console.log('realizarTransferencia called with params:', params)
     if (!params.inventarioDestinoId) {
       const errorMsg =
         'Se requiere un inventario destino para realizar una transferencia'
-      //eslint-disable-next-line no-console
-      console.error(errorMsg)
       setError(errorMsg)
       return {
         success: false,
