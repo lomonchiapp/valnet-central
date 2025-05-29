@@ -1,21 +1,11 @@
 import { BaseModel } from "../baseModel"
 import { Brigada } from "./brigada"
 
-export interface TicketMikrowisp {
-    id: string
-    idcliente: string
-    asunto: string
-    fecha_soporte: string
-    estado: string
-    solicitante: string
-    fechavisita: string
-    dp: string // Deparatamento
-    turno: string // tanda Tarde o Mañana
-    agendado: string // por donde fue agendado
-    lastdate: string
-    motivo_cierre: string
-    fecha: Date
-    hora: Date
+
+export enum EstadoTicket {
+    ABIERTO = "Abierto",
+    CERRADO = "Cerrado",
+    RESPONDIDO = "Respondido"
 }
 
 export enum Prioridad {
@@ -24,9 +14,54 @@ export enum Prioridad {
     ALTA = "Alta"
 }
 
-export interface Ticket extends TicketMikrowisp, BaseModel {
-    brigada: Brigada
-    prioridad: Prioridad
+export enum TipoTicket {
+    AVERIA = "Avería",
+    REPARACION = "Reparación",
+    FACTURACION = "Facturación",
+    CONSULTA = "Consulta",
+    OTRO = "Otro",
+    INSTALACION = "Instalación",
+    DESINSTALACION = "Desinstalación",
+    CAMBIO_DE_PLAN = "Cambio de plan",
 }
 
+export enum Departamento {
+    SAC = "Servicio al Cliente",
+    COORDINACION = "Coordinación",
+    ADMINISTRACION = "Administración",
+    CONTABILIDAD = "Contabilidad",
+    MARKETING = "Marketing",
+}
+
+export enum Source {
+    CHATBOT = "Chatbot",
+    WEB = "Web",
+    WHATSAPP = "Whatsapp",
+    EMAIL = "Email",
+    TELEFONO = "Teléfono",
+    OTRO = "Otro",
+}
+
+export enum Turno {
+    MAÑANA = "Mañana",
+    TARDE = "Tarde",
+}
+
+export interface Ticket extends BaseModel {
+    tipo: TipoTicket
+    cedula: string // cedula del cliente
+    solicitante: string // nombre del cliente
+    idcliente?: string // id del cliente de mikrowisp
+    asunto: string //
+    estado: EstadoTicket
+    fechavisita?: Date
+    dp: Departamento // Deparatamento
+    turno: Turno // tanda Tarde o Mañana
+    source: Source // por donde fue agendado
+    motivo_cierre?: string
+    fecha: Date
+    prioridad: Prioridad
+    //Si va a coordinacion, se debe asignar una brigada
+    idbrigada?: string
+}
 

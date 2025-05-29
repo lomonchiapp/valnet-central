@@ -57,8 +57,18 @@ export const sidebarData: SidebarData = {
           icon: IconGasStation,
         },
         {
-          title: 'Tickets',
+          title: 'Averías / Encargos',
           url: '/coordinacion/tickets',
+          icon: TicketIcon,
+        },
+      ],
+    },
+    {
+      title: 'Soporte',
+      items: [
+        {
+          title: 'Tickets',
+          url: '/soporte/tickets',
           icon: TicketIcon,
         },
       ],

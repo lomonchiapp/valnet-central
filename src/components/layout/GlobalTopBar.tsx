@@ -37,7 +37,7 @@ export function GlobalTopBar() {
   };
 
   return (
-    <div className="w-full flex justify-between items-center rounded-lg p-4 shadow mb-6 bg-[#005BAA]">
+    <div className="w-full sticky top-0 flex justify-between items-center rounded-lg p-4 shadow mb-6 bg-[#005BAA]">
       <div className="flex items-center gap-4 w-full">
         {/* Icono para colapsar la sidebar */}
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hover:bg-accent text-[#005BAA]">

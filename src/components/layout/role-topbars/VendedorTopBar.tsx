@@ -36,7 +36,7 @@ export function VendedorTopBar() {
           className="hover:bg-orange-500 text-white font-semibold shadow"
           onClick={() => navigate('/ventas/pre-registros/nuevo')}
         >
-          + Nueva Venta
+          + Nueva Venta 
         </Button>
       </div>
     </div>

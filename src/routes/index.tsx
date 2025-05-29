@@ -6,7 +6,7 @@ import SignIn from '@/features/auth/sign-in'
 import Inventarios from '@/features/almacen/inventarios'
 // Coordinacion
 import Brigadas from '@/features/coordinacion/brigadas'
-import TicketDetail from '@/features/coordinacion/tickets/TicketDetail'
+import TicketDetail from '@/features/SAC/tickets/TicketDetail'
 import BrigadaDetail from '@/features/coordinacion/brigadas/BrigadaDetail'
 // Almacen
 import Inventario from '@/features/almacen/inventarios/inventario'
@@ -21,7 +21,7 @@ import PreRegistros from '@/features/ventas/pre-registros'
 // Valnet
 import Users from '@/features/valnet/usuarios'
 import Instalaciones from '@/features/instalaciones'
-import Tickets from '@/features/coordinacion/tickets'
+import Tickets from '@/features/SAC/tickets'
 import CombustibleDashboard from '@/features/coordinacion/combustible'
 import WallNet from '@/features/valnet/wallNet'
 import { WallNetConfig } from '@/features/valnet/wallNet'
@@ -92,9 +92,9 @@ export function AppRoutes() {
         <Route path="/almacen/inventarios/:id" element={<Inventario />} />
         {/* Coordinacion */}
         <Route path="/coordinacion/brigadas" element={<Brigadas />} />
-        <Route path="/coordinacion/tickets" element={<Tickets />} />
+        <Route path="/soporte/tickets" element={<Tickets />} />
         <Route path="/coordinacion/brigadas/:id" element={<BrigadaDetail />} />
-        <Route path="/coordinacion/tickets/:id" element={<TicketDetail />} />
+        <Route path="/soporte/tickets/:id" element={<TicketDetail />} />
         <Route path="/coordinacion/combustible" element={<CombustibleDashboard />} />
         {/* Ventas */}
         <Route path="/ventas/pre-registros" element={<Ventas />} />
