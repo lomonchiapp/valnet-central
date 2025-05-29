@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { addDoc, collection, serverTimestamp, updateDoc, doc } from "firebase/firestore";
 import { database } from "@/firebase";
-import { Proveedor } from "@/types/interfaces/almacen/proveedor";
+import { Proveedor } from "@/types/interfaces/contabilidad/proveedor";
 import { toast } from "sonner";
 import {
   Dialog,

@@ -4,7 +4,7 @@ import {database} from "@/firebase";
 import { Articulo, Inventario, Marca } from "@/types";
 import { Ubicacion } from "@/types/interfaces/almacen/ubicacion";
 import { Movimiento } from "@/types/interfaces/almacen/movimiento";
-import { Proveedor } from "@/types/interfaces/almacen/proveedor";
+import { Proveedor } from "@/types/interfaces/contabilidad/proveedor";
 
 // Este es el estado global de la aplicación
 // En este vamos a almacenar todos los datos

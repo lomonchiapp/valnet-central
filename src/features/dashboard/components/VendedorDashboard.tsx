@@ -35,14 +35,14 @@ export function VendedorDashboard({ usuario, preRegistros, contratos }: Vendedor
   const NivelIcon = nivelInfo.icon
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
-        <div>
-          <Card className={`bg-gradient-to-br ${nivelInfo.color} shadow-xl border-0 relative overflow-hidden`}>
+    <div className="space-y-8 px-4 md:px-8 py-6">
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="flex flex-col gap-6">
+          <Card className={`bg-gradient-to-br ${nivelInfo.color} shadow-xl border-0 relative overflow-hidden mb-6 min-h-[220px] md:min-h-[260px] flex flex-col justify-between`}>
             <div className="absolute right-4 top-4 opacity-30 scale-150">
               <NivelIcon width={48} height={48} />
             </div>
-            <CardHeader>
+            <CardHeader className="pb-2">
               <div className="flex items-center gap-3">
                 <NivelIcon width={36} height={36} />
                 <div>
@@ -56,7 +56,7 @@ export function VendedorDashboard({ usuario, preRegistros, contratos }: Vendedor
                 </div>
               )}
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <Progress value={progreso} />
               <div className="mt-2 text-sm">
                 Contratos este mes: <b>{usuario.contratosMes || 0}</b>
@@ -66,8 +66,6 @@ export function VendedorDashboard({ usuario, preRegistros, contratos }: Vendedor
               </div>
             </CardContent>
           </Card>
-        </div>
-        <div>
           <Card className="h-full bg-gradient-to-br from-green-50 to-green-100 border-0 shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -81,8 +79,6 @@ export function VendedorDashboard({ usuario, preRegistros, contratos }: Vendedor
               }
             </CardContent>
           </Card>
-        </div>
-        <div>
           <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-0 shadow-md">
             <CardHeader>
               <CardTitle>Contratos cerrados recientes</CardTitle>
@@ -100,9 +96,7 @@ export function VendedorDashboard({ usuario, preRegistros, contratos }: Vendedor
             </CardContent>
           </Card>
         </div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
+        <div className="flex flex-col gap-6">
           <Card className="h-full bg-gradient-to-br from-blue-50 to-blue-100 border-0 shadow-md">
             <CardHeader>
               <CardTitle>Pre-registros recientes</CardTitle>
@@ -120,7 +114,7 @@ export function VendedorDashboard({ usuario, preRegistros, contratos }: Vendedor
             </CardContent>
           </Card>
         </div>
-        <div>
+        <div className="flex flex-col gap-6">
           <WallNetDashboardWidget />
         </div>
       </div>

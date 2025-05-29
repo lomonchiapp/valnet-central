@@ -44,6 +44,26 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
+      title: 'Contabilidad',
+      items: [
+        {
+          title: 'Pagos',
+          url: '/contabilidad/pagos',
+          icon: IconLayoutDashboard,
+        },
+        {
+          title: 'Recurrentes',
+          url: '/contabilidad/recurrentes',
+          icon: IconReceipt2,
+        },
+        {
+          title: 'Facturas',
+          url: '/contabilidad/facturas',
+          icon: HandshakeIcon,
+        }
+      ],
+    },
+    {
       title: 'Coordinacion',
       items: [
         {
