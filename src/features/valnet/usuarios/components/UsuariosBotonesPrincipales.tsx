@@ -6,12 +6,14 @@ import {
   IconSearch 
 } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
-import { useUsuarios } from '../context/usuarios-context'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 
-export function UsuariosBotonesPrincipales() {
-  const { setOpen } = useUsuarios()
+interface UsuariosBotonesPrincipalesProps {
+  setOpen: (modal: 'agregar' | 'invitar') => void
+}
+
+export function UsuariosBotonesPrincipales({ setOpen }: UsuariosBotonesPrincipalesProps) {
   const [busqueda, setBusqueda] = useState("")
   
   return (

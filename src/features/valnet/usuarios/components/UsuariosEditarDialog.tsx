@@ -1,21 +1,24 @@
 import UsuarioForm from './UsuarioForm'
-import { useUsuarios } from '../context/usuarios-context'
-import { RoleUsuario, StatusUsuario, Usuario } from '@/types/interfaces/valnet/usuario'
-import { User } from '../data/schema'
 import { useUpdateUsuario } from '../hooks/useUpdateUsuario'
+import { Usuario, RoleUsuario, StatusUsuario } from '@/types/interfaces/valnet/usuario'
 
-function mapUserToUsuario(user: User): Partial<Usuario> {
+interface UsuariosEditarDialogProps {
+  setOpen: (modal: string | null) => void
+  currentUser: Usuario | null
+}
+
+function mapUserToUsuario(user: Usuario): Partial<Usuario> {
   return {
-    nombres: user.firstName || '',
-    apellidos: user.lastName || '',
+    nombres: user.nombres || '',
+    apellidos: user.apellidos || '',
     email: user.email || '',
-    role: mapRole(user.role),
-    cedula: '',
-    status: mapStatus(user.status),
-    telefono: user.phoneNumber || '',
-    direccion: '',
-    fechaNacimiento: '',
-    brigadaId: '',
+    role: user.role,
+    cedula: user.cedula || '',
+    status: user.status,
+    telefono: user.telefono || '',
+    direccion: user.direccion || '',
+    fechaNacimiento: user.fechaNacimiento || '',
+    brigadaId: user.brigadaId || '',
     updatedAt: user.updatedAt,
     createdAt: user.createdAt,
   }
@@ -45,8 +48,7 @@ function mapStatus(status: string): StatusUsuario {
   }
 }
 
-export function UsuariosEditarDialog() {
-  const { setOpen, currentUser } = useUsuarios()
+export function UsuariosEditarDialog({ setOpen, currentUser }: UsuariosEditarDialogProps) {
   const { updateUsuario, loading, error } = useUpdateUsuario()
   
   return (

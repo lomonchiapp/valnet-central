@@ -80,9 +80,9 @@ export default function SignIn() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
-              src="/logo.png"
+              src="/valdesk-logo.png"
               alt="Logo"
-              className="h-36 mx-auto mb-8"
+              className="h-16 mx-auto mb-8"
             />
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -104,12 +104,12 @@ export default function SignIn() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo Electrónico
+                  Correo Valnet
                 </label>
                 <Input
                   required
                   type="email"
-                  placeholder="correo@ejemplo.com"
+                  placeholder="correo@valnetrd.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-12"
@@ -131,7 +131,7 @@ export default function SignIn() {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-[#006680] hover:bg-[#006680] transition-colors"
+              className="w-full h-12 bg-[#005BAA] hover:bg-[#0c4373] transition-colors"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -141,7 +141,7 @@ export default function SignIn() {
                   className="flex items-center space-x-2"
                 >
                   <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin" />
-                  <span>Iniciando sesión...</span>
+                  <span>Valnetizando...</span>
                 </motion.div>
               ) : (
                 'Iniciar Sesión'

@@ -10,15 +10,14 @@ import {
 } from '@tabler/icons-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { StatusUsuario, Usuario } from '@/types'
-import { useUsuarios } from '../context/usuarios-context'
 
 interface UsuarioItemProps {
   user: Usuario
+  setOpen: (modal: string | null) => void
+  setCurrentUser: (user: Usuario) => void
 }
 
-export function UsuarioItem({ user }: UsuarioItemProps) {
-  const { setCurrentUser, setOpen } = useUsuarios()
-
+export function UsuarioItem({ user, setOpen, setCurrentUser }: UsuarioItemProps) {
   const handleEdit = () => {
     // Mapear Usuario a User
     setCurrentUser({

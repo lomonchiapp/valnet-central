@@ -1,11 +1,17 @@
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { IconAlertTriangle, IconLoader2 } from '@tabler/icons-react'
-import { useUsuarios } from '../context/usuarios-context'
 import { toast } from '@/hooks/use-toast'
+import { useState } from 'react'
+import { Usuario } from '@/types/interfaces/valnet/usuario'
 
-export function UsuariosEliminarDialog() {
-  const { setOpen, currentUser, setIsLoading, isLoading } = useUsuarios()
+interface UsuariosEliminarDialogProps {
+  setOpen: (modal: string | null) => void
+  currentUser: Usuario | null
+}
+
+export function UsuariosEliminarDialog({ setOpen, currentUser }: UsuariosEliminarDialogProps) {
+  const [isLoading, setIsLoading] = useState(false)
   
   const handleEliminar = async () => {
     if (!currentUser) return

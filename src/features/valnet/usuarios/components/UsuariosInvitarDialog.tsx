@@ -4,15 +4,18 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { IconLoader2, IconMail } from '@tabler/icons-react'
-import { useUsuarios } from '../context/usuarios-context'
 import { toast } from '@/hooks/use-toast'
 import { Textarea } from '@/components/ui/textarea'
 
-export function UsuariosInvitarDialog() {
-  const { setOpen, isLoading, setIsLoading } = useUsuarios()
+interface UsuariosInvitarDialogProps {
+  setOpen: (modal: string | null) => void
+}
+
+export function UsuariosInvitarDialog({ setOpen }: UsuariosInvitarDialogProps) {
   const [emails, setEmails] = useState('')
   const [role, setRole] = useState('vendedor')
   const [mensaje, setMensaje] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   
   const handleInvitar = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -2,15 +2,21 @@ import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog'
-import { useUsuarios } from '../context/usuarios-context'
+import { useCreateUsuario } from '../hooks/useCreateUsuario'
 import UsuarioForm from './UsuarioForm'
 import { UsuariosEliminarDialog } from './UsuariosEliminarDialog'
 import { UsuariosInvitarDialog } from './UsuariosInvitarDialog'
 import { UsuariosEditarDialog } from './UsuariosEditarDialog'
-import { useCreateUsuario } from '../hooks/useCreateUsuario'
+import { Usuario } from '@/types/interfaces/valnet/usuario'
 
-export function UsuariosDialogs() {
-  const { open, setOpen } = useUsuarios()
+interface UsuariosDialogsProps {
+  open: string | null
+  setOpen: (modal: string | null) => void
+  currentUser: Usuario | null
+  setCurrentUser: (user: Usuario | null) => void
+}
+
+export function UsuariosDialogs({ open, setOpen, currentUser, setCurrentUser }: UsuariosDialogsProps) {
   const { createUsuario, loading, error } = useCreateUsuario()
 
   return (
@@ -41,7 +47,7 @@ export function UsuariosDialogs() {
         onOpenChange={(isOpen) => !isOpen && setOpen(null)}
       >
         <DialogContent className="max-w-lg">
-          <UsuariosEliminarDialog />
+          <UsuariosEliminarDialog setOpen={setOpen} currentUser={currentUser} />
         </DialogContent>
       </Dialog>
       
@@ -51,7 +57,7 @@ export function UsuariosDialogs() {
         onOpenChange={(isOpen) => !isOpen && setOpen(null)}
       >
         <DialogContent className="max-w-xl">
-          <UsuariosInvitarDialog />
+          <UsuariosInvitarDialog setOpen={setOpen} />
         </DialogContent>
       </Dialog>
       
@@ -61,7 +67,7 @@ export function UsuariosDialogs() {
         onOpenChange={(isOpen) => !isOpen && setOpen(null)}
       >
         <DialogContent className="max-w-xl">
-          <UsuariosEditarDialog />
+          <UsuariosEditarDialog setOpen={setOpen} currentUser={currentUser} />
         </DialogContent>
       </Dialog>
     </>
