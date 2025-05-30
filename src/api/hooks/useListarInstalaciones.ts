@@ -72,7 +72,7 @@ export const useListarInstalaciones = () => {
     } finally {
       setLoading(false);
     }
-  }, [API_TOKEN, ENDPOINTS.LISTA_INSTALACIONES, apiClient]);
+  }, []);
 
   return {
     listarInstalaciones,
