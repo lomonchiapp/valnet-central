@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Dentro de functions/
+
+functions/node_modules/
+functions/lib/
+functions/dist/
+functions/.env
+functions/.env.*
