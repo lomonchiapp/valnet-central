@@ -96,7 +96,7 @@ export const useListarFacturas = () => {
     } finally {
       setLoading(false);
     }
-  }, [API_TOKEN, ENDPOINTS.FACTURAS, apiClient]);
+  }, []);
 
   return {
     listarFacturas,

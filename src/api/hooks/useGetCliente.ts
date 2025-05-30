@@ -71,14 +71,12 @@ export const useGetCliente = () => {
         cedula
       };
       
-      console.log('Buscando cliente con cédula:', cedula);
       
       const response = await apiClient.post<GetClienteResponse>(
         ENDPOINTS.CLIENTE_DETALLES,
         requestBody
       );
       
-      console.log('Respuesta de cliente:', response);
       
       if (response.estado === 'exito' && response.datos && Array.isArray(response.datos)) {
         setClientes(response.datos);
@@ -96,7 +94,6 @@ export const useGetCliente = () => {
       } else {
         const errorMsg = 'No se encontraron clientes con esa cédula';
         setError(errorMsg);
-        console.error('Error en respuesta API:', errorMsg);
         
         return {
           success: false,
@@ -107,7 +104,6 @@ export const useGetCliente = () => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       setError(`Error de conexión: ${errorMessage}`);
-      console.error('Error en solicitud API:', error);
       
       return {
         success: false,

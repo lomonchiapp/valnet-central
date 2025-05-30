@@ -26,11 +26,8 @@ export default function TicketDetail() {
         <div><span className="font-medium">Prioridad:</span> {ticket.prioridad}</div>
         <div><span className="font-medium">Solicitante:</span> {ticket.solicitante}</div>
         <div><span className="font-medium">Fecha:</span> {ticket.fecha ? new Date(ticket.fecha).toLocaleDateString() : ''}</div>
-        <div><span className="font-medium">Hora:</span> {ticket.hora ? new Date(ticket.hora).toLocaleTimeString() : ''}</div>
         <div><span className="font-medium">Motivo de cierre:</span> {ticket.motivo_cierre || 'N/A'}</div>
-        <div><span className="font-medium">Brigada asignada:</span> {ticket.brigada?.nombre || 'Sin asignar'}</div>
         <div><span className="font-medium">Turno:</span> {ticket.turno}</div>
-        <div><span className="font-medium">Agendado por:</span> {ticket.agendado}</div>
         <div><span className="font-medium">Departamento:</span> {ticket.dp}</div>
       </CardContent>
     </Card>

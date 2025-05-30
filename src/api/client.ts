@@ -11,7 +11,6 @@ export const apiClient = {
    * @returns Promise with the response data
    */
   post: async <T, B = Record<string, unknown>>(endpoint: string, body: B): Promise<T> => {
-    try {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -27,9 +26,6 @@ export const apiClient = {
         throw new Error(`API error: ${response.status} ${response.statusText}`);
       }
 
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    return data;
   },
 }; 
