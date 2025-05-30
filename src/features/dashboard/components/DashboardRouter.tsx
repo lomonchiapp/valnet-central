@@ -48,13 +48,11 @@ export function DashboardRouter() {
     }
   }, [user])
 
-
   useEffect(() => {
     if (user?.role === RoleUsuario.VENDEDOR) {
       fetchVendedorData()
     }
   }, [user, fetchVendedorData])
-
 
   if (loading) {
     return (
