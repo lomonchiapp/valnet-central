@@ -59,7 +59,6 @@ export default function Ubicaciones() {
       toast.success(`Ubicación "${deletingUbicacion.nombre}" eliminada`)
       setDeletingUbicacion(null)
     } catch (err) {
-       
       console.error(err)
       toast.error('Error al eliminar la ubicación')
     } finally {

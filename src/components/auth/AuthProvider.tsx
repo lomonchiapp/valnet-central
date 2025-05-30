@@ -44,7 +44,6 @@ export function AuthProvider({ children }: Props) {
             setUser(null)
           }
         } catch (error) {
-           
           console.error('Error setting user:', error)
           setUser(null)
         } finally {

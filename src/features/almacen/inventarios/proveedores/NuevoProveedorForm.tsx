@@ -74,7 +74,6 @@ export function NuevoProveedorForm({
       reset()
       onOpenChange(false)
     } catch (error) {
-       
       console.error('Error creando proveedor:', error)
       toast.error('Error al crear el proveedor. Intente nuevamente.')
     } finally {

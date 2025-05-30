@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { database } from '@/firebase'
+// Asumiendo que db se exporta desde aquí
+import { Inventario, TipoArticulo, Unidad } from '@/types'
 import {
   collection,
   addDoc,
@@ -7,8 +9,6 @@ import {
   updateDoc,
   doc,
 } from 'firebase/firestore'
-// Asumiendo que db se exporta desde aquí
-import { Inventario, TipoArticulo, Unidad } from '@/types'
 
 export interface NewInventoryData {
   nombre: string
@@ -51,7 +51,7 @@ export const useNewInventory = () => {
     } catch (e) {
       setError(e as Error)
       setIsLoading(false)
-       
+
       console.error('Error adding document: ', e)
       return null
     }

@@ -162,7 +162,6 @@ export default function NuevoPreRegistro() {
         })
       }
     } catch (error) {
-       
       console.error(error)
       toast({
         title: 'Error',

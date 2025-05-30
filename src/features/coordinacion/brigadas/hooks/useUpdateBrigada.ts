@@ -11,7 +11,6 @@ export function useUpdateBrigada() {
         updatedAt: new Date(),
       })
     } catch (error) {
-       
       console.error(error)
       toast.error('Error al actualizar la brigada')
     }

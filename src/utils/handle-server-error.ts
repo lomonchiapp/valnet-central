@@ -2,7 +2,6 @@ import { AxiosError } from 'axios'
 import { toast } from '@/hooks/use-toast'
 
 export function handleServerError(error: unknown) {
-   
   console.log(error)
 
   let errMsg = 'Something went wrong!'

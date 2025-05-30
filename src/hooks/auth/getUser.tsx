@@ -27,7 +27,6 @@ export const getUser = async (uid: string): Promise<Usuario | null> => {
       updatedAt: userData.updatedAt,
     } as Usuario
   } catch (error) {
-     
     console.error('Error fetching user:', error)
     return null
   }

@@ -41,8 +41,7 @@ export default function Tickets() {
           .includes(filterRemitente.toLowerCase())) &&
       (!filterAsunto ||
         ticket.asunto.toLowerCase().includes(filterAsunto.toLowerCase())) &&
-      (!filterTecnico ||
-        (ticket.idbrigada || 'No asignado') === filterTecnico)
+      (!filterTecnico || (ticket.idbrigada || 'No asignado') === filterTecnico)
     )
   })
 

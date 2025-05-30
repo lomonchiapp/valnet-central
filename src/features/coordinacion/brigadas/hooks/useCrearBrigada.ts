@@ -15,7 +15,6 @@ export function useCrearBrigada() {
       await updateDoc(docRef, { id: docRef.id })
       return { ...newBrigada, id: docRef.id }
     } catch (error) {
-       
       console.error(error)
       toast.error('Error al crear la brigada')
       return null
