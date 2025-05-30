@@ -12,13 +12,18 @@ export default [
       react,
       'react-hooks': reactHooks,
     },
-  },
-  react.configs.recommended,
-  reactHooks.configs.recommended,
-  {
-    ignores: ['dist', 'node_modules'],
     rules: {
-      // Puedes agregar reglas personalizadas aquí
+      'react/jsx-uses-react': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      // Agrega aquí más reglas de React si lo necesitas
     },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    ignores: ['dist', 'node_modules'],
   },
 ] 

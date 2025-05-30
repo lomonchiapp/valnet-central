@@ -51,7 +51,7 @@ export const useNewInventory = () => {
     } catch (e) {
       setError(e as Error)
       setIsLoading(false)
-      //eslint-disable-next-line no-console
+       
       console.error('Error adding document: ', e)
       return null
     }

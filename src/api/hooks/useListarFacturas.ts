@@ -61,7 +61,7 @@ export const useListarFacturas = () => {
           // console.log('Facturas encontradas:', response.facturas.length);
           // Log the estado of the first invoice to check its exact string value
           if (response.facturas.length > 0) {
-            //eslint-disable-next-line no-console
+             
             console.log(
               'API returned invoice status (first invoice):',
               response.facturas[0].estado

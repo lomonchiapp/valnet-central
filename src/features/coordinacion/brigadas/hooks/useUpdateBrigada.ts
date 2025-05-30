@@ -11,7 +11,7 @@ export function useUpdateBrigada() {
         updatedAt: new Date(),
       })
     } catch (error) {
-      //eslint-disable-next-line no-console
+       
       console.error(error)
       toast.error('Error al actualizar la brigada')
     }

@@ -44,7 +44,7 @@ export function AuthProvider({ children }: Props) {
             setUser(null)
           }
         } catch (error) {
-          //eslint-disable-next-line no-console
+           
           console.error('Error setting user:', error)
           setUser(null)
         } finally {

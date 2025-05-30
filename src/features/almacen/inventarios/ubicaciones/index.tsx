@@ -59,7 +59,7 @@ export default function Ubicaciones() {
       toast.success(`Ubicación "${deletingUbicacion.nombre}" eliminada`)
       setDeletingUbicacion(null)
     } catch (err) {
-      //eslint-disable-next-line no-console
+       
       console.error(err)
       toast.error('Error al eliminar la ubicación')
     } finally {

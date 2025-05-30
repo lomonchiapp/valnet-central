@@ -27,7 +27,7 @@ export const getUser = async (uid: string): Promise<Usuario | null> => {
       updatedAt: userData.updatedAt,
     } as Usuario
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.error('Error fetching user:', error)
     return null
   }

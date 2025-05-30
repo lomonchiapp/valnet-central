@@ -40,7 +40,7 @@ export default function SignIn() {
       await updateDoc(doc(database, 'usuarios', user.uid), { status: 'Online' })
       // La redirección se manejará en el useEffect cuando el usuario se actualice
     } catch (error) {
-      // eslint-disable-next-line no-console
+       
       console.error('Error al iniciar sesión:', error)
       toast({
         variant: 'destructive',

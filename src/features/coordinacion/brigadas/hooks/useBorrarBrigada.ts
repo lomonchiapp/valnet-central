@@ -25,7 +25,7 @@ export function useBorrarBrigada() {
       await addDoc(collection(database, 'eliminaciones'), eliminacion)
       await deleteDoc(doc(database, 'brigadas', brigada.id))
     } catch (error) {
-      //eslint-disable-next-line no-console
+       
       console.error(error)
       toast.error('Error al eliminar la brigada')
     }
