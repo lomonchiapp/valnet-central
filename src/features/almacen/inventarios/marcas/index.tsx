@@ -12,10 +12,16 @@ import {
 } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { NuevaMarcaForm } from '@/features/almacen/marcas/components/NuevaMarcaForm'
+import { useEliminarMarca } from '@/features/almacen/marcas/hooks/useEliminarMarca'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Marca } from '@/types'
 
 export default function Marcas() {
   const { marcas, subscribeToMarcas } = useAlmacenState()
   const [showNewForm, setShowNewForm] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [marcaAEliminar, setMarcaAEliminar] = useState<Marca | null>(null)
+  const { eliminarMarca, isLoading: eliminandoMarca } = useEliminarMarca()
 
   useEffect(() => {
     const unsubscribe = subscribeToMarcas()
@@ -26,8 +32,26 @@ export default function Marcas() {
     a.nombre.localeCompare(b.nombre)
   )
 
+  const handleDeleteClick = (marca: Marca) => {
+    setMarcaAEliminar(marca)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!marcaAEliminar) return
+    try {
+      await eliminarMarca(marcaAEliminar.id)
+      toast.success(`Marca "${marcaAEliminar.nombre}" eliminada exitosamente`)
+    } catch {
+      toast.error('Error al eliminar la marca. Intente nuevamente.')
+    } finally {
+      setDeleteDialogOpen(false)
+      setMarcaAEliminar(null)
+    }
+  }
+
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 max-w-7xl mx-auto'>
       <div className='flex justify-between items-center'>
         <div>
           <h1 className='text-3xl font-bold tracking-tight'>Marcas</h1>
@@ -67,7 +91,7 @@ export default function Marcas() {
                     <tr key={marca.id} className='border-b last:border-0'>
                       <td className='p-2 font-medium'>{marca.nombre}</td>
                       <td className='p-2 text-right'>
-                        <Button variant='ghost' size='icon'>
+                        <Button variant='ghost' size='icon' onClick={() => handleDeleteClick(marca)}>
                           <Trash2 className='h-4 w-4' />
                         </Button>
                       </td>
@@ -79,6 +103,23 @@ export default function Marcas() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar marca</DialogTitle>
+          </DialogHeader>
+          <p>¿Estás seguro de que deseas eliminar la marca "{marcaAEliminar?.nombre}"?</p>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setDeleteDialogOpen(false)} disabled={eliminandoMarca}>
+              Cancelar
+            </Button>
+            <Button variant='destructive' onClick={handleConfirmDelete} disabled={eliminandoMarca}>
+              {eliminandoMarca ? 'Eliminando...' : 'Eliminar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <NuevaMarcaForm
         open={showNewForm}

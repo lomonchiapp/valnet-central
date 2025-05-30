@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { FIREBASE_AUTH, database } from '@/firebase'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
 import { UsuarioFormState } from '../components/UsuarioForm'
+
+// Cambia esta URL por la de tu función en producción o local
+const NEW_VALNET_USER_ENDPOINT = 'https://us-central1-valnet-86e94.cloudfunctions.net/newValnetUser'
 
 export function useCreateUsuario() {
   const [loading, setLoading] = useState(false)
@@ -12,32 +12,20 @@ export function useCreateUsuario() {
     setLoading(true)
     setError(null)
     try {
-      // 1. Crear usuario en Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(
-        FIREBASE_AUTH,
-        usuario.email,
-        usuario.password || 'valnet2025' // fallback por si no hay password
-      )
-      const { user } = userCredential
-
-      // 2. Guardar datos adicionales en Firestore
-      const usuarioData = {
-        nombres: usuario.nombres,
-        apellidos: usuario.apellidos,
-        email: usuario.email,
-        role: usuario.role,
-        cedula: usuario.cedula,
-        status: usuario.status,
-        telefono: usuario.telefono,
-        direccion: usuario.direccion,
-        fechaNacimiento: usuario.fechaNacimiento,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        id: user.uid,
-      }
-      await setDoc(doc(database, 'usuarios', user.uid), usuarioData)
+      const res = await fetch(NEW_VALNET_USER_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(usuario),
+      })
+      const data = await res.json()
       setLoading(false)
-      return { success: true, uid: user.uid }
+      if (!res.ok) {
+        setError(data.error || 'Error desconocido')
+        return { success: false, error: data.error || 'Error desconocido' }
+      }
+      return { success: true, uid: data.uid }
     } catch (err: unknown) {
       let message = 'Error desconocido'
       if (err instanceof Error) message = err.message

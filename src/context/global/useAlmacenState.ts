@@ -2,7 +2,6 @@ import { database } from '@/firebase'
 import { Articulo, Inventario, Marca } from '@/types'
 import { Movimiento } from '@/types/interfaces/almacen/movimiento'
 import { Ubicacion } from '@/types/interfaces/almacen/ubicacion'
-import { Proveedor } from '@/types/interfaces/contabilidad/proveedor'
 import { onSnapshot, collection } from 'firebase/firestore'
 import { create } from 'zustand'
 
@@ -14,7 +13,6 @@ interface AlmacenState {
   articulos: Articulo[]
   marcas: Marca[]
   ubicaciones: Ubicacion[]
-  proveedores: Proveedor[]
   setArticulos: (articulos: Articulo[]) => void
   setInventarios: (inventarios: Inventario[]) => void
   setMovimientos: (movimientos: Movimiento[]) => void
@@ -24,7 +22,6 @@ interface AlmacenState {
   subscribeToMarcas: () => () => void
   subscribeToUbicaciones: () => () => void
   subscribeToMovimientos: () => () => void
-  subscribeToProveedores: () => () => void
 }
 
 export const useAlmacenState = create<AlmacenState>()((set) => ({
@@ -88,16 +85,5 @@ export const useAlmacenState = create<AlmacenState>()((set) => ({
       }
     )
     return unsubscribe
-  },
-  subscribeToProveedores: () => {
-    const unsubscribe = onSnapshot(
-      collection(database, 'proveedores'),
-      (snapshot) => {
-        set({
-          proveedores: snapshot.docs.map((doc) => doc.data() as Proveedor),
-        })
-      }
-    )
-    return unsubscribe
-  },
+  }
 }))

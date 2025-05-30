@@ -7,7 +7,7 @@ import {
   IconReportMoney,
   IconUser,
 } from '@tabler/icons-react'
-import { HandshakeIcon, Ticket as TicketIcon } from 'lucide-react'
+import { Ticket as TicketIcon } from 'lucide-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -30,15 +30,35 @@ export const sidebarData: SidebarData = {
           url: '/almacen/inventarios',
           icon: IconLayoutDashboard,
         },
+      ],
+    },
+    {
+      title: 'Compras',
+      items: [
         {
-          title: 'Movimientos',
-          url: '/almacen/movimientos',
+          title: 'Gastos / Pagos',
+          url: '/compras/gastos',
           icon: IconReceipt2,
         },
         {
-          title: 'Solicitudes',
-          url: '/almacen/solicitudes',
-          icon: HandshakeIcon,
+          title: 'Pagos Recurrentes',
+          url: '/compras/pagos-recurrentes',
+          icon: IconChecklist,
+        },
+        {
+          title: 'Ordenes de Compra',
+          url: '/compras/ordenes',
+          icon: IconReportMoney,
+        },
+        {
+          title: 'Gastos Menores',
+          url: '/compras/gastos-menores',
+          icon: IconGasStation,
+        },
+        {
+          title: 'Proveedores',
+          url: '/compras/proveedores',
+          icon: IconUser,
         },
       ],
     },
@@ -46,19 +66,29 @@ export const sidebarData: SidebarData = {
       title: 'Contabilidad',
       items: [
         {
-          title: 'Pagos',
-          url: '/contabilidad/pagos',
-          icon: IconLayoutDashboard,
+          title: 'Diario General',
+          url: '/contabilidad/diario-general',
+          icon: IconChecklist,
         },
         {
-          title: 'Recurrentes',
-          url: '/contabilidad/recurrentes',
+          title: 'Asientos Contables',
+          url: '/contabilidad/asientos',
+          icon: IconReportMoney,
+        },
+        {
+          title: 'Cuentas',
+          url: '/contabilidad/cuentas',
           icon: IconReceipt2,
         },
         {
-          title: 'Facturas',
-          url: '/contabilidad/facturas',
-          icon: HandshakeIcon,
+          title: 'Libro Diario',
+          url: '/contabilidad/libro-diario',
+          icon: IconMapPin,
+        },
+        {
+          title: 'Reportes',
+          url: '/contabilidad/reportes',
+          icon: IconLayoutDashboard,
         },
       ],
     },

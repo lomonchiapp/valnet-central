@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { database } from '@/firebase'
-import { Proveedor } from '@/types/interfaces/contabilidad/proveedor'
+import { Proveedor } from '@/types/interfaces/compras/proveedor'
 import {
   addDoc,
   collection,

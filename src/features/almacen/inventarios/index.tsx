@@ -24,6 +24,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NewInventoryForm } from './components/NewInventoryForm'
 import { NoInventoriesWarning } from './components/NoInventoriesWarning'
+import { useComprasState } from '@/context/global/useComprasState'
 
 export default function InventoriosLayout() {
   const navigate = useNavigate()
@@ -31,8 +32,8 @@ export default function InventoriosLayout() {
   const {
     inventarios: inventariosDelContexto,
     subscribeToInventarios,
-    subscribeToProveedores,
   } = useAlmacenState()
+  const { subscribeToProveedores } = useComprasState()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Determine active tab based on current path
@@ -162,7 +163,7 @@ export default function InventoriosLayout() {
       <Tabs
         value={activeTab}
         defaultValue={activeTab}
-        className='w-full'
+        className='max-w-7xl mx-auto'
         onValueChange={(value) => {
           switch (value) {
             case 'inventarios':

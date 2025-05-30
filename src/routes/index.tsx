@@ -15,7 +15,7 @@ import SignIn from '@/features/auth/sign-in'
 import Brigadas from '@/features/coordinacion/brigadas'
 import BrigadaDetail from '@/features/coordinacion/brigadas/BrigadaDetail'
 import CombustibleDashboard from '@/features/coordinacion/combustible'
-import Dashboard from '@/features/dashboard'
+import { DashboardRouter } from '@/features/dashboard/components/DashboardRouter'
 import Instalaciones from '@/features/instalaciones'
 // Valnet
 import Users from '@/features/valnet/usuarios'
@@ -25,6 +25,18 @@ import { WallNetConfig } from '@/features/valnet/wallNet'
 import Ventas from '@/features/ventas'
 import NuevoPreRegistro from '@/features/ventas/components/NuevoPreRegistro'
 import PreRegistros from '@/features/ventas/pre-registros'
+import Compras from '@/features/compras'
+import Gastos from '@/features/compras/gastos'
+import PagosRecurrentes from '@/features/compras/pagos-recurrentes'
+import OrdenesCompra from '@/features/compras/ordenes'
+import GastosMenores from '@/features/compras/gastos-menores'
+import ProveedoresCompras from '@/features/compras/proveedores'
+import Contabilidad from '@/features/contabilidad'
+import DiarioGeneral from '@/features/contabilidad/diario-general'
+import AsientosContables from '@/features/contabilidad/asientos'
+import Cuentas from '@/features/contabilidad/cuentas'
+import LibroDiario from '@/features/contabilidad/libro-diario'
+import Reportes from '@/features/contabilidad/reportes'
 
 // Componente para manejar rutas protegidas
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -80,7 +92,7 @@ export function AppRoutes() {
         }
       >
         {/* Dashboard como ruta principal */}
-        <Route path='/' element={<Dashboard />} />
+        <Route path='/' element={<DashboardRouter />} />
         {/* Rutas de la aplicación */}
         {/* Almacen */}
         <Route path='/almacen/inventarios' element={<Inventarios />}>
@@ -113,6 +125,20 @@ export function AppRoutes() {
         <Route path='/valnet/wallnet/config' element={<WallNetConfig />} />
         {/* Instalaciones */}
         <Route path='/instalaciones' element={<Instalaciones />} />
+        {/* Compras */}
+        <Route path='/compras' element={<Compras />} />
+        <Route path='/compras/gastos' element={<Gastos />} />
+        <Route path='/compras/pagos-recurrentes' element={<PagosRecurrentes />} />
+        <Route path='/compras/ordenes' element={<OrdenesCompra />} />
+        <Route path='/compras/gastos-menores' element={<GastosMenores />} />
+        <Route path='/compras/proveedores' element={<ProveedoresCompras />} />
+        {/* Contabilidad */}
+        <Route path='/contabilidad' element={<Contabilidad />} />
+        <Route path='/contabilidad/diario-general' element={<DiarioGeneral />} />
+        <Route path='/contabilidad/asientos' element={<AsientosContables />} />
+        <Route path='/contabilidad/cuentas' element={<Cuentas />} />
+        <Route path='/contabilidad/libro-diario' element={<LibroDiario />} />
+        <Route path='/contabilidad/reportes' element={<Reportes />} />
       </Route>
 
       {/* Ruta 404 - Redirige al dashboard */}

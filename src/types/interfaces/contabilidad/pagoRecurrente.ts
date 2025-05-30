@@ -7,6 +7,11 @@ export enum FrecuenciaPago {
   ANUAL = 'ANUAL',
 }
 
+export enum EstadoPagoRecurrente {
+  ACTIVO = 'ACTIVO',
+  INACTIVO = 'INACTIVO',
+}
+
 export interface PagoRecurrente extends BaseModel {
   descripcion: string // Descripción del pago recurrente
   monto: number // Monto a pagar
@@ -14,7 +19,7 @@ export interface PagoRecurrente extends BaseModel {
   fechaInicio: string // Fecha de inicio del pago recurrente (ISO string)
   fechaProximoPago: string // Fecha del próximo pago (ISO string)
   fechaFin?: string // Fecha de finalización (opcional)
-  estado: 'activo' | 'inactivo' // Estado del pago recurrente
+  estado: EstadoPagoRecurrente // Estado del pago recurrente
   metodoPago?: string // Método de pago (opcional)
   notas?: string // Notas adicionales (opcional)
   idcuenta: string // ID de la cuenta contable
