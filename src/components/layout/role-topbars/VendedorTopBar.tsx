@@ -42,5 +42,3 @@ export function VendedorTopBar() {
     </div>
   );
 }
-
-export default VendedorTopBar; 

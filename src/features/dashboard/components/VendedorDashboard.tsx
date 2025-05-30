@@ -121,5 +121,3 @@ export function VendedorDashboard({ usuario, preRegistros, contratos }: Vendedor
     </div>
   )
 }
-
-export default VendedorDashboard; 

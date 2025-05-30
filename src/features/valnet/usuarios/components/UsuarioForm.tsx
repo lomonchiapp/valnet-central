@@ -30,6 +30,7 @@ export const UsuarioForm = ({ usuario, onSubmit, isLoading, onCancel }: UsuarioF
     cedula: '',
     status: StatusUsuario.OFFLINE,
     telefono: '',
+    avatar: '',
     direccion: '',
     fechaNacimiento: '',
     password: '',
@@ -43,6 +44,7 @@ export const UsuarioForm = ({ usuario, onSubmit, isLoading, onCancel }: UsuarioF
     if (usuario) {
       setForm({
         nombres: usuario.nombres || '',
+        avatar: usuario.avatar || '',
         apellidos: usuario.apellidos || '',
         email: usuario.email || '',
         role: usuario.role || RoleUsuario.VENDEDOR,
@@ -230,5 +232,3 @@ export const UsuarioForm = ({ usuario, onSubmit, isLoading, onCancel }: UsuarioF
     </>
   )
 }
-
-export default UsuarioForm 

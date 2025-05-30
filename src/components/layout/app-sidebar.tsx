@@ -5,12 +5,12 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
-import { NavGroup } from '@/components/layout/nav-group'
 import { NavUser } from '@/components/layout/nav-user'
 import { sidebarData } from './data/sidebar-data'
 import logo from '/valdesk-logo.png'
 import icon from '/images/icon.png'
 import { useState, useEffect } from 'react'
+import { NavGroup } from './nav-group'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [collapsed, setCollapsed] = useState(false);
