@@ -97,8 +97,8 @@ export const useContabilidadState = create<ContabilidadState>()((set) => ({
   subscribeToReportes: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'reportes'),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (snapshot) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         set({ reportes: snapshot.docs.map((doc) => doc.data() as any) })
       }
     )

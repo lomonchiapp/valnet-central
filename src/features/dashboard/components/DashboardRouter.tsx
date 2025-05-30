@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { database } from '@/firebase'
 import { RoleUsuario, Usuario } from '@/types/interfaces/valnet/usuario'
 import { collection, query, where, getDocs } from 'firebase/firestore'
@@ -18,13 +18,7 @@ export function DashboardRouter() {
   const [preRegistros, setPreRegistros] = useState<RegistroResumen[]>([])
   const [contratos, setContratos] = useState<RegistroResumen[]>([])
 
-  useEffect(() => {
-    if (user?.role === RoleUsuario.VENDEDOR) {
-      fetchVendedorData()
-    }
-  }, [user])
-
-  const fetchVendedorData = async () => {
+  const fetchVendedorData = useCallback(async () => {
     try {
       // Obtener pre-registros del vendedor
       const preRegistrosQuery = query(
@@ -52,7 +46,15 @@ export function DashboardRouter() {
     } catch (error) {
       console.error('Error fetching vendedor data:', error)
     }
-  }
+  }, [user])
+
+
+  useEffect(() => {
+    if (user?.role === RoleUsuario.VENDEDOR) {
+      fetchVendedorData()
+    }
+  }, [user, fetchVendedorData])
+
 
   if (loading) {
     return (
