@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { UsuarioFormState } from '../components/UsuarioForm'
 
 // Cambia esta URL por la de tu función en producción o local
-const NEW_VALNET_USER_ENDPOINT = 'https://us-central1-valnet-86e94.cloudfunctions.net/newValnetUser'
+const NEW_VALNET_USER_ENDPOINT =
+  'https://us-central1-valnet-86e94.cloudfunctions.net/newValnetUser'
 
 export function useCreateUsuario() {
   const [loading, setLoading] = useState(false)

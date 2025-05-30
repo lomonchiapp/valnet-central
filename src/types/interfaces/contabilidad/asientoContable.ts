@@ -13,4 +13,4 @@ export interface AsientoContable {
   referencia?: string
   createdAt: Date
   updatedAt: Date
-} 
+}

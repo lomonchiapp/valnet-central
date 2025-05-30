@@ -1,14 +1,40 @@
 import { useState, useEffect } from 'react'
+import { database as db } from '@/firebase'
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  orderBy,
+} from 'firebase/firestore'
+import { Edit, Trash2, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { toast } from 'sonner'
-import { Edit, Trash2, Plus } from 'lucide-react'
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { FeatureLayout } from '@/components/layout/feature-layout'
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy } from 'firebase/firestore'
-import { database as db } from '@/firebase'
 
 interface GastoMenorForm {
   id: string
@@ -35,11 +61,14 @@ export default function GastosMenores() {
 
   const fetchGastos = async () => {
     try {
-      const q = query(collection(db, 'gastos-menores'), orderBy('fecha', 'desc'))
+      const q = query(
+        collection(db, 'gastos-menores'),
+        orderBy('fecha', 'desc')
+      )
       const querySnapshot = await getDocs(q)
-      const gastosData = querySnapshot.docs.map(doc => ({
+      const gastosData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as GastoMenorForm[]
       setGastos(gastosData)
     } catch (error) {
@@ -64,7 +93,7 @@ export default function GastosMenores() {
           monto: Number(monto),
           fecha,
           responsable,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         toast.success('Gasto menor actualizado')
       } else {
@@ -74,11 +103,11 @@ export default function GastosMenores() {
           fecha,
           responsable,
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         toast.success('Gasto menor agregado')
       }
-      
+
       setDescripcion('')
       setMonto('')
       setFecha('')
@@ -112,9 +141,10 @@ export default function GastosMenores() {
     }
   }
 
-  const filtered = gastos.filter(g =>
-    g.descripcion.toLowerCase().includes(search.toLowerCase()) ||
-    g.responsable.toLowerCase().includes(search.toLowerCase())
+  const filtered = gastos.filter(
+    (g) =>
+      g.descripcion.toLowerCase().includes(search.toLowerCase()) ||
+      g.responsable.toLowerCase().includes(search.toLowerCase())
   )
 
   const actions = (
@@ -126,52 +156,103 @@ export default function GastosMenores() {
 
   return (
     <FeatureLayout
-      title="Gastos Menores"
-      description="Administra los gastos menores de la empresa."
+      title='Gastos Menores'
+      description='Administra los gastos menores de la empresa.'
       actions={actions}
     >
       <div className='flex gap-4 items-center flex-wrap'>
         <Input
           placeholder='Buscar por descripción o responsable...'
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           className='max-w-xs'
         />
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button className='ml-auto' onClick={() => { setEditId(null); setDescripcion(''); setMonto(''); setFecha(''); setResponsable(''); setOpen(true) }}>
+            <Button
+              className='ml-auto'
+              onClick={() => {
+                setEditId(null)
+                setDescripcion('')
+                setMonto('')
+                setFecha('')
+                setResponsable('')
+                setOpen(true)
+              }}
+            >
               <Plus className='w-4 h-4 mr-2' /> Agregar gasto menor
             </Button>
           </SheetTrigger>
-          <SheetContent side='top' className='h-[400px] w-full max-w-2xl mx-auto rounded-b-xl border-t-0 animate-in slide-in-from-top duration-300'>
+          <SheetContent
+            side='top'
+            className='h-[400px] w-full max-w-2xl mx-auto rounded-b-xl border-t-0 animate-in slide-in-from-top duration-300'
+          >
             <SheetHeader className='mb-6'>
-              <SheetTitle className='text-2xl'>{editId ? 'Editar Gasto Menor' : 'Agregar Gasto Menor'}</SheetTitle>
+              <SheetTitle className='text-2xl'>
+                {editId ? 'Editar Gasto Menor' : 'Agregar Gasto Menor'}
+              </SheetTitle>
             </SheetHeader>
             <div className='grid grid-cols-2 gap-4'>
               <div className='space-y-4'>
                 <div>
-                  <label className='text-sm font-medium mb-1.5 block'>Descripción</label>
-                  <Input value={descripcion} onChange={e => setDescripcion(e.target.value)} placeholder='Descripción del gasto' />
+                  <label className='text-sm font-medium mb-1.5 block'>
+                    Descripción
+                  </label>
+                  <Input
+                    value={descripcion}
+                    onChange={(e) => setDescripcion(e.target.value)}
+                    placeholder='Descripción del gasto'
+                  />
                 </div>
                 <div>
-                  <label className='text-sm font-medium mb-1.5 block'>Monto</label>
-                  <Input type='number' value={monto} onChange={e => setMonto(e.target.value)} placeholder='0.00' />
+                  <label className='text-sm font-medium mb-1.5 block'>
+                    Monto
+                  </label>
+                  <Input
+                    type='number'
+                    value={monto}
+                    onChange={(e) => setMonto(e.target.value)}
+                    placeholder='0.00'
+                  />
                 </div>
               </div>
               <div className='space-y-4'>
                 <div>
-                  <label className='text-sm font-medium mb-1.5 block'>Fecha</label>
-                  <Input type='date' value={fecha} onChange={e => setFecha(e.target.value)} />
+                  <label className='text-sm font-medium mb-1.5 block'>
+                    Fecha
+                  </label>
+                  <Input
+                    type='date'
+                    value={fecha}
+                    onChange={(e) => setFecha(e.target.value)}
+                  />
                 </div>
                 <div>
-                  <label className='text-sm font-medium mb-1.5 block'>Responsable</label>
-                  <Input value={responsable} onChange={e => setResponsable(e.target.value)} placeholder='Nombre del responsable' />
+                  <label className='text-sm font-medium mb-1.5 block'>
+                    Responsable
+                  </label>
+                  <Input
+                    value={responsable}
+                    onChange={(e) => setResponsable(e.target.value)}
+                    placeholder='Nombre del responsable'
+                  />
                 </div>
               </div>
             </div>
             <div className='flex gap-2 justify-end mt-6'>
-              <Button variant='outline' type='button' onClick={() => { setOpen(false); setEditId(null); }}>Cancelar</Button>
-              <Button onClick={handleAddOrEdit}>{editId ? 'Actualizar' : 'Agregar'}</Button>
+              <Button
+                variant='outline'
+                type='button'
+                onClick={() => {
+                  setOpen(false)
+                  setEditId(null)
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button onClick={handleAddOrEdit}>
+                {editId ? 'Actualizar' : 'Agregar'}
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
@@ -190,41 +271,69 @@ export default function GastosMenores() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className='text-center text-muted-foreground py-8'>Cargando gastos...</TableCell>
+                <TableCell
+                  colSpan={5}
+                  className='text-center text-muted-foreground py-8'
+                >
+                  Cargando gastos...
+                </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className='text-center text-muted-foreground py-8'>No hay gastos menores registrados.</TableCell>
-              </TableRow>
-            ) : filtered.map((gasto) => (
-              <TableRow key={gasto.id}>
-                <TableCell><span className='font-mono text-xs bg-muted px-2 py-1 rounded'>{gasto.fecha}</span></TableCell>
-                <TableCell>{gasto.descripcion}</TableCell>
-                <TableCell><span className='font-semibold text-primary'>${gasto.monto.toLocaleString()}</span></TableCell>
-                <TableCell>{gasto.responsable}</TableCell>
-                <TableCell className='flex gap-2'>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size='icon' variant='outline' onClick={() => handleEdit(gasto)}>
-                        <Edit className='w-4 h-4' />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Editar</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size='icon' variant='destructive' onClick={() => handleDelete(gasto.id)}>
-                        <Trash2 className='w-4 h-4' />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Eliminar</TooltipContent>
-                  </Tooltip>
+                <TableCell
+                  colSpan={5}
+                  className='text-center text-muted-foreground py-8'
+                >
+                  No hay gastos menores registrados.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filtered.map((gasto) => (
+                <TableRow key={gasto.id}>
+                  <TableCell>
+                    <span className='font-mono text-xs bg-muted px-2 py-1 rounded'>
+                      {gasto.fecha}
+                    </span>
+                  </TableCell>
+                  <TableCell>{gasto.descripcion}</TableCell>
+                  <TableCell>
+                    <span className='font-semibold text-primary'>
+                      ${gasto.monto.toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>{gasto.responsable}</TableCell>
+                  <TableCell className='flex gap-2'>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size='icon'
+                          variant='outline'
+                          onClick={() => handleEdit(gasto)}
+                        >
+                          <Edit className='w-4 h-4' />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Editar</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size='icon'
+                          variant='destructive'
+                          onClick={() => handleDelete(gasto.id)}
+                        >
+                          <Trash2 className='w-4 h-4' />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Eliminar</TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
     </FeatureLayout>
   )
-} 
+}

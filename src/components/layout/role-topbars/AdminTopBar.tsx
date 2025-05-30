@@ -28,10 +28,12 @@ export function AdminTopBar() {
   ]
 
   return (
-    <div className="sticky top-0 z-40 bg-[#005BAA]">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <div className='sticky top-0 z-40 bg-[#005BAA]'>
+      <div className='container mx-auto px-4 py-3 flex items-center justify-between'>
         <div className='flex-1'>
-          <h2 className='text-xl font-medium text-white'>Panel de Administración</h2>
+          <h2 className='text-xl font-medium text-white'>
+            Panel de Administración
+          </h2>
           <p className='text-sm text-muted-foreground text-white'>
             Control y gestión del sistema
           </p>

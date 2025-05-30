@@ -11,6 +11,18 @@ import Proveedores from '@/features/almacen/inventarios/proveedores'
 // Almacen
 import Ubicaciones from '@/features/almacen/inventarios/ubicaciones'
 import SignIn from '@/features/auth/sign-in'
+import Compras from '@/features/compras'
+import Gastos from '@/features/compras/gastos'
+import GastosMenores from '@/features/compras/gastos-menores'
+import OrdenesCompra from '@/features/compras/ordenes'
+import PagosRecurrentes from '@/features/compras/pagos-recurrentes'
+import ProveedoresCompras from '@/features/compras/proveedores'
+import Contabilidad from '@/features/contabilidad'
+import AsientosContables from '@/features/contabilidad/asientos'
+import Cuentas from '@/features/contabilidad/cuentas'
+import DiarioGeneral from '@/features/contabilidad/diario-general'
+import LibroDiario from '@/features/contabilidad/libro-diario'
+import Reportes from '@/features/contabilidad/reportes'
 // Coordinacion
 import Brigadas from '@/features/coordinacion/brigadas'
 import BrigadaDetail from '@/features/coordinacion/brigadas/BrigadaDetail'
@@ -25,18 +37,6 @@ import { WallNetConfig } from '@/features/valnet/wallNet'
 import Ventas from '@/features/ventas'
 import NuevoPreRegistro from '@/features/ventas/components/NuevoPreRegistro'
 import PreRegistros from '@/features/ventas/pre-registros'
-import Compras from '@/features/compras'
-import Gastos from '@/features/compras/gastos'
-import PagosRecurrentes from '@/features/compras/pagos-recurrentes'
-import OrdenesCompra from '@/features/compras/ordenes'
-import GastosMenores from '@/features/compras/gastos-menores'
-import ProveedoresCompras from '@/features/compras/proveedores'
-import Contabilidad from '@/features/contabilidad'
-import DiarioGeneral from '@/features/contabilidad/diario-general'
-import AsientosContables from '@/features/contabilidad/asientos'
-import Cuentas from '@/features/contabilidad/cuentas'
-import LibroDiario from '@/features/contabilidad/libro-diario'
-import Reportes from '@/features/contabilidad/reportes'
 
 // Componente para manejar rutas protegidas
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -128,13 +128,19 @@ export function AppRoutes() {
         {/* Compras */}
         <Route path='/compras' element={<Compras />} />
         <Route path='/compras/gastos' element={<Gastos />} />
-        <Route path='/compras/pagos-recurrentes' element={<PagosRecurrentes />} />
+        <Route
+          path='/compras/pagos-recurrentes'
+          element={<PagosRecurrentes />}
+        />
         <Route path='/compras/ordenes' element={<OrdenesCompra />} />
         <Route path='/compras/gastos-menores' element={<GastosMenores />} />
         <Route path='/compras/proveedores' element={<ProveedoresCompras />} />
         {/* Contabilidad */}
         <Route path='/contabilidad' element={<Contabilidad />} />
-        <Route path='/contabilidad/diario-general' element={<DiarioGeneral />} />
+        <Route
+          path='/contabilidad/diario-general'
+          element={<DiarioGeneral />}
+        />
         <Route path='/contabilidad/asientos' element={<AsientosContables />} />
         <Route path='/contabilidad/cuentas' element={<Cuentas />} />
         <Route path='/contabilidad/libro-diario' element={<LibroDiario />} />

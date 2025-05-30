@@ -85,5 +85,5 @@ export const useAlmacenState = create<AlmacenState>()((set) => ({
       }
     )
     return unsubscribe
-  }
+  },
 }))

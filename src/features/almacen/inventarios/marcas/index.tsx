@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Marca } from '@/types'
 import { PlusCircle, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAlmacenState } from '@/context/global/useAlmacenState'
@@ -10,11 +11,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { NuevaMarcaForm } from '@/features/almacen/marcas/components/NuevaMarcaForm'
 import { useEliminarMarca } from '@/features/almacen/marcas/hooks/useEliminarMarca'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Marca } from '@/types'
 
 export default function Marcas() {
   const { marcas, subscribeToMarcas } = useAlmacenState()
@@ -91,7 +97,11 @@ export default function Marcas() {
                     <tr key={marca.id} className='border-b last:border-0'>
                       <td className='p-2 font-medium'>{marca.nombre}</td>
                       <td className='p-2 text-right'>
-                        <Button variant='ghost' size='icon' onClick={() => handleDeleteClick(marca)}>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          onClick={() => handleDeleteClick(marca)}
+                        >
                           <Trash2 className='h-4 w-4' />
                         </Button>
                       </td>
@@ -109,12 +119,23 @@ export default function Marcas() {
           <DialogHeader>
             <DialogTitle>Eliminar marca</DialogTitle>
           </DialogHeader>
-          <p>¿Estás seguro de que deseas eliminar la marca "{marcaAEliminar?.nombre}"?</p>
+          <p>
+            ¿Estás seguro de que deseas eliminar la marca "
+            {marcaAEliminar?.nombre}"?
+          </p>
           <DialogFooter>
-            <Button variant='outline' onClick={() => setDeleteDialogOpen(false)} disabled={eliminandoMarca}>
+            <Button
+              variant='outline'
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={eliminandoMarca}
+            >
               Cancelar
             </Button>
-            <Button variant='destructive' onClick={handleConfirmDelete} disabled={eliminandoMarca}>
+            <Button
+              variant='destructive'
+              onClick={handleConfirmDelete}
+              disabled={eliminandoMarca}
+            >
               {eliminandoMarca ? 'Eliminando...' : 'Eliminar'}
             </Button>
           </DialogFooter>

@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 const tiposReporte = [
   { value: 'balance', label: 'Balance de Sumas y Saldos' },
@@ -30,7 +37,9 @@ export default function Reportes() {
       <div className='flex justify-between items-center'>
         <div>
           <h1 className='text-3xl font-bold'>Reportes Contables</h1>
-          <p className='text-muted-foreground'>Genera y consulta reportes contables.</p>
+          <p className='text-muted-foreground'>
+            Genera y consulta reportes contables.
+          </p>
         </div>
         <div className='flex gap-2'>
           <Button variant='outline'>Exportar Excel</Button>
@@ -38,12 +47,34 @@ export default function Reportes() {
         </div>
       </div>
       <div className='flex gap-4 items-center flex-wrap'>
-        <select value={tipo} onChange={e => setTipo(e.target.value)} className='border rounded px-2 py-1'>
-          {tiposReporte.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+        <select
+          value={tipo}
+          onChange={(e) => setTipo(e.target.value)}
+          className='border rounded px-2 py-1'
+        >
+          {tiposReporte.map((r) => (
+            <option key={r.value} value={r.value}>
+              {r.label}
+            </option>
+          ))}
         </select>
-        <Input type='date' value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} placeholder='Desde' />
-        <Input type='date' value={fechaFin} onChange={e => setFechaFin(e.target.value)} placeholder='Hasta' />
-        <Input value={cuenta} onChange={e => setCuenta(e.target.value)} placeholder='Cuenta (opcional)' />
+        <Input
+          type='date'
+          value={fechaInicio}
+          onChange={(e) => setFechaInicio(e.target.value)}
+          placeholder='Desde'
+        />
+        <Input
+          type='date'
+          value={fechaFin}
+          onChange={(e) => setFechaFin(e.target.value)}
+          placeholder='Hasta'
+        />
+        <Input
+          value={cuenta}
+          onChange={(e) => setCuenta(e.target.value)}
+          placeholder='Cuenta (opcional)'
+        />
         <Button>Filtrar</Button>
       </div>
       <div className='border rounded-lg overflow-x-auto'>
@@ -70,4 +101,4 @@ export default function Reportes() {
       </div>
     </div>
   )
-} 
+}

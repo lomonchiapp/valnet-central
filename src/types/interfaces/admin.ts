@@ -90,4 +90,4 @@ export interface MetricasSistema {
     pagos: number
     ingresos: number
   }
-} 
+}

@@ -7,7 +7,12 @@ interface FeatureLayoutProps {
   actions?: ReactNode
 }
 
-export function FeatureLayout({ children, title, description, actions }: FeatureLayoutProps) {
+export function FeatureLayout({
+  children,
+  title,
+  description,
+  actions,
+}: FeatureLayoutProps) {
   return (
     <div className='container mx-auto py-6 space-y-6'>
       <div className='flex justify-between items-center'>
@@ -17,13 +22,9 @@ export function FeatureLayout({ children, title, description, actions }: Feature
             <p className='text-muted-foreground'>{description}</p>
           )}
         </div>
-        {actions && (
-          <div className='flex gap-2'>
-            {actions}
-          </div>
-        )}
+        {actions && <div className='flex gap-2'>{actions}</div>}
       </div>
       {children}
     </div>
   )
-} 
+}

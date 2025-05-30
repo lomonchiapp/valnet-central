@@ -5,4 +5,4 @@ export default function LibroDiario() {
       <p>Consulta y administra el libro diario contable.</p>
     </div>
   )
-} 
+}

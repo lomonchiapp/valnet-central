@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PlusCircle, User2 } from 'lucide-react'
+import { useComprasState } from '@/context/global/useComprasState'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -9,7 +10,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { NuevoProveedorForm } from './NuevoProveedorForm'
-import { useComprasState } from '@/context/global/useComprasState'
 
 export default function Proveedores() {
   const [showNewForm, setShowNewForm] = useState(false)

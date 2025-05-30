@@ -1,8 +1,15 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { toast } from 'sonner'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 interface ConceptoForm {
   concepto: string
@@ -27,13 +34,25 @@ interface PagoRecurrenteForm {
 
 const frecuencias = ['1', '3', '6', '12']
 const numeraciones = ['Gasto', 'Compra', 'Servicio']
-const cuentas = ['Tarjeta de crédito empresarial', 'Cuenta corriente', 'Caja chica']
+const cuentas = [
+  'Tarjeta de crédito empresarial',
+  'Cuenta corriente',
+  'Caja chica',
+]
 const formasPago = ['Efectivo', 'Transferencia', 'Cheque']
-const conceptosDisponibles = ['Vacaciones personal de venta', 'Devoluciones en ventas', 'Otros']
+const conceptosDisponibles = [
+  'Vacaciones personal de venta',
+  'Devoluciones en ventas',
+  'Otros',
+]
 const impuestos = ['Impuesto 1', 'Impuesto 2', 'Ninguno']
 const contactos = ['Proveedor A', 'Proveedor B', 'Proveedor C']
 
-export default function NuevoPagoRecurrenteForm({ onClose }: { onClose: () => void }) {
+export default function NuevoPagoRecurrenteForm({
+  onClose,
+}: {
+  onClose: () => void
+}) {
   const [form, setForm] = useState<PagoRecurrenteForm>({
     numeracion: '',
     cuenta: '',
@@ -83,7 +102,10 @@ export default function NuevoPagoRecurrenteForm({ onClose }: { onClose: () => vo
     })
   }
 
-  const subtotal = form.conceptos.reduce((acc, c) => acc + c.precio * c.cantidad, 0)
+  const subtotal = form.conceptos.reduce(
+    (acc, c) => acc + c.precio * c.cantidad,
+    0
+  )
 
   return (
     <div>
@@ -91,51 +113,121 @@ export default function NuevoPagoRecurrenteForm({ onClose }: { onClose: () => vo
         <div className='space-y-4'>
           <div>
             <label className='block font-medium mb-1'>Numeración *</label>
-            <select className='w-full border rounded px-2 py-1' value={form.numeracion} onChange={e => setForm(f => ({ ...f, numeracion: e.target.value }))}>
+            <select
+              className='w-full border rounded px-2 py-1'
+              value={form.numeracion}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, numeracion: e.target.value }))
+              }
+            >
               <option value=''>Selecciona</option>
-              {numeraciones.map(n => <option key={n} value={n}>{n}</option>)}
+              {numeraciones.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className='block font-medium mb-1'>Cuenta *</label>
-            <select className='w-full border rounded px-2 py-1' value={form.cuenta} onChange={e => setForm(f => ({ ...f, cuenta: e.target.value }))}>
+            <select
+              className='w-full border rounded px-2 py-1'
+              value={form.cuenta}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, cuenta: e.target.value }))
+              }
+            >
               <option value=''>Selecciona</option>
-              {cuentas.map(c => <option key={c} value={c}>{c}</option>)}
+              {cuentas.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className='block font-medium mb-1'>Forma de pago *</label>
-            <select className='w-full border rounded px-2 py-1' value={form.formaPago} onChange={e => setForm(f => ({ ...f, formaPago: e.target.value }))}>
+            <select
+              className='w-full border rounded px-2 py-1'
+              value={form.formaPago}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, formaPago: e.target.value }))
+              }
+            >
               <option value=''>Selecciona</option>
-              {formasPago.map(f => <option key={f} value={f}>{f}</option>)}
+              {formasPago.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className='block font-medium mb-1'>Observaciones</label>
-            <textarea className='w-full border rounded px-2 py-1' value={form.observaciones} onChange={e => setForm(f => ({ ...f, observaciones: e.target.value }))} />
+            <textarea
+              className='w-full border rounded px-2 py-1'
+              value={form.observaciones}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, observaciones: e.target.value }))
+              }
+            />
           </div>
         </div>
         <div className='space-y-4'>
           <div>
             <label className='block font-medium mb-1'>Contacto</label>
-            <select className='w-full border rounded px-2 py-1' value={form.contacto} onChange={e => setForm(f => ({ ...f, contacto: e.target.value }))}>
+            <select
+              className='w-full border rounded px-2 py-1'
+              value={form.contacto}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, contacto: e.target.value }))
+              }
+            >
               <option value=''>Selecciona</option>
-              {contactos.map(c => <option key={c} value={c}>{c}</option>)}
+              {contactos.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className='block font-medium mb-1'>Fecha de inicio *</label>
-            <Input type='date' value={form.fechaInicio} onChange={e => setForm(f => ({ ...f, fechaInicio: e.target.value }))} />
+            <Input
+              type='date'
+              value={form.fechaInicio}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, fechaInicio: e.target.value }))
+              }
+            />
           </div>
           <div>
             <label className='block font-medium mb-1'>Vigencia hasta</label>
-            <Input type='date' value={form.vigenciaHasta} onChange={e => setForm(f => ({ ...f, vigenciaHasta: e.target.value }))} />
+            <Input
+              type='date'
+              value={form.vigenciaHasta}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, vigenciaHasta: e.target.value }))
+              }
+            />
           </div>
           <div>
-            <label className='block font-medium mb-1'>Frecuencia (meses) *</label>
-            <select className='w-full border rounded px-2 py-1' value={form.frecuencia} onChange={e => setForm(f => ({ ...f, frecuencia: e.target.value }))}>
+            <label className='block font-medium mb-1'>
+              Frecuencia (meses) *
+            </label>
+            <select
+              className='w-full border rounded px-2 py-1'
+              value={form.frecuencia}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, frecuencia: e.target.value }))
+              }
+            >
               <option value=''>Selecciona</option>
-              {frecuencias.map(f => <option key={f} value={f}>{f}</option>)}
+              {frecuencias.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -163,7 +255,11 @@ export default function NuevoPagoRecurrenteForm({ onClose }: { onClose: () => vo
                 <TableCell>{c.observaciones}</TableCell>
                 <TableCell>RD${(c.precio * c.cantidad).toFixed(2)}</TableCell>
                 <TableCell>
-                  <Button size='icon' variant='ghost' onClick={() => handleRemoveConcepto(i)}>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    onClick={() => handleRemoveConcepto(i)}
+                  >
                     ✕
                   </Button>
                 </TableCell>
@@ -171,29 +267,66 @@ export default function NuevoPagoRecurrenteForm({ onClose }: { onClose: () => vo
             ))}
             <TableRow>
               <TableCell>
-                <select className='w-full border rounded px-2 py-1' value={concepto} onChange={e => setConcepto(e.target.value)}>
+                <select
+                  className='w-full border rounded px-2 py-1'
+                  value={concepto}
+                  onChange={(e) => setConcepto(e.target.value)}
+                >
                   <option value=''>Concepto</option>
-                  {conceptosDisponibles.map(c => <option key={c} value={c}>{c}</option>)}
+                  {conceptosDisponibles.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
                 </select>
               </TableCell>
               <TableCell>
-                <Input type='number' value={precio} onChange={e => setPrecio(e.target.value)} placeholder='Precio' />
+                <Input
+                  type='number'
+                  value={precio}
+                  onChange={(e) => setPrecio(e.target.value)}
+                  placeholder='Precio'
+                />
               </TableCell>
               <TableCell>
-                <select className='w-full border rounded px-2 py-1' value={impuesto} onChange={e => setImpuesto(e.target.value)}>
+                <select
+                  className='w-full border rounded px-2 py-1'
+                  value={impuesto}
+                  onChange={(e) => setImpuesto(e.target.value)}
+                >
                   <option value=''>Impuesto</option>
-                  {impuestos.map(i => <option key={i} value={i}>{i}</option>)}
+                  {impuestos.map((i) => (
+                    <option key={i} value={i}>
+                      {i}
+                    </option>
+                  ))}
                 </select>
               </TableCell>
               <TableCell>
-                <Input type='number' value={cantidad} onChange={e => setCantidad(e.target.value)} min={1} placeholder='Cantidad' />
+                <Input
+                  type='number'
+                  value={cantidad}
+                  onChange={(e) => setCantidad(e.target.value)}
+                  min={1}
+                  placeholder='Cantidad'
+                />
               </TableCell>
               <TableCell>
-                <Input value={obsConcepto} onChange={e => setObsConcepto(e.target.value)} placeholder='Descripción' />
+                <Input
+                  value={obsConcepto}
+                  onChange={(e) => setObsConcepto(e.target.value)}
+                  placeholder='Descripción'
+                />
               </TableCell>
               <TableCell></TableCell>
               <TableCell>
-                <Button size='icon' variant='outline' onClick={handleAddConcepto}>+</Button>
+                <Button
+                  size='icon'
+                  variant='outline'
+                  onClick={handleAddConcepto}
+                >
+                  +
+                </Button>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -211,10 +344,20 @@ export default function NuevoPagoRecurrenteForm({ onClose }: { onClose: () => vo
           </div>
         </div>
         <div className='flex gap-4 mt-4 md:mt-0'>
-          <Button variant='outline' type='button' onClick={onClose}>Cancelar</Button>
-          <Button type='button' onClick={() => { toast.success('Pago recurrente guardado'); onClose(); }}>Guardar</Button>
+          <Button variant='outline' type='button' onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button
+            type='button'
+            onClick={() => {
+              toast.success('Pago recurrente guardado')
+              onClose()
+            }}
+          >
+            Guardar
+          </Button>
         </div>
       </div>
     </div>
   )
-} 
+}

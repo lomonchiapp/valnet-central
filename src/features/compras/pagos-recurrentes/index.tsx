@@ -11,8 +11,13 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import NuevoPagoRecurrenteForm from './NuevoPagoRecurrenteForm'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 
 export default function PagosRecurrentes() {
   const { pagosRecurrentes, subscribeToPagosRecurrentes } = useComprasState()
@@ -31,9 +36,12 @@ export default function PagosRecurrentes() {
     <div className='space-y-6 max-w-7xl mx-auto'>
       <div className='flex justify-between items-center'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>Pagos Recurrentes</h1>
+          <h1 className='text-3xl font-bold tracking-tight'>
+            Pagos Recurrentes
+          </h1>
           <p className='text-muted-foreground'>
-            Administra los pagos recurrentes de la empresa, como facturas de luz, agua, telefónica, etc.
+            Administra los pagos recurrentes de la empresa, como facturas de
+            luz, agua, telefónica, etc.
           </p>
         </div>
         <Button onClick={() => setShowNewForm(true)}>
@@ -52,7 +60,8 @@ export default function PagosRecurrentes() {
         <CardContent>
           {sortedPagosRecurrentes.length === 0 ? (
             <p className='text-center py-8 text-muted-foreground'>
-              No hay pagos recurrentes registrados. Crea uno nuevo para comenzar.
+              No hay pagos recurrentes registrados. Crea uno nuevo para
+              comenzar.
             </p>
           ) : (
             <ScrollArea className='h-[500px]'>
@@ -61,8 +70,12 @@ export default function PagosRecurrentes() {
                   <tr>
                     <th className='text-left font-semibold p-2'>Nombre</th>
                     <th className='text-right font-semibold p-2'>Monto</th>
-                    <th className='text-center font-semibold p-2'>Frecuencia</th>
-                    <th className='text-center font-semibold p-2'>Próximo Pago</th>
+                    <th className='text-center font-semibold p-2'>
+                      Frecuencia
+                    </th>
+                    <th className='text-center font-semibold p-2'>
+                      Próximo Pago
+                    </th>
                     <th className='text-center font-semibold p-2'>Estado</th>
                     <th className='text-right font-semibold p-2'>Acciones</th>
                   </tr>
@@ -73,7 +86,9 @@ export default function PagosRecurrentes() {
                       <td className='p-2 font-medium'>{pago.descripcion}</td>
                       <td className='p-2 text-right'>{pago.monto}</td>
                       <td className='p-2 text-center'>{pago.frecuencia}</td>
-                      <td className='p-2 text-center'>{pago.fechaProximoPago}</td>
+                      <td className='p-2 text-center'>
+                        {pago.fechaProximoPago}
+                      </td>
                       <td className='p-2 text-center'>{pago.estado}</td>
                       <td className='p-2 text-right'>
                         <Button variant='ghost' size='icon'>
@@ -94,12 +109,14 @@ export default function PagosRecurrentes() {
           <SheetHeader>
             <SheetTitle>Nuevo pago recurrente</SheetTitle>
           </SheetHeader>
-          <NuevoPagoRecurrenteForm onClose={() => {
-            setShowNewForm(false)
-            toast.success('Pago recurrente creado exitosamente')
-          }} />
+          <NuevoPagoRecurrenteForm
+            onClose={() => {
+              setShowNewForm(false)
+              toast.success('Pago recurrente creado exitosamente')
+            }}
+          />
         </SheetContent>
       </Sheet>
     </div>
   )
-} 
+}

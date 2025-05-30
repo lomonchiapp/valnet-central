@@ -11,6 +11,7 @@ import { useNavigate, Outlet, useLocation } from 'react-router-dom'
 // Iconos
 import { Inventario, TipoInventario } from 'shared-types'
 import { useAlmacenState } from '@/context/global/useAlmacenState'
+import { useComprasState } from '@/context/global/useComprasState'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -24,15 +25,12 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NewInventoryForm } from './components/NewInventoryForm'
 import { NoInventoriesWarning } from './components/NoInventoriesWarning'
-import { useComprasState } from '@/context/global/useComprasState'
 
 export default function InventoriosLayout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const {
-    inventarios: inventariosDelContexto,
-    subscribeToInventarios,
-  } = useAlmacenState()
+  const { inventarios: inventariosDelContexto, subscribeToInventarios } =
+    useAlmacenState()
   const { subscribeToProveedores } = useComprasState()
   const [isModalOpen, setIsModalOpen] = useState(false)
 

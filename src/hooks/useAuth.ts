@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
 import { database } from '@/firebase'
 import type { Usuario } from '@/types/interfaces/valnet/usuario'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 
 export function useAuth() {
   const [user, setUser] = useState<Usuario | null>(null)
@@ -15,11 +15,13 @@ export function useAuth() {
       try {
         if (firebaseUser) {
           // Obtener datos adicionales del usuario desde Firestore
-          const userDoc = await getDoc(doc(database, 'usuarios', firebaseUser.uid))
+          const userDoc = await getDoc(
+            doc(database, 'usuarios', firebaseUser.uid)
+          )
           if (userDoc.exists()) {
             setUser({
               id: firebaseUser.uid,
-              ...userDoc.data()
+              ...userDoc.data(),
             } as Usuario)
           } else {
             setUser(null)
@@ -39,4 +41,4 @@ export function useAuth() {
   }, [])
 
   return { user, loading, error }
-} 
+}

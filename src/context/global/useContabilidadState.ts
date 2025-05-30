@@ -1,10 +1,11 @@
 import { database } from '@/firebase'
-import { Cuenta } from '@/types/interfaces/contabilidad/cuenta'
 import { AsientoContable } from '@/types/interfaces/contabilidad/asientoContable'
-import { PagoUnico } from '@/types/interfaces/contabilidad/pagoUnico'
+import { Cuenta } from '@/types/interfaces/contabilidad/cuenta'
 import { PagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
+import { PagoUnico } from '@/types/interfaces/contabilidad/pagoUnico'
 import { onSnapshot, collection } from 'firebase/firestore'
 import { create } from 'zustand'
+
 // Este es el estado global de la aplicación
 // En este vamos a almacenar todos los datos
 interface ContabilidadState {
@@ -47,40 +48,60 @@ export const useContabilidadState = create<ContabilidadState>()((set) => ({
   setReportes: (reportes) => set({ reportes }),
   setPagosUnicos: (pagos) => set({ pagosUnicos: pagos }),
   setPagosRecurrentes: (pagos) => set({ pagosRecurrentes: pagos }),
-  subscribeToCuentas: () => { 
+  subscribeToCuentas: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'cuentas'),
-      (snapshot) => { set({ cuentas: snapshot.docs.map((doc) => doc.data() as Cuenta) }) }
+      (snapshot) => {
+        set({ cuentas: snapshot.docs.map((doc) => doc.data() as Cuenta) })
+      }
     )
     return unsubscribe
-   },
-  subscribeToAsientos: () => { 
+  },
+  subscribeToAsientos: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'asientos'),
-      (snapshot) => { set({ asientos: snapshot.docs.map((doc) => doc.data() as AsientoContable) }) }
+      (snapshot) => {
+        set({
+          asientos: snapshot.docs.map((doc) => doc.data() as AsientoContable),
+        })
+      }
     )
     return unsubscribe
-   },
-  subscribeToDiarioGeneral: () => { 
+  },
+  subscribeToDiarioGeneral: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'diarioGeneral'),
-      (snapshot) => { set({ diarioGeneral: snapshot.docs.map((doc) => doc.data() as AsientoContable) }) }
+      (snapshot) => {
+        set({
+          diarioGeneral: snapshot.docs.map(
+            (doc) => doc.data() as AsientoContable
+          ),
+        })
+      }
     )
     return unsubscribe
-   },
-  subscribeToLibroDiario: () => { 
+  },
+  subscribeToLibroDiario: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'libroDiario'),
-      (snapshot) => { set({ libroDiario: snapshot.docs.map((doc) => doc.data() as AsientoContable) }) }
+      (snapshot) => {
+        set({
+          libroDiario: snapshot.docs.map(
+            (doc) => doc.data() as AsientoContable
+          ),
+        })
+      }
     )
     return unsubscribe
-   },
-  subscribeToReportes: () => { 
+  },
+  subscribeToReportes: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'reportes'),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (snapshot) => { set({ reportes: snapshot.docs.map((doc) => doc.data() as any) }) }
+      (snapshot) => {
+        set({ reportes: snapshot.docs.map((doc) => doc.data() as any) })
+      }
     )
     return unsubscribe
-   }
+  },
 }))

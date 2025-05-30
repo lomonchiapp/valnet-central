@@ -1,9 +1,16 @@
 import { useState } from 'react'
+import { AsientoContable } from '@/types/interfaces/contabilidad/asientoContable'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { toast } from 'sonner'
-import { AsientoContable } from '@/types/interfaces/contabilidad/asientoContable'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 interface MovimientoForm {
   cuenta: string
@@ -25,7 +32,10 @@ export default function AsientosContables() {
       toast.error('Completa la cuenta y el debe o haber')
       return
     }
-    setMovimientos([...movimientos, { cuenta, debe: Number(debe) || 0, haber: Number(haber) || 0 }])
+    setMovimientos([
+      ...movimientos,
+      { cuenta, debe: Number(debe) || 0, haber: Number(haber) || 0 },
+    ])
     setCuenta('')
     setDebe('')
     setHaber('')
@@ -49,7 +59,11 @@ export default function AsientosContables() {
         id: Date.now().toString(),
         fecha: new Date(fecha),
         descripcion,
-        movimientos: movimientos.map(m => ({ cuentaId: m.cuenta, debe: m.debe, haber: m.haber })),
+        movimientos: movimientos.map((m) => ({
+          cuentaId: m.cuenta,
+          debe: m.debe,
+          haber: m.haber,
+        })),
         referencia: '',
         createdAt: now,
         updatedAt: now,
@@ -64,26 +78,54 @@ export default function AsientosContables() {
   return (
     <div className='flex flex-col items-center w-full min-h-screen bg-muted py-8'>
       <div className='w-full max-w-4xl bg-white rounded-lg shadow p-8'>
-        <h1 className='text-2xl font-bold mb-6 text-center'>Nuevo Asiento Contable</h1>
+        <h1 className='text-2xl font-bold mb-6 text-center'>
+          Nuevo Asiento Contable
+        </h1>
         <form className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
           <div className='space-y-4'>
             <div>
               <label className='block font-medium mb-1'>Fecha *</label>
-              <Input type='date' value={fecha} onChange={e => setFecha(e.target.value)} />
+              <Input
+                type='date'
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+              />
             </div>
             <div>
               <label className='block font-medium mb-1'>Descripción *</label>
-              <Input value={descripcion} onChange={e => setDescripcion(e.target.value)} placeholder='Descripción' />
+              <Input
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                placeholder='Descripción'
+              />
             </div>
           </div>
           <div className='space-y-4'>
             <div>
-              <label className='block font-medium mb-1'>Agregar Movimiento</label>
+              <label className='block font-medium mb-1'>
+                Agregar Movimiento
+              </label>
               <div className='flex gap-2'>
-                <Input value={cuenta} onChange={e => setCuenta(e.target.value)} placeholder='Cuenta' />
-                <Input type='number' value={debe} onChange={e => setDebe(e.target.value)} placeholder='Debe' />
-                <Input type='number' value={haber} onChange={e => setHaber(e.target.value)} placeholder='Haber' />
-                <Button type='button' onClick={handleAddMovimiento}>Agregar</Button>
+                <Input
+                  value={cuenta}
+                  onChange={(e) => setCuenta(e.target.value)}
+                  placeholder='Cuenta'
+                />
+                <Input
+                  type='number'
+                  value={debe}
+                  onChange={(e) => setDebe(e.target.value)}
+                  placeholder='Debe'
+                />
+                <Input
+                  type='number'
+                  value={haber}
+                  onChange={(e) => setHaber(e.target.value)}
+                  placeholder='Haber'
+                />
+                <Button type='button' onClick={handleAddMovimiento}>
+                  Agregar
+                </Button>
               </div>
             </div>
           </div>
@@ -132,12 +174,22 @@ export default function AsientosContables() {
                   <TableCell>
                     <ul className='list-disc pl-4'>
                       {asiento.movimientos.map((m, i) => (
-                        <li key={i}>{m.cuentaId} - Debe: {m.debe} / Haber: {m.haber}</li>
+                        <li key={i}>
+                          {m.cuentaId} - Debe: {m.debe} / Haber: {m.haber}
+                        </li>
                       ))}
                     </ul>
                   </TableCell>
                   <TableCell>
-                    <Button variant='destructive' size='sm' onClick={() => setAsientos(asientos.filter(a => a.id !== asiento.id))}>Eliminar</Button>
+                    <Button
+                      variant='destructive'
+                      size='sm'
+                      onClick={() =>
+                        setAsientos(asientos.filter((a) => a.id !== asiento.id))
+                      }
+                    >
+                      Eliminar
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -147,4 +199,4 @@ export default function AsientosContables() {
       </div>
     </div>
   )
-} 
+}

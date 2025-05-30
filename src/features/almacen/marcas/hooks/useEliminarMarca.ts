@@ -12,7 +12,11 @@ export function useEliminarMarca() {
     try {
       await deleteDoc(doc(database, 'marcas', marcaId))
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Error desconocido al eliminar la marca'))
+      setError(
+        err instanceof Error
+          ? err
+          : new Error('Error desconocido al eliminar la marca')
+      )
       throw err
     } finally {
       setIsLoading(false)
@@ -20,4 +24,4 @@ export function useEliminarMarca() {
   }
 
   return { eliminarMarca, isLoading, error }
-} 
+}

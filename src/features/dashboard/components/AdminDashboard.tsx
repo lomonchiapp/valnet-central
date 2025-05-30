@@ -1,19 +1,31 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { 
-  Users, 
-  Package, 
-  Wrench, 
-  Ticket, 
+import { useState, useEffect } from 'react'
+import type {
+  MetricasSistema,
+  Pago,
+  Inventario,
+  Brigada,
+} from '@/types/interfaces/admin'
+import { Timestamp } from 'firebase/firestore'
+import {
+  Users,
+  Package,
+  Wrench,
+  Ticket,
   DollarSign,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react'
-import { WallNetDashboardWidget } from './SacDashboard'
 import { useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import type { MetricasSistema, Pago, Inventario, Brigada } from '@/types/interfaces/admin'
-import { Timestamp } from 'firebase/firestore'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card'
+import { WallNetDashboardWidget } from './SacDashboard'
 
 // Mock data
 const mockMetricas: MetricasSistema = {
@@ -29,8 +41,8 @@ const mockMetricas: MetricasSistema = {
     tickets: 5.7,
     brigadas: 0,
     pagos: 8.2,
-    ingresos: 15.3
-  }
+    ingresos: 15.3,
+  },
 }
 
 const mockPagos: Pago[] = [
@@ -39,25 +51,25 @@ const mockPagos: Pago[] = [
     cliente: {
       id: '1',
       nombre: 'Cliente A',
-      email: 'cliente@a.com'
+      email: 'cliente@a.com',
     },
     monto: 1500000,
     concepto: 'Mensualidad Enero',
     fechaVencimiento: Timestamp.fromDate(new Date(Date.now() + 86400000 * 2)), // 2 días
-    estado: 'pendiente'
+    estado: 'pendiente',
   },
   {
     id: '2',
     cliente: {
       id: '2',
       nombre: 'Cliente B',
-      email: 'cliente@b.com'
+      email: 'cliente@b.com',
     },
     monto: 2300000,
     concepto: 'Mensualidad Enero',
     fechaVencimiento: Timestamp.fromDate(new Date(Date.now() + 86400000 * 5)), // 5 días
-    estado: 'pendiente'
-  }
+    estado: 'pendiente',
+  },
 ]
 
 const mockInventario: Inventario[] = [
@@ -70,7 +82,7 @@ const mockInventario: Inventario[] = [
     threshold: 10,
     precio: 150000,
     proveedor: 'TP-Link',
-    ultimaActualizacion: Timestamp.now()
+    ultimaActualizacion: Timestamp.now(),
   },
   {
     id: '2',
@@ -81,7 +93,7 @@ const mockInventario: Inventario[] = [
     threshold: 100,
     precio: 25000,
     proveedor: 'Belden',
-    ultimaActualizacion: Timestamp.now()
+    ultimaActualizacion: Timestamp.now(),
   },
   {
     id: '3',
@@ -92,8 +104,8 @@ const mockInventario: Inventario[] = [
     threshold: 5,
     precio: 450000,
     proveedor: 'Cisco',
-    ultimaActualizacion: Timestamp.now()
-  }
+    ultimaActualizacion: Timestamp.now(),
+  },
 ]
 
 const mockBrigadas: Brigada[] = [
@@ -102,41 +114,41 @@ const mockBrigadas: Brigada[] = [
     nombre: 'Brigada Norte',
     miembros: [
       { id: '1', nombre: 'Juan Pérez', rol: 'Técnico' },
-      { id: '2', nombre: 'María García', rol: 'Técnico' }
+      { id: '2', nombre: 'María García', rol: 'Técnico' },
     ],
     tareas: [
-      { 
-        id: '1', 
+      {
+        id: '1',
         descripcion: 'Instalación cliente nuevo',
         estado: 'pendiente',
-        fechaAsignacion: Timestamp.now()
+        fechaAsignacion: Timestamp.now(),
       },
-      { 
-        id: '2', 
+      {
+        id: '2',
         descripcion: 'Mantenimiento preventivo',
         estado: 'en_proceso',
-        fechaAsignacion: Timestamp.now()
-      }
+        fechaAsignacion: Timestamp.now(),
+      },
     ],
-    estado: 'activo'
+    estado: 'activo',
   },
   {
     id: '2',
     nombre: 'Brigada Sur',
     miembros: [
       { id: '3', nombre: 'Carlos López', rol: 'Técnico' },
-      { id: '4', nombre: 'Ana Martínez', rol: 'Técnico' }
+      { id: '4', nombre: 'Ana Martínez', rol: 'Técnico' },
     ],
     tareas: [
-      { 
-        id: '3', 
+      {
+        id: '3',
         descripcion: 'Reparación de falla',
         estado: 'pendiente',
-        fechaAsignacion: Timestamp.now()
-      }
+        fechaAsignacion: Timestamp.now(),
+      },
     ],
-    estado: 'activo'
-  }
+    estado: 'activo',
+  },
 ]
 
 export function AdminDashboard() {
@@ -152,15 +164,17 @@ export function AdminDashboard() {
     try {
       setLoading(true)
       setError(null)
-      
+
       // Por ahora usamos los datos mock
       setMetricas(mockMetricas)
       setPagos(mockPagos)
       setInventario(mockInventario)
       setBrigadas(mockBrigadas)
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido al cargar los datos'
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Error desconocido al cargar los datos'
       setError(errorMessage)
       console.error('Error en fetchData:', err)
     } finally {
@@ -174,22 +188,22 @@ export function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900'></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="text-red-500 text-lg font-semibold">{error}</div>
-        <Button 
-          variant="outline" 
+      <div className='flex flex-col items-center justify-center min-h-screen gap-4'>
+        <div className='text-red-500 text-lg font-semibold'>{error}</div>
+        <Button
+          variant='outline'
           onClick={fetchData}
-          className="flex items-center gap-2"
+          className='flex items-center gap-2'
         >
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className='h-4 w-4' />
           Intentar nuevamente
         </Button>
       </div>
@@ -200,94 +214,102 @@ export function AdminDashboard() {
     {
       label: 'Usuarios Activos',
       value: metricas.usuariosActivos,
-      icon: <Users className="h-4 w-4 text-muted-foreground" />,
+      icon: <Users className='h-4 w-4 text-muted-foreground' />,
       trend: metricas.tendencias.usuarios,
     },
     {
       label: 'Inventario Total',
       value: metricas.inventarioTotal,
-      icon: <Package className="h-4 w-4 text-muted-foreground" />,
+      icon: <Package className='h-4 w-4 text-muted-foreground' />,
       trend: metricas.tendencias.inventario,
     },
     {
       label: 'Tickets Abiertos',
       value: metricas.ticketsAbiertos,
-      icon: <Ticket className="h-4 w-4 text-muted-foreground" />,
+      icon: <Ticket className='h-4 w-4 text-muted-foreground' />,
       trend: metricas.tendencias.tickets,
     },
     {
       label: 'Brigadas Activas',
       value: metricas.brigadasActivas,
-      icon: <Wrench className="h-4 w-4 text-muted-foreground" />,
+      icon: <Wrench className='h-4 w-4 text-muted-foreground' />,
       trend: metricas.tendencias.brigadas,
     },
   ]
 
   return (
-    <div className="space-y-8 px-4 md:px-8 py-6">
+    <div className='space-y-8 px-4 md:px-8 py-6'>
       {/* Botón de actualización */}
-      <div className="flex justify-end">
+      <div className='flex justify-end'>
         <Button
-          variant="outline"
-          size="sm"
+          variant='outline'
+          size='sm'
           onClick={fetchData}
-          className="flex items-center gap-2"
+          className='flex items-center gap-2'
         >
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className='h-4 w-4' />
           Actualizar datos
         </Button>
       </div>
 
       {/* Métricas principales */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className='grid gap-4 md:grid-cols-4'>
         {metrics.map((metric) => (
           <Card key={metric.label}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium">
+            <CardHeader className='flex flex-row items-center justify-between pb-2 space-y-0'>
+              <CardTitle className='text-sm font-medium'>
                 {metric.label}
               </CardTitle>
               {metric.icon}
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <p className={`text-xs ${
-                metric.trend > 0 ? 'text-green-500' : 
-                metric.trend < 0 ? 'text-red-500' : 
-                'text-muted-foreground'
-              }`}>
-                {metric.trend > 0 ? '+' : ''}{metric.trend.toFixed(1)}% desde el mes pasado
+              <div className='text-2xl font-bold'>{metric.value}</div>
+              <p
+                className={`text-xs ${
+                  metric.trend > 0
+                    ? 'text-green-500'
+                    : metric.trend < 0
+                      ? 'text-red-500'
+                      : 'text-muted-foreground'
+                }`}
+              >
+                {metric.trend > 0 ? '+' : ''}
+                {metric.trend.toFixed(1)}% desde el mes pasado
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
         {/* Pagos próximos */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
+            <CardTitle className='flex items-center gap-2'>
+              <DollarSign className='h-4 w-4' />
               Pagos Próximos
             </CardTitle>
             <CardDescription>Próximos 7 días</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {pagos.map((payment) => (
                 <div
                   key={payment.id}
-                  className="flex justify-between items-center p-2 border-b"
+                  className='flex justify-between items-center p-2 border-b'
                 >
                   <div>
-                    <p className="font-medium">{payment.cliente.nombre}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Vence: {payment.fechaVencimiento.toDate().toLocaleDateString()}
+                    <p className='font-medium'>{payment.cliente.nombre}</p>
+                    <p className='text-xs text-muted-foreground'>
+                      Vence:{' '}
+                      {payment.fechaVencimiento.toDate().toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">${payment.monto.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className='text-right'>
+                    <p className='font-semibold'>
+                      ${payment.monto.toLocaleString()}
+                    </p>
+                    <p className='text-xs text-muted-foreground'>
                       {payment.estado}
                     </p>
                   </div>
@@ -296,9 +318,9 @@ export function AdminDashboard() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button 
-              variant="ghost" 
-              className="w-full"
+            <Button
+              variant='ghost'
+              className='w-full'
               onClick={() => navigate('/admin/pagos')}
             >
               Ver todos los pagos
@@ -309,32 +331,36 @@ export function AdminDashboard() {
         {/* Alertas de inventario */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-red-500" />
+            <CardTitle className='flex items-center gap-2'>
+              <AlertCircle className='h-4 w-4 text-red-500' />
               Alertas de Inventario
             </CardTitle>
             <CardDescription>Productos con stock bajo</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {inventario.map((item) => (
                 <div
                   key={item.id}
-                  className="flex justify-between items-center p-2 border-b"
+                  className='flex justify-between items-center p-2 border-b'
                 >
                   <div>
-                    <p className="font-medium">{item.nombre}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className='font-medium'>{item.nombre}</p>
+                    <p className='text-xs text-muted-foreground'>
                       Stock mínimo: {item.threshold}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-semibold ${
-                      item.stock <= item.threshold * 0.5 ? 'text-red-500' : 'text-yellow-500'
-                    }`}>
+                  <div className='text-right'>
+                    <p
+                      className={`font-semibold ${
+                        item.stock <= item.threshold * 0.5
+                          ? 'text-red-500'
+                          : 'text-yellow-500'
+                      }`}
+                    >
                       {item.stock} unidades
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className='text-xs text-muted-foreground'>
                       {item.stock <= item.threshold * 0.5 ? 'Crítico' : 'Bajo'}
                     </p>
                   </div>
@@ -343,9 +369,9 @@ export function AdminDashboard() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button 
-              variant="ghost" 
-              className="w-full"
+            <Button
+              variant='ghost'
+              className='w-full'
               onClick={() => navigate('/admin/inventario')}
             >
               Ver inventario completo
@@ -354,7 +380,7 @@ export function AdminDashboard() {
         </Card>
 
         {/* Widget WallNet */}
-        <Card className="lg:col-span-1">
+        <Card className='lg:col-span-1'>
           <CardHeader>
             <CardTitle>WallNet</CardTitle>
             <CardDescription>Últimas actualizaciones</CardDescription>
@@ -365,30 +391,32 @@ export function AdminDashboard() {
         </Card>
 
         {/* Brigadas activas */}
-        <Card className="lg:col-span-2">
+        <Card className='lg:col-span-2'>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wrench className="h-4 w-4" />
+            <CardTitle className='flex items-center gap-2'>
+              <Wrench className='h-4 w-4' />
               Brigadas Activas
             </CardTitle>
             <CardDescription>Equipos en campo</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {brigadas.map((brigade) => (
                 <div
                   key={brigade.id}
-                  className="flex justify-between items-center p-2 border-b"
+                  className='flex justify-between items-center p-2 border-b'
                 >
                   <div>
-                    <p className="font-medium">{brigade.nombre}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className='font-medium'>{brigade.nombre}</p>
+                    <p className='text-xs text-muted-foreground'>
                       {brigade.miembros.length} miembros
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{brigade.tareas.length} tareas</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className='text-right'>
+                    <p className='font-semibold'>
+                      {brigade.tareas.length} tareas
+                    </p>
+                    <p className='text-xs text-muted-foreground'>
                       {brigade.estado}
                     </p>
                   </div>
@@ -397,9 +425,9 @@ export function AdminDashboard() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button 
-              variant="ghost" 
-              className="w-full"
+            <Button
+              variant='ghost'
+              className='w-full'
               onClick={() => navigate('/admin/brigadas')}
             >
               Ver todas las brigadas
@@ -411,4 +439,4 @@ export function AdminDashboard() {
   )
 }
 
-export default AdminDashboard 
+export default AdminDashboard

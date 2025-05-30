@@ -1,11 +1,11 @@
-import { Proveedor } from '@/types/interfaces/compras/proveedor'
-import { PagoUnico } from '@/types/interfaces/contabilidad/pagoUnico'
-import { PagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
 import { database } from '@/firebase'
+import { GastoMenor } from '@/types/interfaces/compras/gastoMenor'
+import { OrdenCompra } from '@/types/interfaces/compras/ordenCompra'
+import { Proveedor } from '@/types/interfaces/compras/proveedor'
+import { PagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
+import { PagoUnico } from '@/types/interfaces/contabilidad/pagoUnico'
 import { onSnapshot, collection } from 'firebase/firestore'
 import { create } from 'zustand'
-import { OrdenCompra } from '@/types/interfaces/compras/ordenCompra'
-import { GastoMenor } from '@/types/interfaces/compras/gastoMenor'
 
 interface ComprasState {
   pagos: PagoUnico[]
@@ -38,39 +38,57 @@ export const useComprasState = create<ComprasState>()((set) => ({
   setOrdenes: (ordenes) => set({ ordenes }),
   setGastosMenores: (gastos) => set({ gastosMenores: gastos }),
   setProveedores: (proveedores) => set({ proveedores }),
-  subscribeToPagos: () => { 
+  subscribeToPagos: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'pagos'),
-      (snapshot) => { set({ pagos: snapshot.docs.map((doc) => doc.data() as PagoUnico) }) }
+      (snapshot) => {
+        set({ pagos: snapshot.docs.map((doc) => doc.data() as PagoUnico) })
+      }
     )
     return unsubscribe
-   },
-  subscribeToPagosRecurrentes: () => { 
+  },
+  subscribeToPagosRecurrentes: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'pagosRecurrentes'),
-      (snapshot) => { set({ pagosRecurrentes: snapshot.docs.map((doc) => doc.data() as PagoRecurrente) }) }
+      (snapshot) => {
+        set({
+          pagosRecurrentes: snapshot.docs.map(
+            (doc) => doc.data() as PagoRecurrente
+          ),
+        })
+      }
     )
     return unsubscribe
-   },
-  subscribeToOrdenes: () => { 
+  },
+  subscribeToOrdenes: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'ordenes'),
-      (snapshot) => { set({ ordenes: snapshot.docs.map((doc) => doc.data() as OrdenCompra) }) }
+      (snapshot) => {
+        set({ ordenes: snapshot.docs.map((doc) => doc.data() as OrdenCompra) })
+      }
     )
     return unsubscribe
-   },
-  subscribeToGastosMenores: () => { 
+  },
+  subscribeToGastosMenores: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'gastosMenores'),
-      (snapshot) => { set({ gastosMenores: snapshot.docs.map((doc) => doc.data() as GastoMenor) }) }
+      (snapshot) => {
+        set({
+          gastosMenores: snapshot.docs.map((doc) => doc.data() as GastoMenor),
+        })
+      }
     )
     return unsubscribe
-   },
-  subscribeToProveedores: () => { 
+  },
+  subscribeToProveedores: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'proveedores'),
-      (snapshot) => { set({ proveedores: snapshot.docs.map((doc) => doc.data() as Proveedor) }) }
+      (snapshot) => {
+        set({
+          proveedores: snapshot.docs.map((doc) => doc.data() as Proveedor),
+        })
+      }
     )
     return unsubscribe
-   }
-})) 
+  },
+}))

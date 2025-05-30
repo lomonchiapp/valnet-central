@@ -1,20 +1,20 @@
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  Timestamp, 
-  orderBy, 
-  limit
-} from 'firebase/firestore'
 import { database } from '@/firebase'
-import type { 
-  Inventario, 
-  Ticket, 
-  Brigada, 
-  Pago, 
-  MetricasSistema 
+import type {
+  Inventario,
+  Ticket,
+  Brigada,
+  Pago,
+  MetricasSistema,
 } from '@/types/interfaces/admin'
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+  orderBy,
+  limit,
+} from 'firebase/firestore'
 
 export class AdminService {
   private static instance: AdminService
@@ -37,7 +37,9 @@ export class AdminService {
       const usuariosActivos = usuariosSnapshot.docs.length
 
       // Obtener inventario total
-      const inventarioSnapshot = await getDocs(collection(database, 'inventario'))
+      const inventarioSnapshot = await getDocs(
+        collection(database, 'inventario')
+      )
       const inventarioTotal = inventarioSnapshot.docs.length
 
       // Obtener tickets abiertos
@@ -90,14 +92,14 @@ export class AdminService {
         ticketsAnterior,
         brigadasAnterior,
         pagosAnterior,
-        ingresosAnterior
+        ingresosAnterior,
       ] = await Promise.all([
         this.getMetricaAnterior('usuarios', mesAnterior),
         this.getMetricaAnterior('inventario', mesAnterior),
         this.getMetricaAnterior('tickets', mesAnterior),
         this.getMetricaAnterior('brigadas', mesAnterior),
         this.getMetricaAnterior('pagos', mesAnterior),
-        this.getMetricaAnterior('ingresos', mesAnterior)
+        this.getMetricaAnterior('ingresos', mesAnterior),
       ])
 
       return {
@@ -109,12 +111,15 @@ export class AdminService {
         ingresosMensuales,
         tendencias: {
           usuarios: this.calcularTendencia(usuariosActivos, usuariosAnterior),
-          inventario: this.calcularTendencia(inventarioTotal, inventarioAnterior),
+          inventario: this.calcularTendencia(
+            inventarioTotal,
+            inventarioAnterior
+          ),
           tickets: this.calcularTendencia(ticketsAbiertos, ticketsAnterior),
           brigadas: this.calcularTendencia(brigadasActivas, brigadasAnterior),
           pagos: this.calcularTendencia(pagosPendientes, pagosAnterior),
-          ingresos: this.calcularTendencia(ingresosMensuales, ingresosAnterior)
-        }
+          ingresos: this.calcularTendencia(ingresosMensuales, ingresosAnterior),
+        },
       }
     } catch (error) {
       console.error('Error al obtener métricas del sistema:', error)
@@ -122,10 +127,7 @@ export class AdminService {
     }
   }
 
-  private async getMetricaAnterior(
-    tipo: string,
-    fecha: Date
-  ): Promise<number> {
+  private async getMetricaAnterior(tipo: string, fecha: Date): Promise<number> {
     try {
       const snapshot = await getDocs(
         query(
@@ -165,10 +167,13 @@ export class AdminService {
         )
       )
 
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Pago))
+      return snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as Pago
+      )
     } catch (error) {
       console.error('Error al obtener pagos próximos:', error)
       throw error
@@ -184,10 +189,13 @@ export class AdminService {
         )
       )
 
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Inventario))
+      return snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as Inventario
+      )
     } catch (error) {
       console.error('Error al obtener alertas de inventario:', error)
       throw error
@@ -197,16 +205,16 @@ export class AdminService {
   async getBrigadasActivas(): Promise<Brigada[]> {
     try {
       const snapshot = await getDocs(
-        query(
-          collection(database, 'brigadas'),
-          where('estado', '==', 'activo')
-        )
+        query(collection(database, 'brigadas'), where('estado', '==', 'activo'))
       )
 
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Brigada))
+      return snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as Brigada
+      )
     } catch (error) {
       console.error('Error al obtener brigadas activas:', error)
       throw error
@@ -224,10 +232,13 @@ export class AdminService {
         )
       )
 
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Ticket))
+      return snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          }) as Ticket
+      )
     } catch (error) {
       console.error('Error al obtener tickets abiertos:', error)
       throw error
@@ -235,4 +246,4 @@ export class AdminService {
   }
 }
 
-export const adminService = AdminService.getInstance() 
+export const adminService = AdminService.getInstance()

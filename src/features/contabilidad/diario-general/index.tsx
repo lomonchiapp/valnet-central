@@ -1,7 +1,15 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
 // import { useContabilidadState } from '@/context/global/useContabilidadState' // Para datos reales
 
 // Placeholder de datos
@@ -46,7 +54,9 @@ export default function DiarioGeneral() {
       <div className='flex justify-between items-center'>
         <div>
           <h1 className='text-3xl font-bold'>Diario General</h1>
-          <p className='text-muted-foreground'>Consulta y administra el diario general contable.</p>
+          <p className='text-muted-foreground'>
+            Consulta y administra el diario general contable.
+          </p>
         </div>
         <div className='flex gap-2'>
           <Button variant='outline'>Exportar Excel</Button>
@@ -81,8 +91,8 @@ export default function DiarioGeneral() {
                   <ul className='list-disc pl-4'>
                     {asiento.movimientos.map((m, i) => (
                       <li key={i}>
-                        <span className='font-semibold'>{m.cuenta}:</span> 
-                        <span className='text-green-700'>Debe: {m.debe}</span> / 
+                        <span className='font-semibold'>{m.cuenta}:</span>
+                        <span className='text-green-700'>Debe: {m.debe}</span> /
                         <span className='text-red-700'>Haber: {m.haber}</span>
                       </li>
                     ))}
@@ -100,4 +110,4 @@ export default function DiarioGeneral() {
       </div>
     </div>
   )
-} 
+}
