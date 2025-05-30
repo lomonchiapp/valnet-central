@@ -72,7 +72,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
   const { agregarArticulo, isLoading, error: agregarError } = useAgregarArticulo(inventarioId);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [articuloExistenteDetectado, setArticuloExistenteDetectado] = useState<Partial<NuevoArticuloData> & { id?: string; cantidad?: number; unidad?: Unidad; costo?: number } | null>(null);
+  const [articuloExistenteDetectado, setArticuloExistenteDetectado] = useState<{ id?: string; nombre?: string; cantidad?: number; costo?: number; unidad?: Unidad } | null>(null);
   const [isCheckingArticulo, setIsCheckingArticulo] = useState(false);
   const [currentStep, setCurrentStep] = useState(STEPS.SELECCION_TIPO);
   const [showNuevaMarcaForm, setShowNuevaMarcaForm] = useState(false);
@@ -176,9 +176,11 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
 
   useEffect(() => {
     if (!open) {
-      handleCloseDialog();
+      resetFormAndState();
+      setCurrentStep(STEPS.SELECCION_TIPO);
+      onOpenChange(false);
     }
-  }, [open]);
+  }, [open, resetFormAndState, setCurrentStep, onOpenChange]);
 
   useEffect(() => {
     if (currentStep !== STEPS.DETALLES_EQUIPO_MARCA_MODELO) {
@@ -186,53 +188,50 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
     }
   }, [currentStep, marcaSeleccionadaWatch]);
 
-  const verificarArticuloExistenteDebounced = useCallback(
-    (() => {
-      let timer: NodeJS.Timeout;
-      return async (nombre: string) => {
-        clearTimeout(timer);
-        timer = setTimeout(async () => {
-          const currentTipo = getValues("tipo");
-          if (!nombre || nombre.trim().length < 3 || currentTipo !== TipoArticulo.MATERIAL) {
-            setArticuloExistenteDetectado(null);
-            setIsCheckingArticulo(false);
-            return;
-          }
-          setIsCheckingArticulo(true);
-          setArticuloExistenteDetectado(null); 
+  const verificarArticuloExistenteDebounced = useCallback(() => {
+    let timer: NodeJS.Timeout;
+    return async (nombre: string) => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        const currentTipo = getValues("tipo");
+        if (!nombre || nombre.trim().length < 3 || currentTipo !== TipoArticulo.MATERIAL) {
+          setArticuloExistenteDetectado(null);
+          setIsCheckingArticulo(false);
+          return;
+        }
+        setIsCheckingArticulo(true);
+        setArticuloExistenteDetectado(null); 
 
-          try {
-            const articulosRef = collection(database, 'articulos');
-            const q = query(
-              articulosRef,
-              where('idinventario', '==', inventarioId),
-              where('nombre', '==', nombre.trim()),
-              where('tipo', '==', TipoArticulo.MATERIAL),
-              limit(1)
-            );
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-              const docData = querySnapshot.docs[0].data() as NuevoArticuloData;
-              setArticuloExistenteDetectado({
-                id: querySnapshot.docs[0].id,
-                nombre: docData.nombre,
-                cantidad: docData.cantidad,
-                costo: docData.costo,
-                unidad: docData.unidad ? (docData.unidad as Unidad) : undefined,
-              });
-            } else {
-              setArticuloExistenteDetectado(null);
-            }
-          } catch {
+        try {
+          const articulosRef = collection(database, 'articulos');
+          const q = query(
+            articulosRef,
+            where('idinventario', '==', inventarioId),
+            where('nombre', '==', nombre.trim()),
+            where('tipo', '==', TipoArticulo.MATERIAL),
+            limit(1)
+          );
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const docData = querySnapshot.docs[0].data() as NuevoArticuloData;
+            setArticuloExistenteDetectado({
+              id: querySnapshot.docs[0].id,
+              nombre: docData.nombre,
+              cantidad: docData.cantidad,
+              costo: docData.costo,
+              unidad: docData.unidad as Unidad,
+            });
+          } else {
             setArticuloExistenteDetectado(null);
-          } finally {
-            setIsCheckingArticulo(false);
           }
-        }, 500); 
-      };
-    })(),
-    [inventarioId, getValues]
-  );
+        } catch {
+          setArticuloExistenteDetectado(null);
+        } finally {
+          setIsCheckingArticulo(false);
+        }
+      }, 500); 
+    };
+  }, [getValues, inventarioId]);
 
   useEffect(() => {
     const currentValues = getValues();
@@ -240,7 +239,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
     const nombreMaterial = currentValues.nombre;
 
     if (currentTipo === TipoArticulo.MATERIAL && nombreMaterial) {
-      verificarArticuloExistenteDebounced(nombreMaterial);
+      verificarArticuloExistenteDebounced()(nombreMaterial);
     } else {
       setArticuloExistenteDetectado(null);
       setIsCheckingArticulo(false);
@@ -422,7 +421,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
         }
         fieldsToValidate = ['serial', 'mac'];
         break;
-      case STEPS.DETALLES_EQUIPOS_MULTIPLES:
+      case STEPS.DETALLES_EQUIPOS_MULTIPLES: {
         if (multipleSNList.trim() === '') {
           toast.error("Por favor, ingrese al menos un número de serie.");
           return;
@@ -433,6 +432,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
           return;
         }
         break;
+      }
     }
     
     const isValidStep = await trigger(fieldsToValidate);
@@ -599,7 +599,7 @@ export function NuevoArticuloForm({ open, onOpenChange, inventarioId }: NuevoArt
                                         onSelect={(currentValue) => {
                                           field.onChange(currentValue);
                                           setSearchValueMaterialNombre(currentValue);
-                                          verificarArticuloExistenteDebounced(currentValue);
+                                          verificarArticuloExistenteDebounced()(currentValue);
                                           setOpenMaterialNombreCombobox(false);
                                         }}
                                       >

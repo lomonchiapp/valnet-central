@@ -1,5 +1,4 @@
 import { BaseModel } from "../baseModel"
-import { Brigada } from "./brigada"
 
 
 export enum EstadoTicket {

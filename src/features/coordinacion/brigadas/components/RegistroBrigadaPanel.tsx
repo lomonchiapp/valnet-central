@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import { 
   Card, 
   CardContent, 
@@ -21,7 +21,6 @@ import { Plus, PenIcon, Trash2Icon, PackageIcon, CalendarIcon, TagIcon, MapPinIc
 import { Brigada } from "@/types/interfaces/coordinacion/brigada";
 import { useAlmacenState } from "@/context/global/useAlmacenState";
 import { NewInventoryForm } from "@/features/almacen/inventarios/components/NewInventoryForm";
-import { nuevaBrigada } from "../../hooks/nuevaBrigada";
 import { useCoordinacionState } from "@/context/global/useCoordinacionState";
 import { NuevaBrigadaForm, NuevaBrigadaFormValues } from "./NuevaBrigadaForm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -29,8 +28,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InventarioBrigadaDialog } from "./InventarioBrigadaDialog";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { useCrearBrigada } from "../hooks/useCrearBrigada";
 
 // Tipos para manejar las fechas de Firestore
 type FirestoreTimestamp = {
@@ -51,6 +49,7 @@ export function RegistroBrigadaPanel() {
   
   // Usar inventarios reales de Firestore
   const { inventarios, subscribeToInventarios } = useAlmacenState();
+  const crearBrigada = useCrearBrigada();
   
   // Suscribirse a los inventarios reales
   useEffect(() => {
@@ -75,21 +74,17 @@ export function RegistroBrigadaPanel() {
   }, [selectedInventoryId]);
 
   const onSubmit = async (values: NuevaBrigadaFormValues) => {
-    // Here you would typically handle the API call to save the brigade
-    // For now just add it to the local state
-    const newBrigada: Brigada = {
-      ...values,
-      id: `brigada-${Date.now()}`,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    const id = await nuevaBrigada(newBrigada);
-    if (id) {
-      setBrigadas([...brigadas, {
-        ...newBrigada,
-        inventarioId: newBrigada.inventarioId || "",
-        coordenadas: newBrigada.coordenadas || { lat: 0, lng: 0 }
-      }]);
+    // Crear la brigada en la base de datos
+    const result = await crearBrigada(values);
+    if (result && result.id) {
+      setBrigadas([
+        ...brigadas,
+        {
+          ...result,
+          inventarioId: result.inventarioId || "",
+          coordenadas: result.coordenadas || { lat: 0, lng: 0 },
+        },
+      ]);
     }
     setIsDialogOpen(false);
   };
@@ -168,9 +163,7 @@ export function RegistroBrigadaPanel() {
               </DialogHeader>
               
               <NuevaBrigadaForm 
-                ref={formRef}
                 onSubmit={onSubmit}
-                inventarios={inventarios}
                 onNewInventoryClick={() => setIsNewInventoryDialogOpen(true)}
               />
             </DialogContent>

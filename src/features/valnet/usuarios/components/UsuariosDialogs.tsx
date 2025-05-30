@@ -16,7 +16,7 @@ interface UsuariosDialogsProps {
   setCurrentUser: (user: Usuario | null) => void
 }
 
-export function UsuariosDialogs({ open, setOpen, currentUser, setCurrentUser }: UsuariosDialogsProps) {
+export function UsuariosDialogs({ open, setOpen, currentUser }: UsuariosDialogsProps) {
   const { createUsuario, loading, error } = useCreateUsuario()
 
   return (

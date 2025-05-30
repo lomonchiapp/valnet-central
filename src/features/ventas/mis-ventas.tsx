@@ -55,7 +55,7 @@ export default function MisVentas() {
     return () => {
       isMounted = false;
     };
-  }, []); // Sin dependencia en misPreRegistros
+  }, [misPreRegistros]); // Sin dependencia en misPreRegistros
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
