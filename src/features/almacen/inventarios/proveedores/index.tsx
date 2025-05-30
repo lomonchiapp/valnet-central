@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { PlusCircle, User2 } from 'lucide-react'
-import { useAlmacenState } from '@/context/global/useAlmacenState'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -10,10 +9,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { NuevoProveedorForm } from './NuevoProveedorForm'
+import { useComprasState } from '@/context/global/useComprasState'
 
 export default function Proveedores() {
   const [showNewForm, setShowNewForm] = useState(false)
-  const { proveedores } = useAlmacenState()
+  const { proveedores } = useComprasState()
 
   return (
     <div className='space-y-6'>
