@@ -27,6 +27,7 @@ export function AuthProvider({ children }: Props) {
               // Si no existe el usuario en Firestore, usar datos básicos de Firebase Auth
               setUser({
                 id: firebaseUser.uid,
+                avatar: '',
                 email: firebaseUser.email || '',
                 nombres: firebaseUser.displayName?.split(' ')[0] || '',
                 apellidos: firebaseUser.displayName?.split(' ')[1] || '',

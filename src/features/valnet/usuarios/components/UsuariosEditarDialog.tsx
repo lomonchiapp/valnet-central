@@ -1,6 +1,6 @@
 import { Usuario } from '@/types/interfaces/valnet/usuario'
 import { useUpdateUsuario } from '../hooks/useUpdateUsuario'
-import UsuarioForm from './UsuarioForm'
+import { UsuarioForm } from './UsuarioForm'
 
 interface UsuariosEditarDialogProps {
   setOpen: (modal: string | null) => void

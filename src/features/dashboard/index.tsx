@@ -11,16 +11,13 @@ import GenericDashboard from './components/GenericDashboard'
 // Components
 import InventarioDashboard from './components/InventarioDashboard'
 import SacDashboard from './components/SacDashboard'
-import VendedorDashboard from './components/VendedorDashboard'
+import { VendedorDashboard } from './components/VendedorDashboard'
 
 export default function Dashboard() {
   const { user } = useAuthStore()
   const { inventarios } = useAlmacenState()
   const { preRegistros } = useVentasState()
   const [activeTab, setActiveTab] = useState('overview')
-
-  // Contratos: imágenes subidas a storage (urls)
-  const contratos: string[] = []
 
   // Render dashboard based on user role
   const renderDashboard = () => {
@@ -47,7 +44,7 @@ export default function Dashboard() {
       <VendedorDashboard
         usuario={user}
         preRegistros={preRegistros}
-        contratos={contratos}
+        contratos={[]}
       />
     )
   }

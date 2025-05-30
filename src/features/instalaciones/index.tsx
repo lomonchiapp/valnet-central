@@ -1,28 +1,13 @@
 import { useEffect } from 'react'
 import { useListarInstalaciones } from '@/api/hooks'
-import { useValnetState } from '@/context/global/useValnetState'
 import { Main } from '@/components/layout/main'
-import { CitizensTable } from './components/citizens-table'
-import { instalacionesColumns } from './components/instalaciones-columns'
 
 export default function Instalaciones() {
-  const {
-    listarInstalaciones,
-    instalaciones: apiInstalaciones,
-    loading,
-    error,
-  } = useListarInstalaciones()
-
-  const instalaciones = useValnetState((state) => state.instalaciones)
-  const setInstalaciones = useValnetState((state) => state.setInstalaciones)
+  const { listarInstalaciones, loading, error } = useListarInstalaciones()
 
   useEffect(() => {
     listarInstalaciones()
   }, [listarInstalaciones])
-
-  useEffect(() => {
-    if (apiInstalaciones) setInstalaciones(apiInstalaciones)
-  }, [apiInstalaciones, setInstalaciones])
 
   return (
     <>
@@ -43,10 +28,9 @@ export default function Instalaciones() {
           ) : error ? (
             <div className='w-full text-center text-red-500 py-8'>{error}</div>
           ) : (
-            <CitizensTable
-              data={instalaciones}
-              columns={instalacionesColumns}
-            />
+            <div>
+              <h2>Instalaciones</h2>
+            </div>
           )}
         </div>
       </Main>

@@ -1,7 +1,7 @@
 import { Usuario } from '@/types/interfaces/valnet/usuario'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useCreateUsuario } from '../hooks/useCreateUsuario'
-import UsuarioForm from './UsuarioForm'
+import { UsuarioForm } from './UsuarioForm'
 import { UsuariosEditarDialog } from './UsuariosEditarDialog'
 import { UsuariosEliminarDialog } from './UsuariosEliminarDialog'
 import { UsuariosInvitarDialog } from './UsuariosInvitarDialog'
@@ -25,7 +25,7 @@ export function UsuariosDialogs({
       {/* Diálogo para agregar nuevo usuario */}
       <Dialog
         open={open === 'agregar'}
-        onOpenChange={(isOpen) => !isOpen && setOpen(null)}
+        onOpenChange={(isOpen: boolean) => !isOpen && setOpen(null)}
       >
         <DialogContent className='max-w-xl'>
           <UsuarioForm
@@ -45,7 +45,7 @@ export function UsuariosDialogs({
       {/* Diálogo para eliminar usuario */}
       <Dialog
         open={open === 'eliminar'}
-        onOpenChange={(isOpen) => !isOpen && setOpen(null)}
+        onOpenChange={(isOpen: boolean) => !isOpen && setOpen(null)}
       >
         <DialogContent className='max-w-lg'>
           <UsuariosEliminarDialog setOpen={setOpen} currentUser={currentUser} />
@@ -55,7 +55,7 @@ export function UsuariosDialogs({
       {/* Diálogo para invitar usuario */}
       <Dialog
         open={open === 'invitar'}
-        onOpenChange={(isOpen) => !isOpen && setOpen(null)}
+        onOpenChange={(isOpen: boolean) => !isOpen && setOpen(null)}
       >
         <DialogContent className='max-w-xl'>
           <UsuariosInvitarDialog setOpen={setOpen} />
@@ -65,7 +65,7 @@ export function UsuariosDialogs({
       {/* Diálogo para editar usuario */}
       <Dialog
         open={open === 'editar'}
-        onOpenChange={(isOpen) => !isOpen && setOpen(null)}
+        onOpenChange={(isOpen: boolean) => !isOpen && setOpen(null)}
       >
         <DialogContent className='max-w-xl'>
           <UsuariosEditarDialog setOpen={setOpen} currentUser={currentUser} />
