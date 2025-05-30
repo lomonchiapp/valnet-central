@@ -54,7 +54,7 @@ export function UsuariosEliminarDialog({ setOpen, currentUser }: UsuariosElimina
           <h4 className="text-lg font-medium">¿Está seguro que desea eliminar este usuario?</h4>
           {currentUser && (
             <p className="text-sm text-muted-foreground">
-              {currentUser.firstName} {currentUser.lastName} ({currentUser.email})
+              {currentUser.nombres} {currentUser.apellidos} ({currentUser.email})
             </p>
           )}
         </div>

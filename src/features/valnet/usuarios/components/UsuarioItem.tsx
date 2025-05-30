@@ -22,43 +22,20 @@ export function UsuarioItem({ user, setOpen, setCurrentUser }: UsuarioItemProps)
     // Mapear Usuario a User
     setCurrentUser({
       id: user.id,
-      firstName: user.nombres,
-      lastName: user.apellidos,
-      username: user.email, // o algún campo adecuado
+      nombres: user.nombres,
+      apellidos: user.apellidos,
+      avatar: user.avatar,
+      role: user.role,
+      cedula: user.cedula,
+      status: user.status,
+      telefono: user.telefono,
+      direccion: user.direccion,
+      fechaNacimiento: user.fechaNacimiento,
       email: user.email,
-      phoneNumber: user.telefono,
-      status: mapStatusToString(user.status),
-      role: mapRoleToString(user.role),
-      sucursal: '',
-      departamento: '',
-      createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      createdAt: user.createdAt,
     })
     setOpen('editar')
-  }
-
-  // Helpers para mapear enums a string
-  function mapStatusToString(status: string) {
-    switch (status) {
-      case 'Online': return 'activo'
-      case 'Offline': return 'inactivo'
-      case 'En Pausa': return 'invitado'
-      case 'Ocupado': return 'suspendido'
-      default: return 'inactivo'
-    }
-  }
-
-  function mapRoleToString(role: string) {
-    switch (role) {
-      case 'Admin': return 'admin'
-      case 'Inventario': return 'inventario'
-      case 'Vendedor': return 'vendedor'
-      case 'Servicio al Cliente': return 'soporte'
-      case 'Gerente': return 'gerente'
-      case 'Cajero': return 'cajero'
-      case 'Superadmin': return 'superadmin'
-      default: return 'vendedor'
-    }
   }
 
   // Obtiene iniciales para el avatar
