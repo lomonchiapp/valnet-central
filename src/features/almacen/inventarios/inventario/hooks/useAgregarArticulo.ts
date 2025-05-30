@@ -101,13 +101,7 @@ export function useAgregarArticulo(inventarioId: string) {
           const cantidadAAgregar = Number(articuloPayload.cantidad) || 0
           const nuevaCantidad = cantidadActual + cantidadAAgregar
 
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const {
-            idinventario: payloadIdInventario,
-            nombre: payloadNombre,
-            tipo: payloadTipo,
-            ...otrosDatosDelPayload
-          } = articuloPayload
+          const {...otrosDatosDelPayload } = articuloPayload
 
           const updateData = {
             ...otrosDatosDelPayload, // Contiene costo, unidad, descripcion, etc. actualizados del form
