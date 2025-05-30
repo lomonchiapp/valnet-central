@@ -49,7 +49,7 @@ export default function Usuarios() {
               <UsuarioItem
                 key={usuario.id}
                 user={usuario}
-                setOpen={setOpen}
+                setOpen={setOpen as (modal: string) => void}
                 setCurrentUser={setCurrentUser}
               />
             ))}
@@ -65,7 +65,7 @@ export default function Usuarios() {
         )}
       </div>
       {/* Diálogos para acciones */}
-      <UsuariosDialogs open={open} setOpen={setOpen} currentUser={currentUser} setCurrentUser={setCurrentUser} />
+      <UsuariosDialogs open={open} setOpen={setOpen as (modal: string) => void} currentUser={currentUser} setCurrentUser={setCurrentUser} />
     </Main>
   )
 } 
