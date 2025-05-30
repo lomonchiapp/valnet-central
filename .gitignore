@@ -27,6 +27,7 @@ dist-ssr
 
 functions/node_modules/
 functions/lib/
+functions/index.ts
 functions/dist/
 functions/.env
 functions/.env.*
