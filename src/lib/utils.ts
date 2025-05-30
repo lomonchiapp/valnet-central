@@ -21,26 +21,32 @@ export function formatCurrency(amount: number): string {
     .replace(',', '.')
 }
 
-export function calculateNextPaymentDate(startDate: Date, paymentDay: number): Date {
+export function calculateNextPaymentDate(
+  startDate: Date,
+  paymentDay: number
+): Date {
   const nextDate = new Date(startDate)
-  
+
   // Siempre avanzar al siguiente mes
   nextDate.setMonth(nextDate.getMonth() + 1)
-  
+
   // Ajustar al día de pago
   nextDate.setDate(paymentDay)
-  
+
   // Si el día de pago es anterior al día actual, avanzar otro mes
   if (nextDate < startDate) {
     nextDate.setMonth(nextDate.getMonth() + 1)
   }
-  
+
   return nextDate
 }
 
-export function formatDate(date: Date | string | number | { seconds: number, nanoseconds: number }, format = 'DD/MM/YYYY'): string {
+export function formatDate(
+  date: Date | string | number | { seconds: number; nanoseconds: number },
+  format = 'DD/MM/YYYY'
+): string {
   let d: Date
-  
+
   if (typeof date === 'object' && 'seconds' in date) {
     // Si es un timestamp de Firebase
     d = new Date(date.seconds * 1000)
@@ -55,7 +61,7 @@ export function formatDate(date: Date | string | number | { seconds: number, nan
   }
 
   if (isNaN(d.getTime())) return 'Fecha inválida'
-  
+
   const day = String(d.getDate()).padStart(2, '0')
   const month = String(d.getMonth() + 1).padStart(2, '0')
   const year = d.getFullYear()
@@ -68,12 +74,16 @@ export function formatDate(date: Date | string | number | { seconds: number, nan
 
 //Generador de numeros de facturas recurrentes en base a la fecha y hora. corta y amigable.
 
-export function generateInvoiceNumber(paymentDay: number, paymentDate: Date, citizenId: string) {
+export function generateInvoiceNumber(
+  paymentDay: number,
+  paymentDate: Date,
+  citizenId: string
+) {
   const prefix = 'FC'
   const month = (paymentDate.getMonth() + 1).toString().padStart(2, '0')
   const day = paymentDay.toString().padStart(2, '0')
   const citizenSuffix = citizenId.slice(-2)
-  
+
   return `${prefix}${month}${day}${citizenSuffix}`
 }
 
@@ -92,5 +102,5 @@ export function generateCitizenCode(createdAt: Date, id: string) {
   const prefix = 'CT'
   const year = createdAt.getFullYear().toString().slice(-2)
   const citizenId = id.slice(-4)
-  return `${prefix}${year}${(citizenId)}`
+  return `${prefix}${year}${citizenId}`
 }

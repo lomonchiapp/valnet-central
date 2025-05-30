@@ -1,19 +1,19 @@
-import { BrowserRouter } from 'react-router-dom'
-import { ThemeProvider } from './context/theme-context'
-import { AuthProvider } from './components/auth/AuthProvider'
-import { AppRoutes } from './routes'
-import { Toaster } from './components/ui/toaster'
 import { useEffect, useRef } from 'react'
-import { useToast } from '@/hooks/use-toast'
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { database } from '@/firebase'
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { BrowserRouter } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { useToast } from '@/hooks/use-toast'
 import { ToastAction } from '@/components/ui/toast'
+import { AuthProvider } from './components/auth/AuthProvider'
+import { Toaster } from './components/ui/toaster'
+import { ThemeProvider } from './context/theme-context'
+import { AppRoutes } from './routes'
 
 function WallNetGlobalNotifier() {
   const { toast } = useToast()
   const { user } = useAuthStore()
-  const lastNotified = useRef<{ id: string, createdAt: number } | null>(null)
+  const lastNotified = useRef<{ id: string; createdAt: number } | null>(null)
 
   useEffect(() => {
     if (!lastNotified.current) {
@@ -21,10 +21,15 @@ function WallNetGlobalNotifier() {
       if (stored) {
         try {
           lastNotified.current = JSON.parse(stored)
-        } catch { /* ignore parse error */ }
+        } catch {
+          /* ignore parse error */
+        }
       }
     }
-    const q = query(collection(database, 'wallNetPosts'), orderBy('createdAt', 'desc'))
+    const q = query(
+      collection(database, 'wallNetPosts'),
+      orderBy('createdAt', 'desc')
+    )
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs
       if (docs.length === 0) return
@@ -34,10 +39,8 @@ function WallNetGlobalNotifier() {
       if (
         user &&
         data.userId !== user.id &&
-        (
-          !last ||
-          first.id !== last.id && data.createdAt > (last.createdAt || 0)
-        )
+        (!last ||
+          (first.id !== last.id && data.createdAt > (last.createdAt || 0)))
       ) {
         toast({
           title: 'Nueva publicación en WallNet',
@@ -45,15 +48,21 @@ function WallNetGlobalNotifier() {
           duration: 7000,
           variant: 'wallnet',
           action: (
-            <ToastAction altText="Ver publicación" onClick={() => {
-              window.location.href = '/valnet/wallnet'
-            }}>
+            <ToastAction
+              altText='Ver publicación'
+              onClick={() => {
+                window.location.href = '/valnet/wallnet'
+              }}
+            >
               Ver
             </ToastAction>
-          )
+          ),
         })
         lastNotified.current = { id: first.id, createdAt: data.createdAt }
-        localStorage.setItem('wallnet_last_notified', JSON.stringify({ id: first.id, createdAt: data.createdAt }))
+        localStorage.setItem(
+          'wallnet_last_notified',
+          JSON.stringify({ id: first.id, createdAt: data.createdAt })
+        )
       }
     })
     return () => unsubscribe()
@@ -73,4 +82,4 @@ export default function App() {
       </ThemeProvider>
     </BrowserRouter>
   )
-} 
+}

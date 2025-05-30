@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import { FIREBASE_AUTH, database } from '@/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { FIREBASE_AUTH, database } from '@/firebase'
 import { UsuarioFormState } from '../components/UsuarioForm'
 
 export function useCreateUsuario() {
@@ -48,4 +48,4 @@ export function useCreateUsuario() {
   }
 
   return { createUsuario, loading, error }
-} 
+}

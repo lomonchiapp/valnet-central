@@ -1,6 +1,6 @@
-import { BaseModel } from "../baseModel";
+import { BaseModel } from '../baseModel'
 
 export interface Ubicacion extends BaseModel {
-    nombre: string;
-    idInventario: string;
+  nombre: string
+  idInventario: string
 }

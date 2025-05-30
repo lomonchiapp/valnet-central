@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
 import { FIREBASE_AUTH } from '@/firebase'
-import { useAuthStore } from '@/stores/authStore'
-import { LoadingScreen } from '../loading-screen'
-import { getUser } from '@/hooks/auth/getUser'
 import { RoleUsuario, StatusUsuario } from '@/types'
+import { onAuthStateChanged } from 'firebase/auth'
+import { useAuthStore } from '@/stores/authStore'
+import { getUser } from '@/hooks/auth/getUser'
+import { LoadingScreen } from '../loading-screen'
+
 interface Props {
   children: React.ReactNode
 }
@@ -13,41 +14,44 @@ export function AuthProvider({ children }: Props) {
   const { isLoading, setUser, setIsLoading } = useAuthStore()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(FIREBASE_AUTH, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          // Obtener datos completos del usuario desde Firestore
-          const userData = await getUser(firebaseUser.uid)
-          if (userData) {
-            setUser(userData)
+    const unsubscribe = onAuthStateChanged(
+      FIREBASE_AUTH,
+      async (firebaseUser) => {
+        try {
+          if (firebaseUser) {
+            // Obtener datos completos del usuario desde Firestore
+            const userData = await getUser(firebaseUser.uid)
+            if (userData) {
+              setUser(userData)
+            } else {
+              // Si no existe el usuario en Firestore, usar datos básicos de Firebase Auth
+              setUser({
+                id: firebaseUser.uid,
+                email: firebaseUser.email || '',
+                nombres: firebaseUser.displayName?.split(' ')[0] || '',
+                apellidos: firebaseUser.displayName?.split(' ')[1] || '',
+                telefono: firebaseUser.phoneNumber || '',
+                role: RoleUsuario.TECNICO, // Rol por defecto
+                cedula: '',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                direccion: '',
+                fechaNacimiento: '',
+                status: StatusUsuario.ONLINE,
+              })
+            }
           } else {
-            // Si no existe el usuario en Firestore, usar datos básicos de Firebase Auth
-            setUser({
-              id: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              nombres: firebaseUser.displayName?.split(' ')[0] || '',
-              apellidos: firebaseUser.displayName?.split(' ')[1] || '',
-              telefono: firebaseUser.phoneNumber || '',
-              role: RoleUsuario.TECNICO, // Rol por defecto
-              cedula: '',
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              direccion: '',
-              fechaNacimiento: '',
-              status: StatusUsuario.ONLINE,
-            })
+            setUser(null)
           }
-        } else {
+        } catch (error) {
+          //eslint-disable-next-line no-console
+          console.error('Error setting user:', error)
           setUser(null)
+        } finally {
+          setIsLoading(false)
         }
-      } catch (error) {
-        //eslint-disable-next-line no-console
-        console.error('Error setting user:', error)
-        setUser(null)
-      } finally {
-        setIsLoading(false)
       }
-    })
+    )
 
     return () => unsubscribe()
   }, [setUser, setIsLoading])
@@ -57,4 +61,4 @@ export function AuthProvider({ children }: Props) {
   }
 
   return children
-} 
+}

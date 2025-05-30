@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { doc, updateDoc } from 'firebase/firestore'
 import { database } from '@/firebase'
+import { doc, updateDoc } from 'firebase/firestore'
 import { UsuarioFormState } from '../components/UsuarioForm'
 
 export function useUpdateUsuario() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const updateUsuario = async (uid: string, usuario: Partial<UsuarioFormState>) => {
+  const updateUsuario = async (
+    uid: string,
+    usuario: Partial<UsuarioFormState>
+  ) => {
     setLoading(true)
     setError(null)
     try {
@@ -28,4 +31,4 @@ export function useUpdateUsuario() {
   }
 
   return { updateUsuario, loading, error }
-} 
+}

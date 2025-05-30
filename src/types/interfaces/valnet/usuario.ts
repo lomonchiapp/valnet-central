@@ -1,4 +1,4 @@
-import { BaseModel } from "../baseModel";
+import { BaseModel } from '../baseModel'
 
 export enum RoleUsuario {
   ADMIN = 'Admin',
@@ -26,20 +26,20 @@ export enum NivelVendedor {
 }
 
 export interface Usuario extends BaseModel {
-  nombres: string;
-  apellidos: string;
-  email: string;
-  avatar: string;
-  role: RoleUsuario;
-  cedula: string;
-  status: StatusUsuario;
-  telefono: string;
-  direccion: string;  
-  fechaNacimiento: string;
+  nombres: string
+  apellidos: string
+  email: string
+  avatar: string
+  role: RoleUsuario
+  cedula: string
+  status: StatusUsuario
+  telefono: string
+  direccion: string
+  fechaNacimiento: string
   //campos para tecnicos
-  brigadaId?: string;
+  brigadaId?: string
   //campos para vendedores
-  nivelVendedor?: NivelVendedor;
-  contratosMes?: number;
-  bonoExtra?: boolean;
+  nivelVendedor?: NivelVendedor
+  contratosMes?: number
+  bonoExtra?: boolean
 }

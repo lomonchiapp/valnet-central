@@ -1,5 +1,5 @@
-import { create } from 'zustand'
 import { Usuario } from '@/types'
+import { create } from 'zustand'
 
 interface AuthState {
   user: Usuario | null
@@ -12,7 +12,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
   setUser: (user) => set({ user }),
-  setIsLoading: (isLoading) => set({ isLoading })
+  setIsLoading: (isLoading) => set({ isLoading }),
 }))
 
 // Helper para acceder al estado desde fuera de componentes React

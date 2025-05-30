@@ -1,189 +1,214 @@
-import { useState } from "react";
-import { addDoc, collection, doc, serverTimestamp, updateDoc, query, where, getDocs, onSnapshot, FieldValue } from "firebase/firestore";
-import { database } from "@/firebase";
-import { Ubicacion } from "@/types/interfaces/almacen/ubicacion";
+import { useState } from 'react'
+import { database } from '@/firebase'
+import { Ubicacion } from '@/types/interfaces/almacen/ubicacion'
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  updateDoc,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+  FieldValue,
+} from 'firebase/firestore'
 
 interface NuevaUbicacionData {
-  nombre: string;
-  idInventario?: string;
+  nombre: string
+  idInventario?: string
 }
 
 interface ActualizarUbicacionData {
-  id: string;
-  nombre: string;
-  idInventario?: string;
+  id: string
+  nombre: string
+  idInventario?: string
 }
 
 export function useUbicaciones() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([])
 
   /**
    * Carga todas las ubicaciones disponibles
    */
   const cargarUbicaciones = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const ubicacionesRef = collection(database, "ubicaciones");
-      const snapshot = await getDocs(ubicacionesRef);
-      const ubicacionesList = snapshot.docs.map(doc => doc.data() as Ubicacion);
-      setUbicaciones(ubicacionesList);
-      return ubicacionesList;
+      const ubicacionesRef = collection(database, 'ubicaciones')
+      const snapshot = await getDocs(ubicacionesRef)
+      const ubicacionesList = snapshot.docs.map(
+        (doc) => doc.data() as Ubicacion
+      )
+      setUbicaciones(ubicacionesList)
+      return ubicacionesList
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error desconocido";
-      setError(errorMessage);
-      return [];
+      const errorMessage =
+        err instanceof Error ? err.message : 'Error desconocido'
+      setError(errorMessage)
+      return []
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   /**
    * Crea una nueva ubicación
    */
-  const crearUbicacion = async (data: NuevaUbicacionData): Promise<Ubicacion | null> => {
-    setIsLoading(true);
-    setError(null);
+  const crearUbicacion = async (
+    data: NuevaUbicacionData
+  ): Promise<Ubicacion | null> => {
+    setIsLoading(true)
+    setError(null)
 
     try {
       // Verificar si ya existe una ubicación con el mismo nombre
-      const ubicacionesRef = collection(database, "ubicaciones");
-      const q = query(ubicacionesRef, where("nombre", "==", data.nombre.trim()));
-      const querySnapshot = await getDocs(q);
-      
+      const ubicacionesRef = collection(database, 'ubicaciones')
+      const q = query(ubicacionesRef, where('nombre', '==', data.nombre.trim()))
+      const querySnapshot = await getDocs(q)
+
       if (!querySnapshot.empty) {
-        setError(`Ya existe una ubicación con el nombre "${data.nombre}"`);
-        return null;
+        setError(`Ya existe una ubicación con el nombre "${data.nombre}"`)
+        return null
       }
 
       // Crear la nueva ubicación
       const nuevaUbicacionData = {
         nombre: data.nombre.trim(),
-        idInventario: data.idInventario || "",
+        idInventario: data.idInventario || '',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      };
+      }
 
-      const docRef = await addDoc(collection(database, "ubicaciones"), nuevaUbicacionData);
-      
+      const docRef = await addDoc(
+        collection(database, 'ubicaciones'),
+        nuevaUbicacionData
+      )
+
       // Actualizar el documento recién creado para incluir su propio ID
-      await updateDoc(doc(database, "ubicaciones", docRef.id), {
+      await updateDoc(doc(database, 'ubicaciones', docRef.id), {
         id: docRef.id,
-      });
+      })
 
       const nuevaUbicacion: Ubicacion = {
         id: docRef.id,
         nombre: data.nombre.trim(),
-        idInventario: data.idInventario || "",
+        idInventario: data.idInventario || '',
         createdAt: new Date(),
         updatedAt: new Date(),
-      };
+      }
 
       // Actualizar la lista local de ubicaciones
-      setUbicaciones(prev => [...prev, nuevaUbicacion]);
-      
-      return nuevaUbicacion;
+      setUbicaciones((prev) => [...prev, nuevaUbicacion])
+
+      return nuevaUbicacion
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error desconocido";
-      setError(errorMessage);
-      return null;
+      const errorMessage =
+        err instanceof Error ? err.message : 'Error desconocido'
+      setError(errorMessage)
+      return null
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   /**
    * Actualiza una ubicación existente
    */
-  const actualizarUbicacion = async (data: ActualizarUbicacionData): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
+  const actualizarUbicacion = async (
+    data: ActualizarUbicacionData
+  ): Promise<boolean> => {
+    setIsLoading(true)
+    setError(null)
 
     try {
       // Verificar si ya existe otra ubicación con el mismo nombre
-      const ubicacionesRef = collection(database, "ubicaciones");
+      const ubicacionesRef = collection(database, 'ubicaciones')
       const q = query(
-        ubicacionesRef, 
-        where("nombre", "==", data.nombre.trim()),
-        where("id", "!=", data.id)
-      );
-      const querySnapshot = await getDocs(q);
-      
+        ubicacionesRef,
+        where('nombre', '==', data.nombre.trim()),
+        where('id', '!=', data.id)
+      )
+      const querySnapshot = await getDocs(q)
+
       if (!querySnapshot.empty) {
-        setError(`Ya existe otra ubicación con el nombre "${data.nombre}"`);
-        return false;
+        setError(`Ya existe otra ubicación con el nombre "${data.nombre}"`)
+        return false
       }
 
       // Actualizar la ubicación
-      const ubicacionRef = doc(database, "ubicaciones", data.id);
-      const updateData: { 
-        nombre: string; 
-        updatedAt: FieldValue;
-        idInventario?: string; 
+      const ubicacionRef = doc(database, 'ubicaciones', data.id)
+      const updateData: {
+        nombre: string
+        updatedAt: FieldValue
+        idInventario?: string
       } = {
         nombre: data.nombre.trim(),
         updatedAt: serverTimestamp(),
-      };
-      
+      }
+
       // Solo incluir idInventario si se proporcionó
       if (data.idInventario !== undefined) {
-        updateData.idInventario = data.idInventario;
+        updateData.idInventario = data.idInventario
       }
-      
-      await updateDoc(ubicacionRef, updateData);
+
+      await updateDoc(ubicacionRef, updateData)
 
       // Actualizar la lista local de ubicaciones
-      setUbicaciones(prev => 
-        prev.map(ub => {
+      setUbicaciones((prev) =>
+        prev.map((ub) => {
           if (ub.id === data.id) {
-            const updated = { 
-              ...ub, 
-              nombre: data.nombre.trim(), 
-              updatedAt: new Date()
-            };
-            
+            const updated = {
+              ...ub,
+              nombre: data.nombre.trim(),
+              updatedAt: new Date(),
+            }
+
             // Solo actualizar idInventario si se proporcionó
             if (data.idInventario !== undefined) {
-              updated.idInventario = data.idInventario;
+              updated.idInventario = data.idInventario
             }
-            
-            return updated;
+
+            return updated
           }
-          return ub;
+          return ub
         })
-      );
-      
-      return true;
+      )
+
+      return true
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error desconocido";
-      setError(errorMessage);
-      return false;
+      const errorMessage =
+        err instanceof Error ? err.message : 'Error desconocido'
+      setError(errorMessage)
+      return false
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   /**
    * Configura una suscripción a las ubicaciones
    */
   const subscribeToUbicaciones = () => {
-    const ubicacionesRef = collection(database, "ubicaciones");
+    const ubicacionesRef = collection(database, 'ubicaciones')
     const unsubscribe = onSnapshot(
       ubicacionesRef,
       (snapshot) => {
-        const ubicacionesList = snapshot.docs.map(doc => doc.data() as Ubicacion);
-        setUbicaciones(ubicacionesList);
+        const ubicacionesList = snapshot.docs.map(
+          (doc) => doc.data() as Ubicacion
+        )
+        setUbicaciones(ubicacionesList)
       },
       (error) => {
-        setError(error.message);
+        setError(error.message)
       }
-    );
-    
-    return unsubscribe;
-  };
+    )
+
+    return unsubscribe
+  }
 
   return {
     ubicaciones,
@@ -192,6 +217,6 @@ export function useUbicaciones() {
     actualizarUbicacion,
     subscribeToUbicaciones,
     isLoading,
-    error
-  };
-} 
+    error,
+  }
+}

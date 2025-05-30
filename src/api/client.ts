@@ -1,4 +1,4 @@
-import { API_URL } from './config';
+import { API_URL } from './config'
 
 /**
  * Generic API client for making requests to Mikrowisp
@@ -10,22 +10,25 @@ export const apiClient = {
    * @param body - Request body
    * @returns Promise with the response data
    */
-  post: async <T, B = Record<string, unknown>>(endpoint: string, body: B): Promise<T> => {
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-        credentials: 'same-origin',
-      });
+  post: async <T, B = Record<string, unknown>>(
+    endpoint: string,
+    body: B
+  ): Promise<T> => {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      credentials: 'same-origin',
+    })
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
-      }
+    const data = await response.json()
 
-    return data;
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`)
+    }
+
+    return data
   },
-}; 
+}

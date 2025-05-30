@@ -1,6 +1,6 @@
-import UsuarioForm from './UsuarioForm'
-import { useUpdateUsuario } from '../hooks/useUpdateUsuario'
 import { Usuario } from '@/types/interfaces/valnet/usuario'
+import { useUpdateUsuario } from '../hooks/useUpdateUsuario'
+import UsuarioForm from './UsuarioForm'
 
 interface UsuariosEditarDialogProps {
   setOpen: (modal: string | null) => void
@@ -24,10 +24,12 @@ function mapUserToUsuario(user: Usuario): Partial<Usuario> {
   }
 }
 
-
-export function UsuariosEditarDialog({ setOpen, currentUser }: UsuariosEditarDialogProps) {
+export function UsuariosEditarDialog({
+  setOpen,
+  currentUser,
+}: UsuariosEditarDialogProps) {
   const { updateUsuario, loading, error } = useUpdateUsuario()
-  
+
   return (
     <>
       <UsuarioForm
@@ -40,7 +42,7 @@ export function UsuariosEditarDialog({ setOpen, currentUser }: UsuariosEditarDia
         isLoading={loading}
         onCancel={() => setOpen(null)}
       />
-      {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+      {error && <div className='text-red-500 text-sm mt-2'>{error}</div>}
     </>
   )
-} 
+}

@@ -1,5 +1,5 @@
-import { BaseModel } from "../baseModel";
+import { BaseModel } from '../baseModel'
 
 export interface Marca extends BaseModel {
-    nombre: string;
+  nombre: string
 }

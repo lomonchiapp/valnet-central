@@ -30,4 +30,4 @@ export interface WallNetNewPost {
   audioUrl?: string
   categoryId: string
   priority: WallNetPriority
-} 
+}

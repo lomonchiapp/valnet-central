@@ -1,6 +1,6 @@
-import WallNetPostForm from './WallNetPostForm'
-import WallNetFeed from './WallNetFeed'
 import WallNetConfig from './WallNetConfig'
+import WallNetFeed from './WallNetFeed'
+import WallNetPostForm from './WallNetPostForm'
 
 const WallNet = () => {
   return (
@@ -13,4 +13,4 @@ const WallNet = () => {
 }
 
 export default WallNet
-export { WallNetFeed, WallNetConfig } 
+export { WallNetFeed, WallNetConfig }

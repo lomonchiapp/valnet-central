@@ -1,15 +1,20 @@
+import { useEffect } from 'react'
+import { useListarInstalaciones } from '@/api/hooks'
+import { useValnetState } from '@/context/global/useValnetState'
 import { Main } from '@/components/layout/main'
 import { CitizensTable } from './components/citizens-table'
-import { useListarInstalaciones } from '@/api/hooks'
 import { instalacionesColumns } from './components/instalaciones-columns'
-import { useEffect } from 'react'
-import { useValnetState } from '@/context/global/useValnetState'
 
 export default function Instalaciones() {
-  const { listarInstalaciones, instalaciones: apiInstalaciones, loading, error } = useListarInstalaciones()
+  const {
+    listarInstalaciones,
+    instalaciones: apiInstalaciones,
+    loading,
+    error,
+  } = useListarInstalaciones()
 
-  const instalaciones = useValnetState(state => state.instalaciones)
-  const setInstalaciones = useValnetState(state => state.setInstalaciones)
+  const instalaciones = useValnetState((state) => state.instalaciones)
+  const setInstalaciones = useValnetState((state) => state.setInstalaciones)
 
   useEffect(() => {
     listarInstalaciones()
@@ -32,13 +37,15 @@ export default function Instalaciones() {
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
           {loading ? (
-            <div className="w-full text-center py-8">Cargando instalaciones...</div>
+            <div className='w-full text-center py-8'>
+              Cargando instalaciones...
+            </div>
           ) : error ? (
-            <div className="w-full text-center text-red-500 py-8">{error}</div>
+            <div className='w-full text-center text-red-500 py-8'>{error}</div>
           ) : (
-            <CitizensTable 
-              data={instalaciones} 
-              columns={instalacionesColumns} 
+            <CitizensTable
+              data={instalaciones}
+              columns={instalacionesColumns}
             />
           )}
         </div>

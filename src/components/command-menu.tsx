@@ -1,10 +1,6 @@
 import React from 'react'
+import { IconDeviceLaptop, IconMoon, IconSun } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
-import {
-  IconDeviceLaptop,
-  IconMoon,
-  IconSun,
-} from '@tabler/icons-react'
 import { useSearch } from '@/context/search-context'
 import { useTheme } from '@/context/theme-context'
 import {

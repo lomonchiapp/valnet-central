@@ -1,5 +1,5 @@
-import { create } from 'zustand'
 import { WallNetPost, WallNetCategory } from '@/types/interfaces/valnet/wallNet'
+import { create } from 'zustand'
 
 interface WallNetState {
   posts: WallNetPost[]
@@ -18,5 +18,5 @@ export const useWallNetStore = create<WallNetState>((set) => ({
   setPosts: (posts) => set({ posts }),
   setCategories: (categories) => set({ categories }),
   setLoading: (loading) => set({ loading }),
-  clear: () => set({ posts: [], categories: [], loading: false })
-})) 
+  clear: () => set({ posts: [], categories: [], loading: false }),
+}))

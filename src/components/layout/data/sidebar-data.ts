@@ -11,7 +11,6 @@ import { HandshakeIcon, Ticket as TicketIcon } from 'lucide-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
-  
   navGroups: [
     {
       title: 'Dashboard',
@@ -20,7 +19,7 @@ export const sidebarData: SidebarData = {
           title: 'Panel Principal',
           url: '/',
           icon: IconLayoutDashboard,
-        }
+        },
       ],
     },
     {
@@ -40,7 +39,7 @@ export const sidebarData: SidebarData = {
           title: 'Solicitudes',
           url: '/almacen/solicitudes',
           icon: HandshakeIcon,
-        }
+        },
       ],
     },
     {
@@ -60,7 +59,7 @@ export const sidebarData: SidebarData = {
           title: 'Facturas',
           url: '/contabilidad/facturas',
           icon: HandshakeIcon,
-        }
+        },
       ],
     },
     {
@@ -105,7 +104,7 @@ export const sidebarData: SidebarData = {
           title: 'Mis Ventas',
           url: '/ventas/pre-registros',
           icon: IconReportMoney,
-        }
+        },
       ],
     },
     {
@@ -120,7 +119,7 @@ export const sidebarData: SidebarData = {
           title: 'Configurar WallNet',
           url: '/valnet/wallnet/config',
           icon: IconChecklist,
-        }
+        },
       ],
     },
     {
@@ -130,7 +129,7 @@ export const sidebarData: SidebarData = {
           title: 'Usuarios Valnet',
           url: '/valnet/usuarios',
           icon: IconUser,
-        }
+        },
       ],
     },
   ],

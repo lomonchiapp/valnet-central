@@ -1,6 +1,6 @@
-import { useWallNetStore } from '@/stores/wallNetStore'
-import { WallNetNewPost, WallNetPost } from '@/types/interfaces/valnet/wallNet'
+import { useEffect } from 'react'
 import { database, storage } from '@/firebase'
+import { WallNetNewPost, WallNetPost } from '@/types/interfaces/valnet/wallNet'
 import {
   collection,
   query,
@@ -12,10 +12,10 @@ import {
   doc,
   arrayUnion,
   arrayRemove,
-  deleteDoc
+  deleteDoc,
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { useEffect } from 'react'
+import { useWallNetStore } from '@/stores/wallNetStore'
 
 export interface WallNetComment {
   id: string
@@ -27,14 +27,20 @@ export interface WallNetComment {
 
 // Subir imagen comprimida a Storage
 export async function uploadImage(blob: Blob): Promise<string> {
-  const fileRef = ref(storage, `wallNetImages/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`)
+  const fileRef = ref(
+    storage,
+    `wallNetImages/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`
+  )
   await uploadBytes(fileRef, blob)
   return await getDownloadURL(fileRef)
 }
 
 // Subir audio a Storage
 export async function uploadAudio(blob: Blob): Promise<string> {
-  const fileRef = ref(storage, `wallNetAudio/${Date.now()}_${Math.random().toString(36).slice(2)}.webm`)
+  const fileRef = ref(
+    storage,
+    `wallNetAudio/${Date.now()}_${Math.random().toString(36).slice(2)}.webm`
+  )
   await uploadBytes(fileRef, blob)
   return await getDownloadURL(fileRef)
 }
@@ -46,9 +52,14 @@ export function useWallNetPosts() {
   // Escuchar en tiempo real los posts
   useEffect(() => {
     setLoading(true)
-    const q = query(collection(database, 'wallNetPosts'), orderBy('createdAt', 'desc'))
+    const q = query(
+      collection(database, 'wallNetPosts'),
+      orderBy('createdAt', 'desc')
+    )
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const posts: WallNetPost[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WallNetPost))
+      const posts: WallNetPost[] = snapshot.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() }) as WallNetPost
+      )
       setPosts(posts)
       setLoading(false)
     })
@@ -56,7 +67,11 @@ export function useWallNetPosts() {
   }, [setPosts, setLoading])
 
   // Publicar un nuevo post
-  const postMessage = async (newPost: WallNetNewPost, user: { id: string, name: string, avatar?: string }, category: { id: string, name: string, color?: string }) => {
+  const postMessage = async (
+    newPost: WallNetNewPost,
+    user: { id: string; name: string; avatar?: string },
+    category: { id: string; name: string; color?: string }
+  ) => {
     setLoading(true)
     await addDoc(collection(database, 'wallNetPosts'), {
       userId: user.id,
@@ -69,7 +84,7 @@ export function useWallNetPosts() {
       category: category,
       priority: newPost.priority,
       likes: [],
-      commentsCount: 0
+      commentsCount: 0,
     })
     setLoading(false)
   }
@@ -78,15 +93,23 @@ export function useWallNetPosts() {
   const toggleLike = async (postId: string, userId: string, liked: boolean) => {
     const postRef = doc(database, 'wallNetPosts', postId)
     await updateDoc(postRef, {
-      likes: liked ? arrayRemove(userId) : arrayUnion(userId)
+      likes: liked ? arrayRemove(userId) : arrayUnion(userId),
     })
   }
 
   // Obtener comentarios en tiempo real para un post y actualizar commentsCount
-  const listenComments = (postId: string, callback: (comments: WallNetComment[]) => void) => {
-    const q = query(collection(database, 'wallNetPosts', postId, 'comments'), orderBy('createdAt', 'asc'))
+  const listenComments = (
+    postId: string,
+    callback: (comments: WallNetComment[]) => void
+  ) => {
+    const q = query(
+      collection(database, 'wallNetPosts', postId, 'comments'),
+      orderBy('createdAt', 'asc')
+    )
     return onSnapshot(q, async (snapshot) => {
-      const comments: WallNetComment[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WallNetComment))
+      const comments: WallNetComment[] = snapshot.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() }) as WallNetComment
+      )
       callback(comments)
       // Actualizar commentsCount en el post
       const postRef = doc(database, 'wallNetPosts', postId)
@@ -95,19 +118,29 @@ export function useWallNetPosts() {
   }
 
   // Agregar un comentario a un post
-  const addComment = async (postId: string, user: { id: string, name: string }, content: string) => {
+  const addComment = async (
+    postId: string,
+    user: { id: string; name: string },
+    content: string
+  ) => {
     const commentsRef = collection(database, 'wallNetPosts', postId, 'comments')
     await addDoc(commentsRef, {
       userId: user.id,
       userName: user.name,
       content,
-      createdAt: Timestamp.now().toMillis()
+      createdAt: Timestamp.now().toMillis(),
     })
   }
 
   // Eliminar un comentario
   const removeComment = async (postId: string, commentId: string) => {
-    const commentRef = doc(database, 'wallNetPosts', postId, 'comments', commentId)
+    const commentRef = doc(
+      database,
+      'wallNetPosts',
+      postId,
+      'comments',
+      commentId
+    )
     await deleteDoc(commentRef)
   }
 
@@ -123,5 +156,15 @@ export function useWallNetPosts() {
     await deleteDoc(postRef)
   }
 
-  return { postMessage, toggleLike, listenComments, addComment, removeComment, editPost, deletePost, uploadImage, uploadAudio }
-} 
+  return {
+    postMessage,
+    toggleLike,
+    listenComments,
+    addComment,
+    removeComment,
+    editPost,
+    deletePost,
+    uploadImage,
+    uploadAudio,
+  }
+}

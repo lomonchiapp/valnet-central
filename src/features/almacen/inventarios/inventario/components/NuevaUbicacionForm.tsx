@@ -1,5 +1,9 @@
-import { useForm, SubmitHandler } from "react-hook-form";
-import { toast } from "sonner";
+import { useEffect } from 'react'
+import { useForm, SubmitHandler } from 'react-hook-form'
+import { Ubicacion } from '@/types/interfaces/almacen/ubicacion'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -7,34 +11,31 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import { useUbicaciones } from "../hooks/useUbicaciones";
-import { useEffect } from "react";
-import { Ubicacion } from "@/types/interfaces/almacen/ubicacion";
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useUbicaciones } from '../hooks/useUbicaciones'
 
 interface NuevaUbicacionFormValues {
-  nombre: string;
+  nombre: string
 }
 
 interface NuevaUbicacionFormProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onUbicacionCreada?: (ubicacionId: string, ubicacionNombre: string) => void;
-  ubicacionToEdit?: Ubicacion;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onUbicacionCreada?: (ubicacionId: string, ubicacionNombre: string) => void
+  ubicacionToEdit?: Ubicacion
 }
 
-export function NuevaUbicacionForm({ 
-  open, 
-  onOpenChange, 
-  onUbicacionCreada, 
-  ubicacionToEdit 
+export function NuevaUbicacionForm({
+  open,
+  onOpenChange,
+  onUbicacionCreada,
+  ubicacionToEdit,
 }: NuevaUbicacionFormProps) {
-  const { crearUbicacion, actualizarUbicacion, isLoading, error } = useUbicaciones();
-  
+  const { crearUbicacion, actualizarUbicacion, isLoading, error } =
+    useUbicaciones()
+
   const {
     register,
     handleSubmit,
@@ -43,18 +44,18 @@ export function NuevaUbicacionForm({
     setValue,
   } = useForm<NuevaUbicacionFormValues>({
     defaultValues: {
-      nombre: "",
+      nombre: '',
     },
-  });
+  })
 
   // Set form values when editing an existing location
   useEffect(() => {
     if (ubicacionToEdit && open) {
-      setValue("nombre", ubicacionToEdit.nombre);
+      setValue('nombre', ubicacionToEdit.nombre)
     } else if (!ubicacionToEdit && open) {
-      reset();
+      reset()
     }
-  }, [ubicacionToEdit, open, setValue, reset]);
+  }, [ubicacionToEdit, open, setValue, reset])
 
   const onSubmit: SubmitHandler<NuevaUbicacionFormValues> = async (data) => {
     // If we're editing an existing location
@@ -62,77 +63,79 @@ export function NuevaUbicacionForm({
       const success = await actualizarUbicacion({
         id: ubicacionToEdit.id,
         nombre: data.nombre,
-      });
-      
+      })
+
       if (success) {
-        toast.success(`Ubicación "${data.nombre}" actualizada correctamente`);
-        reset();
-        onOpenChange(false);
-        
+        toast.success(`Ubicación "${data.nombre}" actualizada correctamente`)
+        reset()
+        onOpenChange(false)
+
         if (onUbicacionCreada) {
-          onUbicacionCreada(ubicacionToEdit.id, data.nombre);
+          onUbicacionCreada(ubicacionToEdit.id, data.nombre)
         }
       } else if (error) {
-        toast.error(error);
+        toast.error(error)
       }
     } else {
       // Creating a new location
-      const ubicacion = await crearUbicacion({ nombre: data.nombre });
-      
+      const ubicacion = await crearUbicacion({ nombre: data.nombre })
+
       if (ubicacion) {
-        toast.success(`Ubicación "${data.nombre}" creada correctamente`);
-        reset();
-        onOpenChange(false);
-        
+        toast.success(`Ubicación "${data.nombre}" creada correctamente`)
+        reset()
+        onOpenChange(false)
+
         if (onUbicacionCreada) {
-          onUbicacionCreada(ubicacion.id, ubicacion.nombre);
+          onUbicacionCreada(ubicacion.id, ubicacion.nombre)
         }
       } else if (error) {
-        toast.error(error);
+        toast.error(error)
       }
     }
-  };
+  }
 
   const handleDialogClose = () => {
     if (!isLoading) {
-      reset();
-      onOpenChange(false);
+      reset()
+      onOpenChange(false)
     }
-  };
+  }
 
-  const isEditMode = !!ubicacionToEdit;
+  const isEditMode = !!ubicacionToEdit
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "Editar Ubicación" : "Nueva Ubicación"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? 'Editar Ubicación' : 'Nueva Ubicación'}
+          </DialogTitle>
           <DialogDescription>
-            {isEditMode 
-              ? "Modifica los detalles de la ubicación seleccionada." 
-              : "Crea una nueva ubicación para los artículos en el inventario."}
+            {isEditMode
+              ? 'Modifica los detalles de la ubicación seleccionada.'
+              : 'Crea una nueva ubicación para los artículos en el inventario.'}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="nombre" className="text-right">
+          <div className='grid gap-4 py-4'>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='nombre' className='text-right'>
                 Nombre
               </Label>
               <Input
-                id="nombre"
-                className="col-span-3"
-                {...register("nombre", {
-                  required: "El nombre es obligatorio",
+                id='nombre'
+                className='col-span-3'
+                {...register('nombre', {
+                  required: 'El nombre es obligatorio',
                   minLength: {
                     value: 2,
-                    message: "El nombre debe tener al menos 2 caracteres",
+                    message: 'El nombre debe tener al menos 2 caracteres',
                   },
                 })}
               />
               {errors.nombre && (
-                <p className="text-destructive text-sm col-start-2 col-span-3">
+                <p className='text-destructive text-sm col-start-2 col-span-3'>
                   {errors.nombre.message}
                 </p>
               )}
@@ -140,16 +143,21 @@ export function NuevaUbicacionForm({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleDialogClose} disabled={isLoading}>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={handleDialogClose}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditMode ? "Actualizar Ubicación" : "Crear Ubicación"}
+            <Button type='submit' disabled={isLoading}>
+              {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+              {isEditMode ? 'Actualizar Ubicación' : 'Crear Ubicación'}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  );
-} 
+  )
+}

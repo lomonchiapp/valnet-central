@@ -1,15 +1,14 @@
-import { BaseModel } from "../baseModel"
+import { BaseModel } from '../baseModel'
 
 export interface Coordenadas {
-    lat: number
-    lng: number
+  lat: number
+  lng: number
 }
 
 export interface Brigada extends BaseModel {
-    nombre: string
-    matricula: string
-    inventarioId?: string
-    coordenadas?: Coordenadas
-    kilometrajeActual?: number
+  nombre: string
+  matricula: string
+  inventarioId?: string
+  coordenadas?: Coordenadas
+  kilometrajeActual?: number
 }
-

@@ -1,15 +1,15 @@
+import Cookies from 'js-cookie'
 import { Outlet } from 'react-router-dom'
+import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
-import { cn } from '@/lib/utils'
-import Cookies from 'js-cookie'
 import { GlobalTopBar } from './GlobalTopBar'
 
 export default function AuthenticatedLayout() {
   const defaultOpen = Cookies.get('sidebar:state') !== 'false'
-  
+
   return (
     <SearchProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
@@ -27,13 +27,13 @@ export default function AuthenticatedLayout() {
             'group-data-[scroll-locked=1]/body:has-[main.fixed-main]:h-svh'
           )}
         >
-          <div className="p-4">
+          <div className='p-4'>
             <GlobalTopBar />
           </div>
-          
+
           <Outlet />
         </div>
       </SidebarProvider>
     </SearchProvider>
   )
-} 
+}
