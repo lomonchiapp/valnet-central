@@ -1,0 +1,14 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useState } from 'react';
+import { PlusCircle, User2 } from 'lucide-react';
+import { useAlmacenState } from '@/context/global/useAlmacenState';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
+import { NuevoProveedorForm } from './NuevoProveedorForm';
+export default function Proveedores() {
+    const [showNewForm, setShowNewForm] = useState(false);
+    const { proveedores } = useAlmacenState();
+    return (_jsxs("div", { className: 'space-y-6', children: [_jsxs("div", { className: 'flex justify-between items-center', children: [_jsxs("div", { children: [_jsx("h1", { className: 'text-3xl font-bold tracking-tight', children: "Proveedores" }), _jsx("p", { className: 'text-muted-foreground', children: "Administra los proveedores de productos y servicios." })] }), _jsxs(Button, { onClick: () => setShowNewForm(true), children: [_jsx(PlusCircle, { className: 'mr-2 h-4 w-4' }), "Nuevo Proveedor"] })] }), _jsxs(Card, { children: [_jsxs(CardHeader, { children: [_jsx(CardTitle, { children: "Proveedores Registrados" }), _jsx(CardDescription, { children: "Lista de todos los proveedores disponibles para asignar a art\u00EDculos." })] }), _jsx(CardContent, { children: proveedores.length === 0 ? (_jsx("p", { className: 'text-center py-8 text-muted-foreground', children: "No hay proveedores registrados. Crea uno nuevo para comenzar." })) : (_jsx("div", { className: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6', children: proveedores.map((proveedor) => (_jsxs(Card, { className: 'shadow-md border border-muted-foreground/10', children: [_jsxs(CardHeader, { className: 'flex flex-row items-center gap-3 pb-2', children: [_jsx("div", { className: 'bg-primary/10 rounded-full p-2', children: _jsx(User2, { className: 'h-6 w-6 text-primary' }) }), _jsxs("div", { children: [_jsx(CardTitle, { className: 'text-lg font-semibold leading-tight', children: proveedor.nombre }), _jsxs(CardDescription, { className: 'text-xs', children: ["Contacto: ", proveedor.contacto] })] })] }), _jsxs(CardContent, { className: 'space-y-1 text-sm', children: [_jsxs("div", { children: [_jsx("span", { className: 'font-medium', children: "Tel\u00E9fono:" }), ' ', proveedor.telefono] }), _jsxs("div", { children: [_jsx("span", { className: 'font-medium', children: "Email:" }), ' ', proveedor.email] }), _jsxs("div", { children: [_jsx("span", { className: 'font-medium', children: "Direcci\u00F3n:" }), ' ', proveedor.direccion] })] })] }, proveedor.id))) })) })] }), _jsx(NuevoProveedorForm, { open: showNewForm, onOpenChange: setShowNewForm, onProveedorCreado: () => {
+                    setShowNewForm(false);
+                } })] }));
+}

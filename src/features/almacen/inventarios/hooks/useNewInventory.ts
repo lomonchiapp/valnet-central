@@ -8,7 +8,15 @@ import {
   doc,
 } from 'firebase/firestore'
 // Asumiendo que db se exporta desde aquí
-import { Inventario } from 'shared-types'
+import { Inventario, TipoArticulo, Unidad } from '@/types'
+
+export interface NewInventoryData {
+  nombre: string
+  descripcion: string
+  tipo: TipoArticulo
+  cantidad: number
+  unidad: Unidad
+}
 
 export const useNewInventory = () => {
   const [isLoading, setIsLoading] = useState(false)

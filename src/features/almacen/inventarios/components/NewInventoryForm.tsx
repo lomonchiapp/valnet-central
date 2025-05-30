@@ -1,6 +1,6 @@
 import React from 'react'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { TipoInventario } from 'shared-types'
+import { Inventario, TipoArticulo, TipoInventario } from 'shared-types'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -48,12 +48,12 @@ export const NewInventoryForm: React.FC<NewInventoryFormProps> = ({
 
   const onSubmit: SubmitHandler<NewInventoryData> = async (data) => {
     // Asegurarse de que el tipo es uno de los valores del enum TipoInventario
-    if (!Object.values(TipoInventario).includes(data.tipo)) {
+    if (!Object.values(TipoArticulo).includes(data.tipo as TipoArticulo)) {
       toast.error('Tipo de inventario inválido')
       return
     }
 
-    const newInventoryId = await createInventory(data)
+    const newInventoryId = await createInventory(data as unknown as Inventario)
     if (newInventoryId) {
       toast.success('Inventario creado exitosamente!')
       reset() // Limpia el formulario

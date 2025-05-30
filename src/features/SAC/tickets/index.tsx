@@ -42,7 +42,7 @@ export default function Tickets() {
       (!filterAsunto ||
         ticket.asunto.toLowerCase().includes(filterAsunto.toLowerCase())) &&
       (!filterTecnico ||
-        (ticket.brigada?.nombre || 'No asignado') === filterTecnico)
+        (ticket.idbrigada || 'No asignado') === filterTecnico)
     )
   })
 
@@ -175,7 +175,7 @@ export default function Tickets() {
                 </TableCell>
                 <TableCell>{ticket.solicitante}</TableCell>
                 <TableCell>{ticket.asunto}</TableCell>
-                <TableCell>{ticket.brigada?.nombre || 'No asignado'}</TableCell>
+                <TableCell>{ticket.idbrigada || 'No asignado'}</TableCell>
                 <TableCell>{formatDate(ticket.fechavisita)}</TableCell>
                 <TableCell className='text-right'>
                   <Button variant='ghost' size='icon' title='Ver detalles'>
