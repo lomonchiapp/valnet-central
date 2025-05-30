@@ -1,11 +1,58 @@
 import { useAuth } from '@/hooks/useAuth'
-import { RoleUsuario } from '@/types/interfaces/valnet/usuario'
+import { RoleUsuario, Usuario } from '@/types/interfaces/valnet/usuario'
 import { AdminDashboard } from './AdminDashboard'
 import { GenericDashboard } from './GenericDashboard'
+import { VendedorDashboard } from './VendedorDashboard'
 import { Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { collection, query, where, getDocs } from 'firebase/firestore'
+import { database } from '@/firebase'
+
+interface RegistroResumen {
+  id: string
+  descripcion?: string
+}
 
 export function DashboardRouter() {
   const { user, loading } = useAuth()
+  const [preRegistros, setPreRegistros] = useState<RegistroResumen[]>([])
+  const [contratos, setContratos] = useState<RegistroResumen[]>([])
+
+  useEffect(() => {
+    if (user?.role === RoleUsuario.VENDEDOR) {
+      fetchVendedorData()
+    }
+  }, [user])
+
+  const fetchVendedorData = async () => {
+    try {
+      // Obtener pre-registros del vendedor
+      const preRegistrosQuery = query(
+        collection(database, 'pre-registros'),
+        where('vendedorId', '==', user?.id)
+      )
+      const preRegistrosSnapshot = await getDocs(preRegistrosQuery)
+      const preRegistrosData = preRegistrosSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as RegistroResumen[]
+      setPreRegistros(preRegistrosData)
+
+      // Obtener contratos del vendedor
+      const contratosQuery = query(
+        collection(database, 'contratos'),
+        where('vendedorId', '==', user?.id)
+      )
+      const contratosSnapshot = await getDocs(contratosQuery)
+      const contratosData = contratosSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as RegistroResumen[]
+      setContratos(contratosData)
+    } catch (error) {
+      console.error('Error fetching vendedor data:', error)
+    }
+  }
 
   if (loading) {
     return (
@@ -25,6 +72,11 @@ export function DashboardRouter() {
       case RoleUsuario.ADMIN:
         return <AdminDashboard />
       case RoleUsuario.VENDEDOR:
+        return <VendedorDashboard 
+          usuario={user as Usuario}
+          preRegistros={preRegistros}
+          contratos={contratos}
+        />
       case RoleUsuario.SAC:
       case RoleUsuario.TECNICO:
       case RoleUsuario.TECNICO_LIDER:
@@ -33,6 +85,7 @@ export function DashboardRouter() {
       case RoleUsuario.CONTABILIDAD:
         return <GenericDashboard inventarios={[]} preRegistros={[]} />
       default:
+        console.warn('Rol no reconocido:', user.role)
         return <Navigate to="/unauthorized" replace />
     }
   }
