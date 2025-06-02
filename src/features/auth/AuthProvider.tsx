@@ -7,7 +7,7 @@ import { auth } from '@/lib/firebase'
 import { db } from '@/lib/firebase'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { setUser, setIsLoading } = useAuthStore()
+  const { isLoading, setUser, setIsLoading } = useAuthStore()
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -33,6 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => unsubscribe()
   }, [setUser, setIsLoading])
+
+  // Mostrar loading screen mientras se verifica la autenticación
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900'></div>
+      </div>
+    )
+  }
 
   return children
 }

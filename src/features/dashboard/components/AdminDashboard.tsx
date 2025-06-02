@@ -34,7 +34,6 @@ import {
   CardFooter,
 } from '@/components/ui/card'
 import { useObtenerNotificaciones } from '@/features/notificaciones/hooks'
-import { WallNetDashboardWidget } from './SacDashboard'
 
 // Mock data
 const mockMetricas: MetricasSistema = {
@@ -166,7 +165,6 @@ export function AdminDashboard() {
   const [pagos, setPagos] = useState<Pago[]>(mockPagos)
   const [inventario, setInventario] = useState<Inventario[]>(mockInventario)
   const [brigadas, setBrigadas] = useState<Brigada[]>(mockBrigadas)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { obtenerNotificaciones } = useObtenerNotificaciones()
   const [notificacionesPagos, setNotificacionesPagos] = useState<
@@ -175,7 +173,6 @@ export function AdminDashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      setLoading(true)
       setError(null)
 
       // Obtener notificaciones de pagos
@@ -199,22 +196,12 @@ export function AdminDashboard() {
           : 'Error desconocido al cargar los datos'
       setError(errorMessage)
       console.error('Error en fetchData:', err)
-    } finally {
-      setLoading(false)
     }
   }, [obtenerNotificaciones])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
-
-  if (loading) {
-    return (
-      <div className='flex items-center justify-center min-h-screen'>
-        <div className='animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900'></div>
-      </div>
-    )
-  }
 
   if (error) {
     return (
@@ -327,7 +314,7 @@ export function AdminDashboard() {
         ))}
       </div>
 
-      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+      <div className='grid gap-6 md:grid-cols-2'>
         {/* Pagos próximos con notificaciones */}
         <Card>
           <CardHeader>
@@ -459,19 +446,8 @@ export function AdminDashboard() {
           </CardFooter>
         </Card>
 
-        {/* Widget WallNet */}
-        <Card className='lg:col-span-1'>
-          <CardHeader>
-            <CardTitle>WallNet</CardTitle>
-            <CardDescription>Últimas actualizaciones</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <WallNetDashboardWidget />
-          </CardContent>
-        </Card>
-
         {/* Brigadas activas */}
-        <Card className='lg:col-span-2'>
+        <Card className='md:col-span-2'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <Wrench className='h-4 w-4' />
