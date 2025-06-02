@@ -6,7 +6,7 @@ export enum StatusPago {
   CANCELADO = 'cancelado',
 }
 
-export enum MetodoPago {
+enum MetodoPago {
   EFECTIVO = 'efectivo',
   TRANSFERENCIA = 'transferencia',
   CHEQUE = 'cheque',

@@ -7,7 +7,7 @@ import { auth } from '@/lib/firebase'
 import { db } from '@/lib/firebase'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { setUser, setLoading } = useAuthStore()
+  const { setUser, setIsLoading } = useAuthStore()
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -28,11 +28,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setUser(null)
       }
-      setLoading(false)
+      setIsLoading(false)
     })
 
     return () => unsubscribe()
-  }, [setUser, setLoading])
+  }, [setUser, setIsLoading])
 
   return children
 }
