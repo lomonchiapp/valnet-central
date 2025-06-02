@@ -9,12 +9,12 @@
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import cors from "cors";
+import * as cors from "cors";
 
 admin.initializeApp();
 
 // Configurar CORS
-const corsHandler = cors({ origin: true });
+const corsHandler = cors.default({ origin: true });
 
 export const newTicket = functions.https.onRequest(async (req, res) => {
   if (req.method !== "POST") {
