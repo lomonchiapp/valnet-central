@@ -1,6 +1,6 @@
 import { database } from '@/firebase'
-import { Notificacion, EstadoNotificacion, TipoNotificacion } from '@/types/interfaces/notificaciones/notificacion'
-import { doc, collection, setDoc, query, where, orderBy, getDocs, updateDoc, Timestamp } from 'firebase/firestore'
+import { Notificacion, EstadoNotificacion } from '@/types/interfaces/notificaciones/notificacion'
+import { doc, collection, setDoc, query, where, orderBy, getDocs, updateDoc } from 'firebase/firestore'
 import { toast } from 'sonner'
 
 type NotificacionInput = Omit<Notificacion, 'id' | 'createdAt' | 'updatedAt'>

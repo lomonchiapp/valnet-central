@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type {
   MetricasSistema,
   Pago,
@@ -167,7 +167,7 @@ export function AdminDashboard() {
   const { obtenerNotificaciones } = useObtenerNotificaciones()
   const [notificacionesPagos, setNotificacionesPagos] = useState<Notificacion[]>([])
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -195,11 +195,11 @@ export function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [ obtenerNotificaciones ])
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [ fetchData ])
 
   if (loading) {
     return (

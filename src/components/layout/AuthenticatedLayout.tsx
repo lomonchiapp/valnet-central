@@ -6,7 +6,6 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
 import { GlobalTopBar } from './GlobalTopBar'
-import { Sidebar } from './Sidebar'
 import { Toaster } from '@/components/ui/toaster'
 
 export default function AuthenticatedLayout() {

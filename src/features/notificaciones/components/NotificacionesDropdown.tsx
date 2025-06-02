@@ -1,19 +1,27 @@
-import { useEffect, useState } from 'react'
-import { Bell } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { format } from 'date-fns'
+import {
+  Notificacion,
+  EstadoNotificacion,
+  TipoNotificacion,
+} from '@/types/interfaces/notificaciones/notificacion'
 import { es } from 'date-fns/locale'
-import { Notificacion, EstadoNotificacion, TipoNotificacion } from '@/types/interfaces/notificaciones/notificacion'
-import { useObtenerNotificaciones, useMarcarNotificacionLeida, useArchivarNotificacion } from '../hooks'
+import { Bell } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useNavigate } from 'react-router-dom'
+import {
+  useObtenerNotificaciones,
+  useMarcarNotificacionLeida,
+  useArchivarNotificacion,
+} from '../hooks'
 
 export function NotificacionesDropdown() {
   const navigate = useNavigate()
@@ -23,21 +31,21 @@ export function NotificacionesDropdown() {
   const { marcarNotificacionLeida } = useMarcarNotificacionLeida()
   const { archivarNotificacion } = useArchivarNotificacion()
 
-  useEffect(() => {
-    loadNotificaciones()
-    // Refresh notifications every minute
-    const interval = setInterval(loadNotificaciones, 60000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const loadNotificaciones = async () => {
+  const loadNotificaciones = useCallback(async () => {
     try {
       const notifs = await obtenerNotificaciones(EstadoNotificacion.PENDIENTE)
       setNotificaciones(notifs)
     } catch (error) {
       console.error('Error al cargar notificaciones:', error)
     }
-  }
+  }, [obtenerNotificaciones])
+  
+  useEffect(() => {
+    loadNotificaciones()
+    // Refresh notifications every minute
+    const interval = setInterval(loadNotificaciones, 60000)
+    return () => clearInterval(interval)
+  }, [loadNotificaciones])
 
   const handleNotificacionClick = async (notificacion: Notificacion) => {
     try {
@@ -67,7 +75,7 @@ export function NotificacionesDropdown() {
     e.stopPropagation()
     try {
       await archivarNotificacion(id)
-      setNotificaciones(prev => prev.filter(n => n.id !== id))
+      setNotificaciones((prev) => prev.filter((n) => n.id !== id))
     } catch (error) {
       console.error('Error al archivar notificación:', error)
     }
@@ -100,47 +108,63 @@ export function NotificacionesDropdown() {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" style={{ borderColor: '#F37021', borderWidth: '1px' }}>
-          <Bell className="h-5 w-5 text-white" />
+        <Button
+          variant='ghost'
+          size='icon'
+          className='relative'
+          style={{ borderColor: '#F37021', borderWidth: '1px' }}
+        >
+          <Bell className='h-5 w-5 text-white' />
           {notificaciones.length > 0 && (
             <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0"
+              variant='destructive'
+              className='absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0'
             >
               {notificaciones.length}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <ScrollArea className="h-[400px]">
+      <DropdownMenuContent align='end' className='w-80'>
+        <ScrollArea className='h-[400px]'>
           {notificaciones.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
+            <div className='p-4 text-center text-muted-foreground'>
               No hay notificaciones pendientes
             </div>
           ) : (
             notificaciones.map((notificacion) => (
               <DropdownMenuItem
                 key={notificacion.id}
-                className="flex flex-col items-start p-4 cursor-pointer hover:bg-accent"
+                className='flex flex-col items-start p-4 cursor-pointer hover:bg-accent'
                 onClick={() => handleNotificacionClick(notificacion)}
               >
-                <div className="flex items-center gap-2 w-full">
-                  <span className="text-lg">{getNotificacionIcon(notificacion.tipo)}</span>
-                  <span className="font-medium flex-1">{notificacion.titulo}</span>
-                  <Badge variant="outline" className={getPrioridadColor(notificacion.prioridad)}>
+                <div className='flex items-center gap-2 w-full'>
+                  <span className='text-lg'>
+                    {getNotificacionIcon(notificacion.tipo)}
+                  </span>
+                  <span className='font-medium flex-1'>
+                    {notificacion.titulo}
+                  </span>
+                  <Badge
+                    variant='outline'
+                    className={getPrioridadColor(notificacion.prioridad)}
+                  >
                     {notificacion.prioridad}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{notificacion.mensaje}</p>
-                <div className="flex items-center justify-between w-full mt-2">
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(notificacion.fechaNotificacion), 'PPP', { locale: es })}
+                <p className='text-sm text-muted-foreground mt-1'>
+                  {notificacion.mensaje}
+                </p>
+                <div className='flex items-center justify-between w-full mt-2'>
+                  <span className='text-xs text-muted-foreground'>
+                    {format(new Date(notificacion.fechaNotificacion), 'PPP', {
+                      locale: es,
+                    })}
                   </span>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs"
+                    variant='ghost'
+                    size='sm'
+                    className='h-6 px-2 text-xs'
                     onClick={(e) => handleArchivar(notificacion.id, e)}
                   >
                     Archivar
@@ -153,4 +177,4 @@ export function NotificacionesDropdown() {
       </DropdownMenuContent>
     </DropdownMenu>
   )
-} 
+}

@@ -387,6 +387,11 @@ export default function Cuentas() {
                                   {getMovimientosCount(cuenta.id)} mov.
                                 </span>
                               )}
+                              {getPagosPendientesPorCuenta(cuenta.id).length > 0 && (
+                                <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
+                                  {getPagosPendientesPorCuenta(cuenta.id).length} pendientes
+                                </span>
+                              )}
                             </div>
                             <p className={`text-lg font-semibold ${
                               cuenta.balance >= 0 ? 'text-green-600' : 'text-red-600'
@@ -443,6 +448,11 @@ export default function Cuentas() {
                                     {getMovimientosCount(sub.id) > 0 && (
                                       <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
                                         {getMovimientosCount(sub.id)} mov.
+                                      </span>
+                                    )}
+                                    {getPagosPendientesPorCuenta(sub.id).length > 0 && (
+                                      <span className="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
+                                        {getPagosPendientesPorCuenta(sub.id).length} pendientes
                                       </span>
                                     )}
                                   </div>

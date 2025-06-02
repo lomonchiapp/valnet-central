@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { Link } from 'react-router-dom'
 import { NavGroup as NavGroupType } from './types'
 import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
@@ -33,7 +32,7 @@ export const NavGroup: React.FC<NavGroupProps> = ({ title, items, itemClassName 
                 key={item.url}
                 title={item.title}
                 url={item.url}
-                icon={item.icon}
+                icon={item.icon as React.ComponentType<{ className?: string }>}
                 badge={item.badge}
                 className={itemClassName}
               />

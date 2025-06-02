@@ -3,12 +3,11 @@ import { useAuthStore } from '@/stores/authStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useToast } from '@/components/ui/use-toast'
-import { Camera, Mail, Phone, MapPin, Building, User as UserIcon } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { Camera, Mail, Phone, MapPin } from 'lucide-react'
 import { storage } from '@/lib/firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { doc, updateDoc } from 'firebase/firestore'
@@ -52,7 +51,8 @@ export function PerfilPage() {
         title: "Avatar actualizado",
         description: "Tu foto de perfil ha sido actualizada exitosamente",
       })
-    } catch (error) {
+      } catch (error: unknown) {
+      console.error('Error al actualizar el avatar:', error)
       toast({
         title: "Error",
         description: "Hubo un error al actualizar tu avatar",
@@ -148,31 +148,9 @@ export function PerfilPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="empresa">Empresa</Label>
-                  <div className="flex items-center gap-2">
-                    <Building className="h-4 w-4 text-gray-500" />
-                    <Input id="empresa" defaultValue={user.empresa || ''} />
-                  </div>
-                </div>
+              
 
-                <div className="space-y-2">
-                  <Label htmlFor="cargo">Cargo</Label>
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="h-4 w-4 text-gray-500" />
-                    <Input id="cargo" defaultValue={user.cargo || ''} />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Biografía</Label>
-                  <Textarea
-                    id="bio"
-                    defaultValue={user.bio || ''}
-                    placeholder="Cuéntanos un poco sobre ti..."
-                    className="h-32"
-                  />
-                </div>
+                
 
                 <div className="flex justify-end">
                   <Button disabled={isLoading}>

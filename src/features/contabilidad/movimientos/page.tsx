@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useContabilidadState } from '@/context/global/useContabilidadState'
 import { MovimientoCuenta, OrigenMovimiento, TipoMovimiento } from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { useObtenerMovimientosCuenta } from './hooks'
@@ -32,13 +32,9 @@ export default function MovimientosPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    if (selectedCuenta) {
-      loadMovimientos()
-    }
-  }, [selectedCuenta])
 
-  const loadMovimientos = async () => {
+
+  const loadMovimientos = useCallback(async () => {
     try {
       setIsLoading(true)
       const movs = await obtenerMovimientosCuenta(selectedCuenta)
@@ -48,7 +44,13 @@ export default function MovimientosPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [ selectedCuenta, obtenerMovimientosCuenta ])
+
+  useEffect(() => {
+    if (selectedCuenta) {
+      loadMovimientos()
+    }
+  }, [ selectedCuenta, loadMovimientos ])
 
   const filteredMovimientos = movimientos.filter(mov => {
     const matchesOrigen = selectedOrigen === 'TODOS' || mov.origen === selectedOrigen

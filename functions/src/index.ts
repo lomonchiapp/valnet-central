@@ -9,7 +9,7 @@
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-const cors = require('cors');
+import cors from 'cors';
 
 admin.initializeApp();
 

@@ -268,7 +268,7 @@ export const useProcesarPagoVariable = () => {
 
       // 5. Calculate next payment date based on frequency
       const fechaActual = new Date()
-      let fechaProximoPago = new Date(fechaActual)
+      const fechaProximoPago = new Date(fechaActual)
 
       switch (pago.frecuencia) {
         case 'DIARIO':
