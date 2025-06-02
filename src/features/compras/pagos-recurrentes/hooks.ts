@@ -9,7 +9,11 @@ import { EstadoPagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurr
 import {
   TipoNotificacion,
   EstadoNotificacion,
+  PrioridadNotificacion,
+  TipoAccionNotificacion,
 } from '@/types/interfaces/notificaciones/notificacion'
+import { CategoriaNotificacion } from '@/types/interfaces/notificaciones/notificacion'
+import { RoleUsuario } from '@/types/interfaces/valnet/usuario'
 import {
   doc,
   updateDoc,
@@ -91,12 +95,13 @@ export const useCrearPagoRecurrente = () => {
         estado: EstadoNotificacion.PENDIENTE,
         titulo: 'Nuevo Pago Recurrente Creado',
         mensaje: `Se ha creado un nuevo pago recurrente: ${pago.descripcion}`,
-        idOrigen: docRef.id,
+        roles: [RoleUsuario.ADMIN, RoleUsuario.CONTABILIDAD],
+        categoria: CategoriaNotificacion.PAGOS,
         fechaNotificacion: new Date().toISOString(),
-        prioridad: 'MEDIA',
+        prioridad: PrioridadNotificacion.MEDIA,
         accion: {
-          tipo: 'IR_A_PAGO',
-          id: docRef.id,
+          tipo: TipoAccionNotificacion.MODAL,
+          destino: docRef.id,
         },
       })
 
@@ -108,13 +113,18 @@ export const useCrearPagoRecurrente = () => {
           estado: EstadoNotificacion.PENDIENTE,
           titulo: 'Pago Recurrente Próximo',
           mensaje: `El pago recurrente "${pago.descripcion}" vence en 3 días`,
-          idOrigen: docRef.id,
           fechaNotificacion: fechaNotificacionProximo.toISOString(),
-          fechaVencimiento: fechaProximoPago.toISOString(),
-          prioridad: 'ALTA',
+          prioridad: PrioridadNotificacion.ALTA,
+          categoria: CategoriaNotificacion.PAGOS,
+          roles: [RoleUsuario.ADMIN, RoleUsuario.CONTABILIDAD],
+          metadatos: {
+            entidadId: docRef.id,
+            entidadTipo: 'pago_recurrente',
+            fechaVencimiento: fechaProximoPago.toISOString(),
+          },
           accion: {
-            tipo: 'IR_A_PAGO',
-            id: docRef.id,
+            tipo: TipoAccionNotificacion.MODAL,
+            destino: docRef.id,
           },
         })
       }
@@ -127,13 +137,18 @@ export const useCrearPagoRecurrente = () => {
           estado: EstadoNotificacion.PENDIENTE,
           titulo: 'Pago Recurrente Vencido',
           mensaje: `El pago recurrente "${pago.descripcion}" está vencido`,
-          idOrigen: docRef.id,
           fechaNotificacion: fechaNotificacionVencido.toISOString(),
-          fechaVencimiento: fechaProximoPago.toISOString(),
-          prioridad: 'ALTA',
+          prioridad: PrioridadNotificacion.ALTA,
+          categoria: CategoriaNotificacion.PAGOS,
+          roles: [RoleUsuario.ADMIN, RoleUsuario.CONTABILIDAD],
+          metadatos: {
+            entidadId: docRef.id,
+            entidadTipo: 'pago_recurrente',
+            fechaVencimiento: fechaProximoPago.toISOString(),
+          },
           accion: {
-            tipo: 'IR_A_PAGO',
-            id: docRef.id,
+            tipo: TipoAccionNotificacion.NAVEGACION,
+            destino: `/compras/pagos-recurrentes`,
           },
         })
       }

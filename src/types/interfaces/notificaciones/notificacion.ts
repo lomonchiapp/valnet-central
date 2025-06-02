@@ -74,8 +74,15 @@ export enum CategoriaNotificacion {
   GENERAL = 'GENERAL',
 }
 
+export enum TipoAccionNotificacion {
+  NAVEGACION = 'NAVEGACION',
+  MODAL = 'MODAL',
+  ACCION_DIRECTA = 'ACCION_DIRECTA',
+  ENLACE_EXTERNO = 'ENLACE_EXTERNO',
+}
+
 export interface AccionNotificacion {
-  tipo: 'NAVEGACION' | 'MODAL' | 'ACCION_DIRECTA' | 'ENLACE_EXTERNO'
+  tipo: TipoAccionNotificacion
   destino: string // ruta, ID del modal, función, URL
   parametros?: Record<string, string | number | boolean>
   textoBoton?: string
@@ -106,7 +113,7 @@ export interface Notificacion extends BaseModel {
   descripcion?: string // descripción más detallada
 
   // Destinatarios
-  idUsuarioDestino: string // usuario principal destinatario
+  idUsuarioDestino?: string // usuario principal destinatario
   idUsuariosAdicionales?: string[] // usuarios adicionales que pueden ver
   roles?: RoleUsuario[] // roles que pueden ver la notificación
 
@@ -117,7 +124,7 @@ export interface Notificacion extends BaseModel {
   fechaLeida?: string // cuándo fue leída
 
   // Metadata y acciones
-  metadatos: MetadatosNotificacion
+  metadatos?: MetadatosNotificacion
   accion?: AccionNotificacion
 
   // Control
