@@ -11,9 +11,9 @@ import {
   Package,
   Wrench,
   Ticket,
-  DollarSign,
   AlertCircle,
   RefreshCw,
+  Bell,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,11 @@ import {
   CardFooter,
 } from '@/components/ui/card'
 import { WallNetDashboardWidget } from './SacDashboard'
+import { useObtenerNotificaciones } from '@/features/notificaciones/hooks'
+import { EstadoNotificacion, TipoNotificacion, Notificacion } from '@/types/interfaces/notificaciones/notificacion'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { Badge } from '@/components/ui/badge'
 
 // Mock data
 const mockMetricas: MetricasSistema = {
@@ -159,11 +164,21 @@ export function AdminDashboard() {
   const [brigadas, setBrigadas] = useState<Brigada[]>(mockBrigadas)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { obtenerNotificaciones } = useObtenerNotificaciones()
+  const [notificacionesPagos, setNotificacionesPagos] = useState<Notificacion[]>([])
 
   const fetchData = async () => {
     try {
       setLoading(true)
       setError(null)
+
+      // Obtener notificaciones de pagos
+      const notifs = await obtenerNotificaciones(EstadoNotificacion.PENDIENTE)
+      const pagosNotifs = notifs.filter(n => 
+        n.tipo === TipoNotificacion.PAGO_PROXIMO || 
+        n.tipo === TipoNotificacion.PAGO_VENCIDO
+      )
+      setNotificacionesPagos(pagosNotifs)
 
       // Por ahora usamos los datos mock
       setMetricas(mockMetricas)
@@ -237,6 +252,30 @@ export function AdminDashboard() {
     },
   ]
 
+  const getNotificacionIcon = (tipo: TipoNotificacion) => {
+    switch (tipo) {
+      case TipoNotificacion.PAGO_RECURRENTE:
+        return '💰'
+      case TipoNotificacion.PAGO_VENCIDO:
+        return '⚠️'
+      case TipoNotificacion.PAGO_PROXIMO:
+        return '🔔'
+      default:
+        return '📌'
+    }
+  }
+
+  const getNotificacionColor = (tipo: TipoNotificacion) => {
+    switch (tipo) {
+      case TipoNotificacion.PAGO_VENCIDO:
+        return 'bg-red-100 text-red-800'
+      case TipoNotificacion.PAGO_PROXIMO:
+        return 'bg-yellow-100 text-yellow-800'
+      default:
+        return 'bg-blue-100 text-blue-800'
+    }
+  }
+
   return (
     <div className='space-y-8 px-4 md:px-8 py-6'>
       {/* Botón de actualización */}
@@ -282,27 +321,49 @@ export function AdminDashboard() {
       </div>
 
       <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-        {/* Pagos próximos */}
+        {/* Pagos próximos con notificaciones */}
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <DollarSign className='h-4 w-4' />
-              Pagos Próximos
+              <Bell className='h-4 w-4' />
+              Pagos y Notificaciones
             </CardTitle>
-            <CardDescription>Próximos 7 días</CardDescription>
+            <CardDescription>Próximos pagos y alertas</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='space-y-2'>
+            <div className='space-y-4'>
+              {/* Notificaciones de pagos */}
+              {notificacionesPagos.map((notif) => (
+                <div
+                  key={notif.id}
+                  className='flex items-start gap-3 p-3 rounded-lg border'
+                >
+                  <span className='text-xl'>{getNotificacionIcon(notif.tipo)}</span>
+                  <div className='flex-1'>
+                    <div className='flex items-center justify-between'>
+                      <h4 className='font-medium'>{notif.titulo}</h4>
+                      <Badge variant="outline" className={getNotificacionColor(notif.tipo)}>
+                        {notif.tipo === TipoNotificacion.PAGO_VENCIDO ? 'Vencido' : 'Próximo'}
+                      </Badge>
+                    </div>
+                    <p className='text-sm text-muted-foreground mt-1'>{notif.mensaje}</p>
+                    <p className='text-xs text-muted-foreground mt-2'>
+                      {format(new Date(notif.fechaNotificacion), 'PPP', { locale: es })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Pagos regulares */}
               {pagos.map((payment) => (
                 <div
                   key={payment.id}
-                  className='flex justify-between items-center p-2 border-b'
+                  className='flex justify-between items-center p-3 rounded-lg border'
                 >
                   <div>
                     <p className='font-medium'>{payment.cliente.nombre}</p>
                     <p className='text-xs text-muted-foreground'>
-                      Vence:{' '}
-                      {payment.fechaVencimiento.toDate().toLocaleDateString()}
+                      Vence: {payment.fechaVencimiento.toDate().toLocaleDateString()}
                     </p>
                   </div>
                   <div className='text-right'>
@@ -321,7 +382,7 @@ export function AdminDashboard() {
             <Button
               variant='ghost'
               className='w-full'
-              onClick={() => navigate('/admin/pagos')}
+              onClick={() => navigate('/compras/pagos-recurrentes')}
             >
               Ver todos los pagos
             </Button>

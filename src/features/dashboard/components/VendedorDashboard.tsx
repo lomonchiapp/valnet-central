@@ -13,7 +13,6 @@ import {
   GoldIcon,
   DiamondIcon,
 } from '@/components/icons/VendedorNivelIcons'
-import { WallNetDashboardWidget } from './SacDashboard'
 
 interface RegistroResumen {
   id: string
@@ -87,7 +86,7 @@ export function VendedorDashboard({
 
   return (
     <div className='space-y-8 px-4 md:px-8 py-6'>
-      <div className='grid gap-6 md:grid-cols-3'>
+      <div className='grid gap-6 md:grid-cols-2'>
         <div className='flex flex-col gap-6'>
           <Card
             className={`bg-gradient-to-br ${nivelInfo.color} shadow-xl border-0 relative overflow-hidden mb-6 min-h-[220px] md:min-h-[260px] flex flex-col justify-between`}
@@ -187,9 +186,6 @@ export function VendedorDashboard({
               )}
             </CardContent>
           </Card>
-        </div>
-        <div className='flex flex-col gap-6'>
-          <WallNetDashboardWidget />
         </div>
       </div>
     </div>

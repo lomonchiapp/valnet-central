@@ -179,17 +179,29 @@ export default function InventoriosLayout() {
           }
         }}
       >
-        <TabsList className='grid w-full grid-cols-4'>
-          <TabsTrigger value='inventarios' className='flex items-center'>
+        <TabsList className='grid w-full bg-white grid-cols-4 border-b border-slate-200'>
+          <TabsTrigger 
+            value='inventarios' 
+            className='flex items-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm'
+          >
             <Warehouse className='w-4 h-4 mr-2' /> Inventarios
           </TabsTrigger>
-          <TabsTrigger value='ubicaciones' className='flex items-center'>
+          <TabsTrigger 
+            value='ubicaciones' 
+            className='flex items-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm'
+          >
             <MapPin className='w-4 h-4 mr-2' /> Ubicaciones
           </TabsTrigger>
-          <TabsTrigger value='marcas' className='flex items-center'>
+          <TabsTrigger 
+            value='marcas' 
+            className='flex items-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm'
+          >
             <Tag className='w-4 h-4 mr-2' /> Marcas
           </TabsTrigger>
-          <TabsTrigger value='proveedores' className='flex items-center'>
+          <TabsTrigger 
+            value='proveedores' 
+            className='flex items-center data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm'
+          >
             <Truck className='w-4 h-4 mr-2' /> Proveedores
           </TabsTrigger>
         </TabsList>

@@ -8,19 +8,19 @@ import { onSnapshot, collection } from 'firebase/firestore'
 import { create } from 'zustand'
 
 interface ComprasState {
-  pagos: PagoUnico[]
+  pagosUnicos: PagoUnico[]
   pagosRecurrentes: PagoRecurrente[]
   ordenes: OrdenCompra[]
   gastosMenores: GastoMenor[]
   proveedores: Proveedor[]
 
-  setPagos: (pagos: PagoUnico[]) => void
-  setPagosRecurrentes: (pagos: PagoRecurrente[]) => void
+  setPagosUnicos: (pagosUnicos: PagoUnico[]) => void
+  setPagosRecurrentes: (pagosRecurrentes: PagoRecurrente[]) => void
   setOrdenes: (ordenes: OrdenCompra[]) => void
   setGastosMenores: (gastos: GastoMenor[]) => void
   setProveedores: (proveedores: Proveedor[]) => void
 
-  subscribeToPagos: () => () => void
+  subscribeToPagosUnicos: () => () => void
   subscribeToPagosRecurrentes: () => () => void
   subscribeToOrdenes: () => () => void
   subscribeToGastosMenores: () => () => void
@@ -28,21 +28,21 @@ interface ComprasState {
 }
 
 export const useComprasState = create<ComprasState>()((set) => ({
-  pagos: [],
+  pagosUnicos: [],
   pagosRecurrentes: [],
   ordenes: [],
   gastosMenores: [],
   proveedores: [],
-  setPagos: (pagos) => set({ pagos }),
+  setPagosUnicos: (pagosUnicos) => set({ pagosUnicos }),
   setPagosRecurrentes: (pagos) => set({ pagosRecurrentes: pagos }),
   setOrdenes: (ordenes) => set({ ordenes }),
   setGastosMenores: (gastos) => set({ gastosMenores: gastos }),
   setProveedores: (proveedores) => set({ proveedores }),
-  subscribeToPagos: () => {
+  subscribeToPagosUnicos: () => {
     const unsubscribe = onSnapshot(
-      collection(database, 'pagos'),
+      collection(database, 'pagosUnicos'),
       (snapshot) => {
-        set({ pagos: snapshot.docs.map((doc) => doc.data() as PagoUnico) })
+        set({ pagosUnicos: snapshot.docs.map((doc) => doc.data() as PagoUnico) })
       }
     )
     return unsubscribe

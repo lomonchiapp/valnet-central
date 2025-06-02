@@ -5,14 +5,16 @@ interface AuthState {
   user: Usuario | null
   isLoading: boolean
   setUser: (user: Usuario | null) => void
-  setIsLoading: (isLoading: boolean) => void
+  setLoading: (isLoading: boolean) => void
+  clearUser: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
   setUser: (user) => set({ user }),
-  setIsLoading: (isLoading) => set({ isLoading }),
+  setLoading: (isLoading) => set({ isLoading }),
+  clearUser: () => set({ user: null }),
 }))
 
 // Helper para acceder al estado desde fuera de componentes React

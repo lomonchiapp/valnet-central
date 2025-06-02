@@ -5,4 +5,5 @@ export interface PagoUnico extends BaseModel {
   monto: number // Monto a pagar
   fecha: string // Fecha del pago (ISO string)
   idcuenta: string // ID de la cuenta contable
+  idproveedor: string // ID del proveedor
 }

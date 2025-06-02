@@ -37,6 +37,7 @@ import { WallNetConfig } from '@/features/valnet/wallNet'
 import Ventas from '@/features/ventas'
 import NuevoPreRegistro from '@/features/ventas/components/NuevoPreRegistro'
 import PreRegistros from '@/features/ventas/pre-registros'
+import { PerfilPage } from '@/pages/PerfilPage'
 
 // Componente para manejar rutas protegidas
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -145,6 +146,8 @@ export function AppRoutes() {
         <Route path='/contabilidad/cuentas' element={<Cuentas />} />
         <Route path='/contabilidad/libro-diario' element={<LibroDiario />} />
         <Route path='/contabilidad/reportes' element={<Reportes />} />
+        {/* Perfil */}
+        <Route path='/perfil' element={<PerfilPage />} />
       </Route>
 
       {/* Ruta 404 - Redirige al dashboard */}

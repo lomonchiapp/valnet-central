@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { Ubicacion } from '@/types/interfaces/almacen/ubicacion'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Warehouse } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,9 +15,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useUbicaciones } from '../hooks/useUbicaciones'
+import { useAlmacenState } from '@/context/global/useAlmacenState'
+import { Card } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 interface NuevaUbicacionFormValues {
   nombre: string
+  idInventario: string
 }
 
 interface NuevaUbicacionFormProps {
@@ -33,8 +37,8 @@ export function NuevaUbicacionForm({
   onUbicacionCreada,
   ubicacionToEdit,
 }: NuevaUbicacionFormProps) {
-  const { crearUbicacion, actualizarUbicacion, isLoading, error } =
-    useUbicaciones()
+  const { crearUbicacion, actualizarUbicacion, isLoading, error } = useUbicaciones()
+  const { inventarios } = useAlmacenState()
 
   const {
     register,
@@ -42,27 +46,38 @@ export function NuevaUbicacionForm({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<NuevaUbicacionFormValues>({
     defaultValues: {
       nombre: '',
+      idInventario: '',
     },
   })
+
+  const selectedInventario = watch('idInventario')
 
   // Set form values when editing an existing location
   useEffect(() => {
     if (ubicacionToEdit && open) {
       setValue('nombre', ubicacionToEdit.nombre)
+      setValue('idInventario', ubicacionToEdit.idInventario)
     } else if (!ubicacionToEdit && open) {
       reset()
     }
   }, [ubicacionToEdit, open, setValue, reset])
 
   const onSubmit: SubmitHandler<NuevaUbicacionFormValues> = async (data) => {
+    if (!data.idInventario) {
+      toast.error('Debes seleccionar un inventario')
+      return
+    }
+
     // If we're editing an existing location
     if (ubicacionToEdit) {
       const success = await actualizarUbicacion({
         id: ubicacionToEdit.id,
         nombre: data.nombre,
+        idInventario: data.idInventario,
       })
 
       if (success) {
@@ -78,7 +93,10 @@ export function NuevaUbicacionForm({
       }
     } else {
       // Creating a new location
-      const ubicacion = await crearUbicacion({ nombre: data.nombre })
+      const ubicacion = await crearUbicacion({
+        nombre: data.nombre,
+        idInventario: data.idInventario,
+      })
 
       if (ubicacion) {
         toast.success(`Ubicación "${data.nombre}" creada correctamente`)
@@ -105,7 +123,7 @@ export function NuevaUbicacionForm({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className='sm:max-w-[425px]'>
+      <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>
             {isEditMode ? 'Editar Ubicación' : 'Nueva Ubicación'}
@@ -118,7 +136,7 @@ export function NuevaUbicacionForm({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className='grid gap-4 py-4'>
+          <div className='grid gap-6 py-4'>
             <div className='grid grid-cols-4 items-center gap-4'>
               <Label htmlFor='nombre' className='text-right'>
                 Nombre
@@ -137,6 +155,37 @@ export function NuevaUbicacionForm({
               {errors.nombre && (
                 <p className='text-destructive text-sm col-start-2 col-span-3'>
                   {errors.nombre.message}
+                </p>
+              )}
+            </div>
+
+            <div className='space-y-4'>
+              <Label className='text-right'>Seleccionar Inventario</Label>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                {inventarios.map((inventario) => (
+                  <Card
+                    key={inventario.id}
+                    className={cn(
+                      'p-4 cursor-pointer transition-colors hover:bg-accent',
+                      selectedInventario === inventario.id && 'border-primary bg-accent'
+                    )}
+                    onClick={() => setValue('idInventario', inventario.id)}
+                  >
+                    <div className='flex items-center space-x-3'>
+                      <Warehouse className='h-5 w-5 text-muted-foreground' />
+                      <div>
+                        <h4 className='font-medium'>{inventario.nombre}</h4>
+                        <p className='text-sm text-muted-foreground'>
+                          {inventario.descripcion}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              {errors.idInventario && (
+                <p className='text-destructive text-sm'>
+                  {errors.idInventario.message}
                 </p>
               )}
             </div>

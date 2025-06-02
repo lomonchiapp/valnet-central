@@ -5,10 +5,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useToast } from '@/hooks/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { AuthProvider } from './components/auth/AuthProvider'
-import { Toaster } from './components/ui/toaster'
+import { AuthProvider } from '@/features/auth/AuthProvider'
+import { Toaster } from '@/components/ui/toaster'
 import { ThemeProvider } from './context/theme-context'
-import { AppRoutes } from './routes'
+import { AppRoutes } from '@/routes'
+import { WallNetGlobalPanel } from '@/features/wallnet/components/WallNetGlobalPanel'
 
 function WallNetGlobalNotifier() {
   const { toast } = useToast()
@@ -46,7 +47,7 @@ function WallNetGlobalNotifier() {
           title: 'Nueva publicación en WallNet',
           description: `${data.userName}: ${data.content?.slice(0, 80)}`,
           duration: 7000,
-          variant: 'wallnet',
+          variant: 'default',
           action: (
             <ToastAction
               altText='Ver publicación'
@@ -76,6 +77,7 @@ export default function App() {
       <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
         <AuthProvider>
           <WallNetGlobalNotifier />
+          <WallNetGlobalPanel />
           <AppRoutes />
           <Toaster />
         </AuthProvider>
