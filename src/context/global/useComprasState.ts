@@ -42,7 +42,9 @@ export const useComprasState = create<ComprasState>()((set) => ({
     const unsubscribe = onSnapshot(
       collection(database, 'pagosUnicos'),
       (snapshot) => {
-        set({ pagosUnicos: snapshot.docs.map((doc) => doc.data() as PagoUnico) })
+        set({
+          pagosUnicos: snapshot.docs.map((doc) => doc.data() as PagoUnico),
+        })
       }
     )
     return unsubscribe

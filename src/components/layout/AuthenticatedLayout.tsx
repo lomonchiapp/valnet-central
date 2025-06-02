@@ -3,10 +3,10 @@ import { Outlet } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
+import { Toaster } from '@/components/ui/toaster'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import SkipToMain from '@/components/skip-to-main'
 import { GlobalTopBar } from './GlobalTopBar'
-import { Toaster } from '@/components/ui/toaster'
 
 export default function AuthenticatedLayout() {
   const defaultOpen = Cookies.get('sidebar:state') !== 'false'
@@ -15,7 +15,7 @@ export default function AuthenticatedLayout() {
     <SearchProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
         <SkipToMain />
-        <div className="fixed top-0 left-0 w-full z-50 h-20">
+        <div className='fixed top-0 left-0 w-full z-50 h-20'>
           <GlobalTopBar />
         </div>
         <AppSidebar />
@@ -32,9 +32,9 @@ export default function AuthenticatedLayout() {
             'mt-20'
           )}
         >
-          <div className="fixed inset-0 bg-muted -z-10" />
-          <div className="flex-1 min-h-full">
-            <div className="p-12">
+          <div className='fixed inset-0 bg-muted -z-10' />
+          <div className='flex-1 min-h-full'>
+            <div className='p-12'>
               <Outlet />
             </div>
           </div>

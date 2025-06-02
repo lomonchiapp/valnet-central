@@ -77,23 +77,21 @@ export function getMovimientoBadge(tipo: TipoMovimiento) {
   switch (tipo) {
     case TipoMovimiento.ENTRADA:
       return (
-        <Badge className="bg-green-100 text-green-800 border-green-300">
+        <Badge className='bg-green-100 text-green-800 border-green-300'>
           Entrada
         </Badge>
       )
     case TipoMovimiento.SALIDA:
       return (
-        <Badge className="bg-red-100 text-red-800 border-red-300">
-          Salida
-        </Badge>
+        <Badge className='bg-red-100 text-red-800 border-red-300'>Salida</Badge>
       )
     case TipoMovimiento.TRANSFERENCIA:
       return (
-        <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+        <Badge className='bg-blue-100 text-blue-800 border-blue-300'>
           Transferencia
         </Badge>
       )
     default:
       return <Badge>Desconocido</Badge>
   }
-} 
+}

@@ -1,6 +1,12 @@
 import { database } from '@/firebase'
 import { Cuenta } from '@/types/interfaces/contabilidad/cuenta'
-import { doc, updateDoc, deleteDoc, collection, setDoc } from 'firebase/firestore'
+import {
+  doc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  setDoc,
+} from 'firebase/firestore'
 import { toast } from 'sonner'
 
 interface CuentaInput extends Omit<Cuenta, 'id'> {
@@ -52,7 +58,7 @@ export const useActualizarCuenta = () => {
   const actualizarBalance = async (id: string, nuevoBalance: number) => {
     try {
       const cuentaRef = doc(database, 'cuentas', id)
-      await updateDoc(cuentaRef, { 
+      await updateDoc(cuentaRef, {
         balance: nuevoBalance,
         updatedAt: new Date(),
       })
@@ -81,4 +87,4 @@ export const useBorrarCuenta = () => {
   }
 
   return { borrarCuenta }
-} 
+}

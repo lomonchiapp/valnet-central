@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { database } from '@/firebase'
+import { AppRoutes } from '@/routes'
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { BrowserRouter } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useToast } from '@/hooks/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { AuthProvider } from '@/features/auth/AuthProvider'
 import { Toaster } from '@/components/ui/toaster'
-import { ThemeProvider } from './context/theme-context'
-import { AppRoutes } from '@/routes'
+import { AuthProvider } from '@/features/auth/AuthProvider'
 import { WallNetGlobalPanel } from '@/features/wallnet/components/WallNetGlobalPanel'
+import { ThemeProvider } from './context/theme-context'
 
 function WallNetGlobalNotifier() {
   const { toast } = useToast()

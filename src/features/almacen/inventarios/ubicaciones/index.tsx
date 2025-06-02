@@ -24,7 +24,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { NuevaUbicacionForm } from '../inventario/components/NuevaUbicacionForm'
 import {
   Select,
   SelectContent,
@@ -32,12 +31,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { NuevaUbicacionForm } from '../inventario/components/NuevaUbicacionForm'
 
 export default function Ubicaciones() {
-  const { ubicaciones, inventarios, subscribeToUbicaciones, subscribeToInventarios } = useAlmacenState()
+  const {
+    ubicaciones,
+    inventarios,
+    subscribeToUbicaciones,
+    subscribeToInventarios,
+  } = useAlmacenState()
   const [showNewForm, setShowNewForm] = useState(false)
-  const [editingUbicacion, setEditingUbicacion] = useState<Ubicacion | null>(null)
-  const [deletingUbicacion, setDeletingUbicacion] = useState<Ubicacion | null>(null)
+  const [editingUbicacion, setEditingUbicacion] = useState<Ubicacion | null>(
+    null
+  )
+  const [deletingUbicacion, setDeletingUbicacion] = useState<Ubicacion | null>(
+    null
+  )
   const [isDeleting, setIsDeleting] = useState(false)
   const [selectedInventario, setSelectedInventario] = useState<string>('todos')
 
@@ -67,32 +76,38 @@ export default function Ubicaciones() {
   }
 
   const getInventarioNombre = (idInventario: string) => {
-    const inventario = inventarios.find(inv => inv.id === idInventario)
+    const inventario = inventarios.find((inv) => inv.id === idInventario)
     return inventario?.nombre || 'Inventario no encontrado'
   }
 
-  const filteredUbicaciones = selectedInventario === 'todos' 
-    ? ubicaciones 
-    : ubicaciones.filter(u => u.idInventario === selectedInventario)
+  const filteredUbicaciones =
+    selectedInventario === 'todos'
+      ? ubicaciones
+      : ubicaciones.filter((u) => u.idInventario === selectedInventario)
 
   const sortedUbicaciones = [...filteredUbicaciones].sort((a, b) =>
     a.nombre.localeCompare(b.nombre)
   )
 
-  const groupedUbicaciones = sortedUbicaciones.reduce((acc, ubicacion) => {
-    const inventarioId = ubicacion.idInventario
-    if (!acc[inventarioId]) {
-      acc[inventarioId] = []
-    }
-    acc[inventarioId].push(ubicacion)
-    return acc
-  }, {} as Record<string, Ubicacion[]>)
+  const groupedUbicaciones = sortedUbicaciones.reduce(
+    (acc, ubicacion) => {
+      const inventarioId = ubicacion.idInventario
+      if (!acc[inventarioId]) {
+        acc[inventarioId] = []
+      }
+      acc[inventarioId].push(ubicacion)
+      return acc
+    },
+    {} as Record<string, Ubicacion[]>
+  )
 
   return (
     <div className='space-y-6'>
       <div className='flex justify-between items-center'>
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>Ubicaciones de Almacén</h1>
+          <h1 className='text-3xl font-bold tracking-tight'>
+            Ubicaciones de Almacén
+          </h1>
           <p className='text-muted-foreground'>
             Administra las ubicaciones físicas para organizar el inventario.
           </p>
@@ -109,7 +124,8 @@ export default function Ubicaciones() {
             <div>
               <CardTitle>Ubicaciones Registradas</CardTitle>
               <CardDescription>
-                Lista de todas las ubicaciones disponibles para asignar a artículos.
+                Lista de todas las ubicaciones disponibles para asignar a
+                artículos.
               </CardDescription>
             </div>
             <Select
@@ -140,45 +156,53 @@ export default function Ubicaciones() {
               {selectedInventario === 'todos' ? (
                 // Mostrar agrupado por inventario
                 <div className='space-y-6 p-4'>
-                  {Object.entries(groupedUbicaciones).map(([inventarioId, ubicaciones]) => (
-                    <div key={inventarioId} className='space-y-4'>
-                      <h3 className='text-lg font-semibold text-muted-foreground'>
-                        {getInventarioNombre(inventarioId)}
-                      </h3>
-                      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                        {ubicaciones.map((ubicacion) => (
-                          <Card key={ubicacion.id} className='relative group'>
-                            <CardHeader className='pb-2'>
-                              <div className='flex items-center justify-between'>
-                                <div className='flex items-center space-x-2'>
-                                  <Warehouse className='h-5 w-5 text-muted-foreground' />
-                                  <CardTitle className='text-lg'>{ubicacion.nombre}</CardTitle>
+                  {Object.entries(groupedUbicaciones).map(
+                    ([inventarioId, ubicaciones]) => (
+                      <div key={inventarioId} className='space-y-4'>
+                        <h3 className='text-lg font-semibold text-muted-foreground'>
+                          {getInventarioNombre(inventarioId)}
+                        </h3>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                          {ubicaciones.map((ubicacion) => (
+                            <Card key={ubicacion.id} className='relative group'>
+                              <CardHeader className='pb-2'>
+                                <div className='flex items-center justify-between'>
+                                  <div className='flex items-center space-x-2'>
+                                    <Warehouse className='h-5 w-5 text-muted-foreground' />
+                                    <CardTitle className='text-lg'>
+                                      {ubicacion.nombre}
+                                    </CardTitle>
+                                  </div>
+                                  <div className='flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                    <Button
+                                      variant='ghost'
+                                      size='icon'
+                                      onClick={() =>
+                                        setEditingUbicacion(ubicacion)
+                                      }
+                                      className='h-8 w-8'
+                                    >
+                                      <Pencil className='h-4 w-4' />
+                                    </Button>
+                                    <Button
+                                      variant='ghost'
+                                      size='icon'
+                                      onClick={() =>
+                                        setDeletingUbicacion(ubicacion)
+                                      }
+                                      className='h-8 w-8'
+                                    >
+                                      <Trash2 className='h-4 w-4' />
+                                    </Button>
+                                  </div>
                                 </div>
-                                <div className='flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-                                  <Button
-                                    variant='ghost'
-                                    size='icon'
-                                    onClick={() => setEditingUbicacion(ubicacion)}
-                                    className='h-8 w-8'
-                                  >
-                                    <Pencil className='h-4 w-4' />
-                                  </Button>
-                                  <Button
-                                    variant='ghost'
-                                    size='icon'
-                                    onClick={() => setDeletingUbicacion(ubicacion)}
-                                    className='h-8 w-8'
-                                  >
-                                    <Trash2 className='h-4 w-4' />
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardHeader>
-                          </Card>
-                        ))}
+                              </CardHeader>
+                            </Card>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               ) : (
                 // Mostrar solo las ubicaciones del inventario seleccionado
@@ -189,7 +213,9 @@ export default function Ubicaciones() {
                         <div className='flex items-center justify-between'>
                           <div className='flex items-center space-x-2'>
                             <Warehouse className='h-5 w-5 text-muted-foreground' />
-                            <CardTitle className='text-lg'>{ubicacion.nombre}</CardTitle>
+                            <CardTitle className='text-lg'>
+                              {ubicacion.nombre}
+                            </CardTitle>
                           </div>
                           <div className='flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity'>
                             <Button

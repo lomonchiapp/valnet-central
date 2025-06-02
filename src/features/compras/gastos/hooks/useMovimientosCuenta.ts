@@ -1,6 +1,10 @@
 import { useMemo, useEffect } from 'react'
+import {
+  MovimientoCuenta,
+  TipoMovimiento,
+  OrigenMovimiento,
+} from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { useContabilidadState } from '@/context/global/useContabilidadState'
-import { MovimientoCuenta, TipoMovimiento, OrigenMovimiento } from '@/types/interfaces/contabilidad/movimientoCuenta'
 
 interface UseMovimientosCuentaReturn {
   movimientos: MovimientoCuenta[]
@@ -14,7 +18,8 @@ interface UseMovimientosCuentaReturn {
 }
 
 export function useMovimientosCuenta(): UseMovimientosCuentaReturn {
-  const { movimientosCuenta, subscribeToMovimientosCuenta } = useContabilidadState()
+  const { movimientosCuenta, subscribeToMovimientosCuenta } =
+    useContabilidadState()
 
   useEffect(() => {
     const unsubscribe = subscribeToMovimientosCuenta()
@@ -24,24 +29,30 @@ export function useMovimientosCuenta(): UseMovimientosCuentaReturn {
   const movimientosPorCuenta = useMemo(() => {
     return (idcuenta: string) => {
       return movimientosCuenta
-        .filter(m => m.idcuenta === idcuenta)
-        .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+        .filter((m) => m.idcuenta === idcuenta)
+        .sort(
+          (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        )
     }
   }, [movimientosCuenta])
 
   const movimientosPorOrigen = useMemo(() => {
     return (origen: OrigenMovimiento) => {
       return movimientosCuenta
-        .filter(m => m.origen === origen)
-        .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+        .filter((m) => m.origen === origen)
+        .sort(
+          (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        )
     }
   }, [movimientosCuenta])
 
   const movimientosPorTipo = useMemo(() => {
     return (tipo: TipoMovimiento) => {
       return movimientosCuenta
-        .filter(m => m.tipo === tipo)
-        .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+        .filter((m) => m.tipo === tipo)
+        .sort(
+          (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        )
     }
   }, [movimientosCuenta])
 
@@ -49,20 +60,22 @@ export function useMovimientosCuenta(): UseMovimientosCuentaReturn {
     return (fecha: string) => {
       const fechaObj = new Date(fecha)
       const fechaStr = fechaObj.toISOString().split('T')[0]
-      
+
       return movimientosCuenta
-        .filter(m => m.fecha.split('T')[0] === fechaStr)
-        .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+        .filter((m) => m.fecha.split('T')[0] === fechaStr)
+        .sort(
+          (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        )
     }
   }, [movimientosCuenta])
 
   const estadisticas = useMemo(() => {
     const totalDebitos = movimientosCuenta
-      .filter(m => m.tipo === TipoMovimiento.DEBITO)
+      .filter((m) => m.tipo === TipoMovimiento.DEBITO)
       .reduce((sum, m) => sum + m.monto, 0)
 
     const totalCreditos = movimientosCuenta
-      .filter(m => m.tipo === TipoMovimiento.CREDITO)
+      .filter((m) => m.tipo === TipoMovimiento.CREDITO)
       .reduce((sum, m) => sum + m.monto, 0)
 
     const saldoNeto = totalCreditos - totalDebitos
@@ -71,11 +84,13 @@ export function useMovimientosCuenta(): UseMovimientosCuentaReturn {
   }, [movimientosCuenta])
 
   return {
-    movimientos: movimientosCuenta.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()),
+    movimientos: movimientosCuenta.sort(
+      (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+    ),
     movimientosPorCuenta,
     movimientosPorOrigen,
     movimientosPorTipo,
     movimientosDelDia,
     ...estadisticas,
   }
-} 
+}

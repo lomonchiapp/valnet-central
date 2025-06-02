@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react'
+import {
+  Cuenta,
+  TipoCuentaContable,
+} from '@/types/interfaces/contabilidad/cuenta'
+import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Sheet,
   SheetContent,
@@ -9,17 +22,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Plus } from 'lucide-react'
-import { Cuenta, TipoCuentaContable } from '@/types/interfaces/contabilidad/cuenta'
 import { useCrearCuenta, useActualizarCuenta } from './hooks'
-import { toast } from 'sonner'
 
 interface NuevaCuentaContableProps {
   cuentas: (Cuenta & { parentId?: string })[]
@@ -27,13 +30,19 @@ interface NuevaCuentaContableProps {
   editCuenta?: (Cuenta & { parentId?: string }) | null
 }
 
-export function NuevaCuentaContable({ cuentas, onSuccess, editCuenta }: NuevaCuentaContableProps) {
+export function NuevaCuentaContable({
+  cuentas,
+  onSuccess,
+  editCuenta,
+}: NuevaCuentaContableProps) {
   const { crearCuenta } = useCrearCuenta()
   const { actualizarCuenta } = useActualizarCuenta()
 
   const [isOpen, setIsOpen] = useState(false)
   const [nombre, setNombre] = useState('')
-  const [tipo, setTipo] = useState<TipoCuentaContable>(TipoCuentaContable.ACTIVO)
+  const [tipo, setTipo] = useState<TipoCuentaContable>(
+    TipoCuentaContable.ACTIVO
+  )
   const [descripcion, setDescripcion] = useState('')
   const [balance, setBalance] = useState('0')
   const [parentId, setParentId] = useState<string>('none')
@@ -103,9 +112,7 @@ export function NuevaCuentaContable({ cuentas, onSuccess, editCuenta }: NuevaCue
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>
-            {editId ? 'Editar cuenta' : 'Nueva cuenta'}
-          </SheetTitle>
+          <SheetTitle>{editId ? 'Editar cuenta' : 'Nueva cuenta'}</SheetTitle>
           <SheetDescription>
             {editId
               ? 'Modifica los datos de la cuenta seleccionada'
@@ -123,7 +130,10 @@ export function NuevaCuentaContable({ cuentas, onSuccess, editCuenta }: NuevaCue
           </div>
           <div className='space-y-2'>
             <label className='text-sm font-medium'>Tipo</label>
-            <Select value={tipo} onValueChange={(value) => setTipo(value as TipoCuentaContable)}>
+            <Select
+              value={tipo}
+              onValueChange={(value) => setTipo(value as TipoCuentaContable)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder='Selecciona el tipo' />
               </SelectTrigger>
@@ -160,7 +170,7 @@ export function NuevaCuentaContable({ cuentas, onSuccess, editCuenta }: NuevaCue
                 <SelectValue placeholder='Selecciona cuenta padre' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Cuenta principal</SelectItem>
+                <SelectItem value='none'>Cuenta principal</SelectItem>
                 {principales.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.nombre}
@@ -176,4 +186,4 @@ export function NuevaCuentaContable({ cuentas, onSuccess, editCuenta }: NuevaCue
       </SheetContent>
     </Sheet>
   )
-} 
+}

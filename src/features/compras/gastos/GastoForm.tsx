@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react'
+import { database } from '@/firebase'
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore'
 import { toast } from 'sonner'
+import { useComprasState } from '@/context/global/useComprasState'
+import { useContabilidadState } from '@/context/global/useContabilidadState'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -15,10 +25,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { useComprasState } from '@/context/global/useComprasState'
-import { useContabilidadState } from '@/context/global/useContabilidadState'
-import { database } from '@/firebase'
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
 
 export interface GastoFormData {
   id?: string
@@ -36,20 +42,25 @@ interface GastoFormProps {
   onSuccess?: () => void
 }
 
-export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFormProps) {
+export function GastoForm({
+  open,
+  onOpenChange,
+  editGasto,
+  onSuccess,
+}: GastoFormProps) {
   const { proveedores, subscribeToProveedores } = useComprasState()
   const { cuentas, subscribeToCuentas } = useContabilidadState()
 
   useEffect(() => {
-   console.log('Iniciando suscripciones...')
-   const unsubscribeProveedores = subscribeToProveedores()
-   const unsubscribeCuentas = subscribeToCuentas()
+    console.log('Iniciando suscripciones...')
+    const unsubscribeProveedores = subscribeToProveedores()
+    const unsubscribeCuentas = subscribeToCuentas()
 
-   return () => {
-    console.log('Limpiando suscripciones...')
-    unsubscribeProveedores()
-    unsubscribeCuentas()
-   }
+    return () => {
+      console.log('Limpiando suscripciones...')
+      unsubscribeProveedores()
+      unsubscribeCuentas()
+    }
   }, [subscribeToProveedores, subscribeToCuentas])
 
   // Debug: Log para verificar las cuentas
@@ -69,7 +80,6 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
   })
   const [isLoading, setIsLoading] = useState(false)
 
-
   useEffect(() => {
     if (editGasto) {
       setFormData(editGasto)
@@ -85,7 +95,13 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
   }, [editGasto, open])
 
   const handleSubmit = async () => {
-    if (!formData.proveedorId || !formData.cuentaId || !formData.descripcion || !formData.monto || !formData.fecha) {
+    if (
+      !formData.proveedorId ||
+      !formData.cuentaId ||
+      !formData.descripcion ||
+      !formData.monto ||
+      !formData.fecha
+    ) {
       toast.error('Completa todos los campos')
       return
     }
@@ -143,7 +159,7 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
             Complete todos los campos para registrar el gasto
           </p>
         </SheetHeader>
-        
+
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 px-4'>
           <div className='space-y-6'>
             <div className='transform transition-all duration-200 hover:scale-[1.02]'>
@@ -152,7 +168,9 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
               </label>
               <Select
                 value={formData.proveedorId}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, proveedorId: value }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, proveedorId: value }))
+                }
                 disabled={isLoading}
               >
                 <SelectTrigger className='h-12 border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500 transition-colors duration-200'>
@@ -160,8 +178,8 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
                 </SelectTrigger>
                 <SelectContent className='animate-in slide-in-from-top-2 duration-200'>
                   {proveedores.map((proveedor) => (
-                    <SelectItem 
-                      key={proveedor.id} 
+                    <SelectItem
+                      key={proveedor.id}
                       value={proveedor.id}
                       className='hover:bg-blue-50 transition-colors duration-150'
                     >
@@ -178,7 +196,9 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
               </label>
               <Select
                 value={formData.cuentaId}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, cuentaId: value }))}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, cuentaId: value }))
+                }
                 disabled={isLoading}
               >
                 <SelectTrigger className='h-12 border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500 transition-colors duration-200'>
@@ -186,10 +206,16 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
                     {formData.cuentaId && (
                       <div className='flex flex-col text-left'>
                         <span className='font-medium'>
-                          {cuentas.find(c => c.id === formData.cuentaId)?.nombre}
+                          {
+                            cuentas.find((c) => c.id === formData.cuentaId)
+                              ?.nombre
+                          }
                         </span>
                         <span className='text-xs text-gray-500'>
-                          {cuentas.find(c => c.id === formData.cuentaId)?.descripcion}
+                          {
+                            cuentas.find((c) => c.id === formData.cuentaId)
+                              ?.descripcion
+                          }
                         </span>
                       </div>
                     )}
@@ -202,14 +228,18 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
                     </div>
                   ) : (
                     cuentas.map((cuenta) => (
-                      <SelectItem 
-                        key={cuenta.id} 
+                      <SelectItem
+                        key={cuenta.id}
                         value={cuenta.id}
                         className='hover:bg-blue-50 transition-colors duration-150 cursor-pointer'
                       >
                         <div className='flex flex-col py-1 w-full'>
-                          <span className='font-medium text-gray-900'>{cuenta.nombre}</span>
-                          <span className='text-xs text-gray-500 mt-1'>{cuenta.descripcion}</span>
+                          <span className='font-medium text-gray-900'>
+                            {cuenta.nombre}
+                          </span>
+                          <span className='text-xs text-gray-500 mt-1'>
+                            {cuenta.descripcion}
+                          </span>
                         </div>
                       </SelectItem>
                     ))
@@ -224,7 +254,12 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
               </label>
               <Input
                 value={formData.descripcion}
-                onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    descripcion: e.target.value,
+                  }))
+                }
                 placeholder='Descripción del gasto'
                 disabled={isLoading}
                 className='h-12 border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200'
@@ -245,7 +280,12 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
                   type='number'
                   step='0.01'
                   value={formData.monto}
-                  onChange={(e) => setFormData(prev => ({ ...prev, monto: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      monto: Number(e.target.value),
+                    }))
+                  }
                   placeholder='0.00'
                   disabled={isLoading}
                   className='h-12 pl-8 border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200 text-lg font-semibold'
@@ -260,7 +300,9 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
               <Input
                 type='date'
                 value={formData.fecha}
-                onChange={(e) => setFormData(prev => ({ ...prev, fecha: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, fecha: e.target.value }))
+                }
                 disabled={isLoading}
                 className='h-12 border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200'
               />
@@ -276,19 +318,19 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
                 <div className='flex justify-between items-center'>
                   <span className='text-gray-600'>Proveedor:</span>
                   <span className='font-medium text-gray-900'>
-                    {formData.proveedorId 
-                      ? proveedores.find(p => p.id === formData.proveedorId)?.nombre || 'No seleccionado'
-                      : 'No seleccionado'
-                    }
+                    {formData.proveedorId
+                      ? proveedores.find((p) => p.id === formData.proveedorId)
+                          ?.nombre || 'No seleccionado'
+                      : 'No seleccionado'}
                   </span>
                 </div>
                 <div className='flex justify-between items-center'>
                   <span className='text-gray-600'>Cuenta:</span>
                   <span className='font-medium text-gray-900'>
-                    {formData.cuentaId 
-                      ? cuentas.find(c => c.id === formData.cuentaId)?.nombre || 'No seleccionada'
-                      : 'No seleccionada'
-                    }
+                    {formData.cuentaId
+                      ? cuentas.find((c) => c.id === formData.cuentaId)
+                          ?.nombre || 'No seleccionada'
+                      : 'No seleccionada'}
                   </span>
                 </div>
                 <div className='border-t border-blue-200 pt-2 mt-3'>
@@ -314,8 +356,8 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
           >
             Cancelar
           </Button>
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             disabled={isLoading}
             className='px-8 py-3 h-12 bg-blue-600 hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl'
           >
@@ -324,12 +366,14 @@ export function GastoForm({ open, onOpenChange, editGasto, onSuccess }: GastoFor
                 <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
                 Guardando...
               </div>
+            ) : editGasto ? (
+              'Actualizar Gasto'
             ) : (
-              editGasto ? 'Actualizar Gasto' : 'Agregar Gasto'
+              'Agregar Gasto'
             )}
           </Button>
         </div>
       </SheetContent>
     </Sheet>
   )
-} 
+}

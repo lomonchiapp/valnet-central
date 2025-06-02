@@ -20,29 +20,42 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  getArticuloInfo,
+  formatDate,
+  getMovimientoBadge,
+} from '@/features/almacen/inventarios/helpers/inventarioHelpers'
 import { ArticulosTable } from './components/ArticulosTable'
 import { NuevoArticuloForm } from './components/NuevoArticuloForm'
-import { getArticuloInfo, formatDate, getMovimientoBadge } from '@/features/almacen/inventarios/helpers/inventarioHelpers'
 
 // Helper para parsear fechas de distintos formatos
 function parseFecha(fecha: unknown): Date {
-  if (fecha instanceof Date) return fecha;
-  if (typeof fecha === 'object' && fecha && (fecha as { toDate?: () => Date }).toDate) return (fecha as { toDate: () => Date }).toDate();
+  if (fecha instanceof Date) return fecha
+  if (
+    typeof fecha === 'object' &&
+    fecha &&
+    (fecha as { toDate?: () => Date }).toDate
+  )
+    return (fecha as { toDate: () => Date }).toDate()
   if (typeof fecha === 'string') {
     // Si es ISO, Date lo entiende
-    if (!isNaN(Date.parse(fecha))) return new Date(fecha);
+    if (!isNaN(Date.parse(fecha))) return new Date(fecha)
     // Si es formato DD/MM/YYYY, HH:mm a. m./p. m.
-    const match = fecha.match(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}) (a|p)\. m\./);
+    const match = fecha.match(
+      /(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}) (a|p)\. m\./
+    )
     if (match) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [__, d, m, y, h, min, ap] = match;
-      let hour = parseInt(h, 10);
-      if (ap === 'p' && hour < 12) hour += 12;
-      if (ap === 'a' && hour === 12) hour = 0;
-      return new Date(`${y}-${m}-${d}T${hour.toString().padStart(2, '0')}:${min}:00`);
+      const [__, d, m, y, h, min, ap] = match
+      let hour = parseInt(h, 10)
+      if (ap === 'p' && hour < 12) hour += 12
+      if (ap === 'a' && hour === 12) hour = 0
+      return new Date(
+        `${y}-${m}-${d}T${hour.toString().padStart(2, '0')}:${min}:00`
+      )
     }
   }
-  return new Date(0); // fallback
+  return new Date(0) // fallback
 }
 
 export default function Inventario() {
@@ -77,7 +90,9 @@ export default function Inventario() {
       .filter(
         (m) => m.idinventario_origen === id || m.idinventario_destino === id
       )
-      .sort((a, b) => parseFecha(b.fecha).getTime() - parseFecha(a.fecha).getTime())
+      .sort(
+        (a, b) => parseFecha(b.fecha).getTime() - parseFecha(a.fecha).getTime()
+      )
   }, [movimientos, id])
 
   if (!inventario) {
@@ -119,7 +134,9 @@ export default function Inventario() {
             <div className='grid grid-cols-2 gap-4'>
               <div>
                 <p className='text-sm font-medium'>Tipo</p>
-                <p className='text-sm text-muted-foreground'>{inventario.tipo}</p>
+                <p className='text-sm text-muted-foreground'>
+                  {inventario.tipo}
+                </p>
               </div>
               <div>
                 <p className='text-sm font-medium'>ID</p>
@@ -198,7 +215,10 @@ export default function Inventario() {
                       </TableHeader>
                       <TableBody>
                         {movimientosInventario.map((movimiento) => {
-                          const info = getArticuloInfo(articulos, movimiento.idarticulo)
+                          const info = getArticuloInfo(
+                            articulos,
+                            movimiento.idarticulo
+                          )
                           return (
                             <TableRow
                               key={movimiento.id}

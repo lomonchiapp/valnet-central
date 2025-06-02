@@ -1,6 +1,18 @@
 import { database } from '@/firebase'
-import { Notificacion, EstadoNotificacion } from '@/types/interfaces/notificaciones/notificacion'
-import { doc, collection, setDoc, query, where, orderBy, getDocs, updateDoc } from 'firebase/firestore'
+import {
+  Notificacion,
+  EstadoNotificacion,
+} from '@/types/interfaces/notificaciones/notificacion'
+import {
+  doc,
+  collection,
+  setDoc,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  updateDoc,
+} from 'firebase/firestore'
 import { toast } from 'sonner'
 
 type NotificacionInput = Omit<Notificacion, 'id' | 'createdAt' | 'updatedAt'>
@@ -39,7 +51,7 @@ export const useObtenerNotificaciones = () => {
       }
 
       const querySnapshot = await getDocs(q)
-      return querySnapshot.docs.map(doc => doc.data() as Notificacion)
+      return querySnapshot.docs.map((doc) => doc.data() as Notificacion)
     } catch (error) {
       console.error('Error al obtener las notificaciones:', error)
       toast.error('Error al obtener las notificaciones')
@@ -54,12 +66,14 @@ export const useMarcarNotificacionLeida = () => {
   const marcarNotificacionLeida = async (id: string, userId: string) => {
     try {
       const notificacionRef = doc(database, 'notificaciones', id)
-      const notificacionDoc = await getDocs(query(collection(database, 'notificaciones'), where('id', '==', id)))
-      
+      const notificacionDoc = await getDocs(
+        query(collection(database, 'notificaciones'), where('id', '==', id))
+      )
+
       if (!notificacionDoc.empty) {
         const notificacion = notificacionDoc.docs[0].data() as Notificacion
         const leidaPor = notificacion.leidaPor || []
-        
+
         if (!leidaPor.includes(userId)) {
           await updateDoc(notificacionRef, {
             leidaPor: [...leidaPor, userId],
@@ -94,4 +108,4 @@ export const useArchivarNotificacion = () => {
   }
 
   return { archivarNotificacion }
-} 
+}

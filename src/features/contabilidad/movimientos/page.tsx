@@ -1,9 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useContabilidadState } from '@/context/global/useContabilidadState'
-import { MovimientoCuenta, OrigenMovimiento, TipoMovimiento } from '@/types/interfaces/contabilidad/movimientoCuenta'
-import { useObtenerMovimientosCuenta } from './hooks'
 import { format } from 'date-fns'
+import {
+  MovimientoCuenta,
+  OrigenMovimiento,
+  TipoMovimiento,
+} from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { es } from 'date-fns/locale'
+import { Search } from 'lucide-react'
+import { useContabilidadState } from '@/context/global/useContabilidadState'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -12,27 +25,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Search } from 'lucide-react'
+import { useObtenerMovimientosCuenta } from './hooks'
 
 export default function MovimientosPage() {
   const { cuentas } = useContabilidadState()
   const { obtenerMovimientosCuenta } = useObtenerMovimientosCuenta()
   const [movimientos, setMovimientos] = useState<MovimientoCuenta[]>([])
   const [selectedCuenta, setSelectedCuenta] = useState<string>('')
-  const [selectedOrigen, setSelectedOrigen] = useState<OrigenMovimiento | 'TODOS'>('TODOS')
+  const [selectedOrigen, setSelectedOrigen] = useState<
+    OrigenMovimiento | 'TODOS'
+  >('TODOS')
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-
-
 
   const loadMovimientos = useCallback(async () => {
     try {
@@ -44,17 +48,19 @@ export default function MovimientosPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [ selectedCuenta, obtenerMovimientosCuenta ])
+  }, [selectedCuenta, obtenerMovimientosCuenta])
 
   useEffect(() => {
     if (selectedCuenta) {
       loadMovimientos()
     }
-  }, [ selectedCuenta, loadMovimientos ])
+  }, [selectedCuenta, loadMovimientos])
 
-  const filteredMovimientos = movimientos.filter(mov => {
-    const matchesOrigen = selectedOrigen === 'TODOS' || mov.origen === selectedOrigen
-    const matchesSearch = searchTerm === '' || 
+  const filteredMovimientos = movimientos.filter((mov) => {
+    const matchesOrigen =
+      selectedOrigen === 'TODOS' || mov.origen === selectedOrigen
+    const matchesSearch =
+      searchTerm === '' ||
       mov.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
       mov.idOrigen.toLowerCase().includes(searchTerm.toLowerCase())
     return matchesOrigen && matchesSearch
@@ -84,15 +90,15 @@ export default function MovimientosPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Movimientos de Cuenta</h1>
+    <div className='container mx-auto py-6 space-y-6'>
+      <div className='flex justify-between items-center'>
+        <h1 className='text-2xl font-bold'>Movimientos de Cuenta</h1>
       </div>
 
-      <div className="flex gap-4 items-center">
+      <div className='flex gap-4 items-center'>
         <Select value={selectedCuenta} onValueChange={setSelectedCuenta}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Selecciona una cuenta" />
+          <SelectTrigger className='w-[200px]'>
+            <SelectValue placeholder='Selecciona una cuenta' />
           </SelectTrigger>
           <SelectContent>
             {cuentas.map((cuenta) => (
@@ -103,12 +109,17 @@ export default function MovimientosPage() {
           </SelectContent>
         </Select>
 
-        <Select value={selectedOrigen} onValueChange={(value) => setSelectedOrigen(value as OrigenMovimiento | 'TODOS')}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filtrar por origen" />
+        <Select
+          value={selectedOrigen}
+          onValueChange={(value) =>
+            setSelectedOrigen(value as OrigenMovimiento | 'TODOS')
+          }
+        >
+          <SelectTrigger className='w-[200px]'>
+            <SelectValue placeholder='Filtrar por origen' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="TODOS">Todos</SelectItem>
+            <SelectItem value='TODOS'>Todos</SelectItem>
             {Object.values(OrigenMovimiento).map((origen) => (
               <SelectItem key={origen} value={origen}>
                 {getOrigenLabel(origen)}
@@ -117,13 +128,13 @@ export default function MovimientosPage() {
           </SelectContent>
         </Select>
 
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className='relative flex-1'>
+          <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
           <Input
-            placeholder="Buscar por descripción o ID..."
+            placeholder='Buscar por descripción o ID...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
+            className='pl-8'
           />
         </div>
 
@@ -132,7 +143,7 @@ export default function MovimientosPage() {
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className='rounded-md border'>
         <Table>
           <TableHeader>
             <TableRow>
@@ -140,9 +151,9 @@ export default function MovimientosPage() {
               <TableHead>Descripción</TableHead>
               <TableHead>Origen</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead className="text-right">Monto</TableHead>
-              <TableHead className="text-right">Balance Anterior</TableHead>
-              <TableHead className="text-right">Balance Nuevo</TableHead>
+              <TableHead className='text-right'>Monto</TableHead>
+              <TableHead className='text-right'>Balance Anterior</TableHead>
+              <TableHead className='text-right'>Balance Nuevo</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -154,19 +165,19 @@ export default function MovimientosPage() {
                 <TableCell>{movimiento.descripcion}</TableCell>
                 <TableCell>{getOrigenLabel(movimiento.origen)}</TableCell>
                 <TableCell>{getTipoLabel(movimiento.tipo)}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className='text-right'>
                   {movimiento.monto.toLocaleString('es-MX', {
                     style: 'currency',
                     currency: 'MXN',
                   })}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className='text-right'>
                   {movimiento.balanceAnterior.toLocaleString('es-MX', {
                     style: 'currency',
                     currency: 'MXN',
                   })}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className='text-right'>
                   {movimiento.balanceNuevo.toLocaleString('es-MX', {
                     style: 'currency',
                     currency: 'MXN',
@@ -179,4 +190,4 @@ export default function MovimientosPage() {
       </div>
     </div>
   )
-} 
+}

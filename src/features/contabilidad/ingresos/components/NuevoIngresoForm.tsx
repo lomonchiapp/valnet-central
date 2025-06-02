@@ -1,8 +1,26 @@
 import { useState, useEffect } from 'react'
+import { database } from '@/firebase'
+import { TipoCuentaContable } from '@/types/interfaces/contabilidad/cuenta'
+import { Ingreso, TipoIngreso } from '@/types/interfaces/contabilidad/ingreso'
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { Plus, TrendingUp } from 'lucide-react'
+import { toast } from 'sonner'
+import { useContabilidadState } from '@/context/global/useContabilidadState'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -16,20 +34,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Plus, TrendingUp } from 'lucide-react'
-import { Ingreso, TipoIngreso } from '@/types/interfaces/contabilidad/ingreso'
-import { TipoCuentaContable } from '@/types/interfaces/contabilidad/cuenta'
-import { useContabilidadState } from '@/context/global/useContabilidadState'
+import { Textarea } from '@/components/ui/textarea'
 import { useIngresos, type IngresoInput } from '../hooks/useIngresos'
-import { database } from '@/firebase'
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
-import { toast } from 'sonner'
 
 interface NuevoIngresoFormProps {
   open: boolean
@@ -46,10 +52,15 @@ const tipoIngresoLabels: Record<TipoIngreso, string> = {
   [TipoIngreso.OTRO]: 'Otro',
 }
 
-export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }: NuevoIngresoFormProps) {
+export function NuevoIngresoForm({
+  open,
+  onOpenChange,
+  editIngreso,
+  onSuccess,
+}: NuevoIngresoFormProps) {
   const { cuentas, subscribeToCuentas } = useContabilidadState()
   const { isLoading, createIngreso, updateIngreso } = useIngresos()
-  
+
   const [formData, setFormData] = useState<IngresoInput>({
     descripcion: '',
     monto: 0,
@@ -62,13 +73,13 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
 
   // Estados para el modal de cuenta
   const [showCuentaForm, setShowCuentaForm] = useState(false)
-  
+
   // Estados para el formulario de cuenta
   const [cuentaFormData, setCuentaFormData] = useState({
     nombre: '',
     tipo: TipoCuentaContable.ACTIVO,
     descripcion: '',
-    balance: 0
+    balance: 0,
   })
   const [isCreatingCuenta, setIsCreatingCuenta] = useState(false)
 
@@ -123,10 +134,13 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
     onOpenChange(false)
   }
 
-  const handleFieldChange = (field: keyof IngresoInput, value: string | number | TipoIngreso) => {
-    setFormData(prev => ({
+  const handleFieldChange = (
+    field: keyof IngresoInput,
+    value: string | number | TipoIngreso
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }))
   }
 
@@ -143,20 +157,20 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
-      
+
       await updateDoc(doc(database, 'cuentas', docRef.id), {
         id: docRef.id,
       })
-      
+
       // Auto-seleccionar la cuenta recién creada
-      setFormData(prev => ({ ...prev, idcuenta: docRef.id }))
-      
+      setFormData((prev) => ({ ...prev, idcuenta: docRef.id }))
+
       toast.success('Cuenta creada exitosamente')
       setCuentaFormData({
         nombre: '',
         tipo: TipoCuentaContable.ACTIVO,
         descripcion: '',
-        balance: 0
+        balance: 0,
       })
       setShowCuentaForm(false)
     } catch (error) {
@@ -175,12 +189,18 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
       >
         <SheetHeader className='mb-6'>
           <SheetTitle className='text-2xl font-bold text-gray-900 flex items-center gap-2'>
-            <TrendingUp className="h-6 w-6 text-green-600" />
+            <TrendingUp className='h-6 w-6 text-green-600' />
             {editIngreso ? 'Editar Ingreso' : 'Nuevo Ingreso'}
           </SheetTitle>
         </SheetHeader>
-        
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className='space-y-6'>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSubmit()
+          }}
+          className='space-y-6'
+        >
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* Columna izquierda */}
             <div className='space-y-4'>
@@ -190,7 +210,9 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                 </Label>
                 <Select
                   value={formData.tipo}
-                  onValueChange={(value) => handleFieldChange('tipo', value as TipoIngreso)}
+                  onValueChange={(value) =>
+                    handleFieldChange('tipo', value as TipoIngreso)
+                  }
                   disabled={isLoading}
                 >
                   <SelectTrigger className='mt-1'>
@@ -213,7 +235,9 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                 <div className='flex gap-2 mt-1'>
                   <Select
                     value={formData.idcuenta}
-                    onValueChange={(value) => handleFieldChange('idcuenta', value)}
+                    onValueChange={(value) =>
+                      handleFieldChange('idcuenta', value)
+                    }
                     disabled={isLoading}
                   >
                     <SelectTrigger className='flex-1'>
@@ -223,8 +247,13 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                       {cuentas.map((cuenta) => (
                         <SelectItem key={cuenta.id} value={cuenta.id}>
                           <div className='flex flex-col'>
-                            <span className='font-medium'>{cuenta.nombre} - (${cuenta.balance.toLocaleString()})</span>
-                            <span className='text-xs text-gray-500'>{cuenta.descripcion}</span>
+                            <span className='font-medium'>
+                              {cuenta.nombre} - ($
+                              {cuenta.balance.toLocaleString()})
+                            </span>
+                            <span className='text-xs text-gray-500'>
+                              {cuenta.descripcion}
+                            </span>
                           </div>
                         </SelectItem>
                       ))}
@@ -250,7 +279,9 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                 <Textarea
                   id='descripcion'
                   value={formData.descripcion}
-                  onChange={(e) => handleFieldChange('descripcion', e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange('descripcion', e.target.value)
+                  }
                   placeholder='Describe el concepto del ingreso...'
                   disabled={isLoading}
                   rows={3}
@@ -265,7 +296,9 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                 <Input
                   id='referencia'
                   value={formData.referencia}
-                  onChange={(e) => handleFieldChange('referencia', e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange('referencia', e.target.value)
+                  }
                   placeholder='Número de factura, recibo, etc.'
                   disabled={isLoading}
                   className='mt-1'
@@ -289,7 +322,9 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                     step='0.01'
                     min='0'
                     value={formData.monto}
-                    onChange={(e) => handleFieldChange('monto', Number(e.target.value))}
+                    onChange={(e) =>
+                      handleFieldChange('monto', Number(e.target.value))
+                    }
                     placeholder='0.00'
                     disabled={isLoading}
                     className='pl-8'
@@ -329,7 +364,7 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
               {/* Resumen */}
               <div className='p-4 bg-green-50 rounded-lg border border-green-200'>
                 <h4 className='text-sm font-medium text-green-900 mb-2 flex items-center gap-2'>
-                  <TrendingUp className="h-4 w-4" />
+                  <TrendingUp className='h-4 w-4' />
                   Resumen del Ingreso
                 </h4>
                 <div className='space-y-1 text-sm text-green-800'>
@@ -342,10 +377,10 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                   <div className='flex justify-between'>
                     <span>Cuenta:</span>
                     <span className='font-medium'>
-                      {formData.idcuenta 
-                        ? cuentas.find(c => c.id === formData.idcuenta)?.nombre || 'No seleccionada'
-                        : 'No seleccionada'
-                      }
+                      {formData.idcuenta
+                        ? cuentas.find((c) => c.id === formData.idcuenta)
+                            ?.nombre || 'No seleccionada'
+                        : 'No seleccionada'}
                     </span>
                   </div>
                   {formData.idcuenta && formData.monto > 0 && (
@@ -354,7 +389,11 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                         <div className='flex justify-between text-xs'>
                           <span>Balance actual:</span>
                           <span className='font-medium'>
-                            ${(cuentas.find(c => c.id === formData.idcuenta)?.balance || 0).toLocaleString()}
+                            $
+                            {(
+                              cuentas.find((c) => c.id === formData.idcuenta)
+                                ?.balance || 0
+                            ).toLocaleString()}
                           </span>
                         </div>
                         <div className='flex justify-between text-xs'>
@@ -366,7 +405,11 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                         <div className='flex justify-between text-xs font-semibold border-t border-green-300 pt-1 mt-1'>
                           <span>Balance resultante:</span>
                           <span className='text-green-700'>
-                            ${((cuentas.find(c => c.id === formData.idcuenta)?.balance || 0) + formData.monto).toLocaleString()}
+                            $
+                            {(
+                              (cuentas.find((c) => c.id === formData.idcuenta)
+                                ?.balance || 0) + formData.monto
+                            ).toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -374,7 +417,9 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                   )}
                   <div className='border-t border-green-300 pt-2 mt-3'>
                     <div className='flex justify-between items-center'>
-                      <span className='font-semibold text-green-800'>Total del Ingreso:</span>
+                      <span className='font-semibold text-green-800'>
+                        Total del Ingreso:
+                      </span>
                       <span className='font-bold text-2xl text-green-600'>
                         ${formData.monto.toLocaleString()}
                       </span>
@@ -394,8 +439,16 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
             >
               Cancelar
             </Button>
-            <Button type='submit' disabled={isLoading} className="bg-green-600 hover:bg-green-700">
-              {isLoading ? 'Guardando...' : editIngreso ? 'Actualizar' : 'Registrar Ingreso'}
+            <Button
+              type='submit'
+              disabled={isLoading}
+              className='bg-green-600 hover:bg-green-700'
+            >
+              {isLoading
+                ? 'Guardando...'
+                : editIngreso
+                  ? 'Actualizar'
+                  : 'Registrar Ingreso'}
             </Button>
           </div>
         </form>
@@ -413,16 +466,26 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
               <Input
                 id='nombre-cuenta'
                 value={cuentaFormData.nombre}
-                onChange={(e) => setCuentaFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                onChange={(e) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    nombre: e.target.value,
+                  }))
+                }
                 placeholder='Nombre de la cuenta'
                 disabled={isCreatingCuenta}
               />
             </div>
             <div>
               <Label htmlFor='tipo-cuenta'>Tipo *</Label>
-              <Select 
-                value={cuentaFormData.tipo} 
-                onValueChange={(value) => setCuentaFormData(prev => ({ ...prev, tipo: value as TipoCuentaContable }))}
+              <Select
+                value={cuentaFormData.tipo}
+                onValueChange={(value) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    tipo: value as TipoCuentaContable,
+                  }))
+                }
                 disabled={isCreatingCuenta}
               >
                 <SelectTrigger>
@@ -442,7 +505,12 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
               <Input
                 id='descripcion-cuenta'
                 value={cuentaFormData.descripcion}
-                onChange={(e) => setCuentaFormData(prev => ({ ...prev, descripcion: e.target.value }))}
+                onChange={(e) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    descripcion: e.target.value,
+                  }))
+                }
                 placeholder='Descripción de la cuenta'
                 disabled={isCreatingCuenta}
               />
@@ -453,7 +521,12 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
                 id='balance-cuenta'
                 type='number'
                 value={cuentaFormData.balance}
-                onChange={(e) => setCuentaFormData(prev => ({ ...prev, balance: Number(e.target.value) }))}
+                onChange={(e) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    balance: Number(e.target.value),
+                  }))
+                }
                 placeholder='0.00'
                 disabled={isCreatingCuenta}
               />
@@ -476,4 +549,4 @@ export function NuevoIngresoForm({ open, onOpenChange, editIngreso, onSuccess }:
       </Dialog>
     </Sheet>
   )
-} 
+}

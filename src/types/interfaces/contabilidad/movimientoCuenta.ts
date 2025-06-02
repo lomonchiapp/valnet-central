@@ -25,4 +25,4 @@ export interface MovimientoCuenta extends BaseModel {
   balanceAnterior: number // Balance de la cuenta antes del movimiento
   balanceNuevo: number // Balance de la cuenta después del movimiento
   notas?: string // Notas adicionales
-} 
+}

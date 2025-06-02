@@ -1,3 +1,4 @@
+import { PerfilPage } from '@/pages/PerfilPage'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout'
@@ -37,7 +38,6 @@ import { WallNetConfig } from '@/features/valnet/wallNet'
 import Ventas from '@/features/ventas'
 import NuevoPreRegistro from '@/features/ventas/components/NuevoPreRegistro'
 import PreRegistros from '@/features/ventas/pre-registros'
-import { PerfilPage } from '@/pages/PerfilPage'
 
 // Componente para manejar rutas protegidas
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {

@@ -1,6 +1,20 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
+import {
+  TipoMovimiento,
+  OrigenMovimiento,
+} from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { es } from 'date-fns/locale'
+import { useContabilidadState } from '@/context/global/useContabilidadState'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -9,41 +23,41 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TipoMovimiento, OrigenMovimiento } from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { useMovimientosCuenta } from '@/features/compras/gastos/hooks/useMovimientosCuenta'
-import { useContabilidadState } from '@/context/global/useContabilidadState'
 
 interface HistorialMovimientosProps {
   idcuenta?: string
   titulo?: string
 }
 
-export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimientos' }: HistorialMovimientosProps) {
-  const { movimientos, movimientosPorCuenta, totalDebitos, totalCreditos, saldoNeto } = useMovimientosCuenta()
+export function HistorialMovimientos({
+  idcuenta,
+  titulo = 'Historial de Movimientos',
+}: HistorialMovimientosProps) {
+  const {
+    movimientos,
+    movimientosPorCuenta,
+    totalDebitos,
+    totalCreditos,
+    saldoNeto,
+  } = useMovimientosCuenta()
   const { cuentas } = useContabilidadState()
-  
+
   const [filtroOrigen, setFiltroOrigen] = useState<string>('todos')
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
 
-  const movimientosMostrar = idcuenta 
+  const movimientosMostrar = idcuenta
     ? movimientosPorCuenta(idcuenta)
     : movimientos
 
   const movimientosFiltrados = movimientosMostrar
-    .filter(m => filtroOrigen === 'todos' || m.origen === filtroOrigen)
-    .filter(m => filtroTipo === 'todos' || m.tipo === filtroTipo)
+    .filter((m) => filtroOrigen === 'todos' || m.origen === filtroOrigen)
+    .filter((m) => filtroTipo === 'todos' || m.tipo === filtroTipo)
 
   const getCuentaNombre = (idcuenta: string) => {
-    return cuentas.find(c => c.id === idcuenta)?.nombre || 'Cuenta no encontrada'
+    return (
+      cuentas.find((c) => c.id === idcuenta)?.nombre || 'Cuenta no encontrada'
+    )
   }
 
   const getOrigenBadgeColor = (origen: OrigenMovimiento) => {
@@ -66,8 +80,8 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
   }
 
   const getTipoBadgeColor = (tipo: TipoMovimiento) => {
-    return tipo === TipoMovimiento.DEBITO 
-      ? 'bg-red-100 text-red-800' 
+    return tipo === TipoMovimiento.DEBITO
+      ? 'bg-red-100 text-red-800'
       : 'bg-green-100 text-green-800'
   }
 
@@ -78,15 +92,21 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
           <span>{titulo}</span>
           {!idcuenta && (
             <div className='flex gap-4 text-sm'>
-              <span className='text-red-600'>Débitos: ${totalDebitos.toLocaleString()}</span>
-              <span className='text-green-600'>Créditos: ${totalCreditos.toLocaleString()}</span>
-              <span className={`font-bold ${saldoNeto >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className='text-red-600'>
+                Débitos: ${totalDebitos.toLocaleString()}
+              </span>
+              <span className='text-green-600'>
+                Créditos: ${totalCreditos.toLocaleString()}
+              </span>
+              <span
+                className={`font-bold ${saldoNeto >= 0 ? 'text-green-600' : 'text-red-600'}`}
+              >
                 Saldo Neto: ${saldoNeto.toLocaleString()}
               </span>
             </div>
           )}
         </CardTitle>
-        
+
         {/* Filtros */}
         <div className='flex gap-4'>
           <Select value={filtroOrigen} onValueChange={setFiltroOrigen}>
@@ -95,7 +115,7 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='todos'>Todos los orígenes</SelectItem>
-              {Object.values(OrigenMovimiento).map(origen => (
+              {Object.values(OrigenMovimiento).map((origen) => (
                 <SelectItem key={origen} value={origen}>
                   {origen.replace('_', ' ')}
                 </SelectItem>
@@ -115,7 +135,7 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
           </Select>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <Table>
           <TableHeader>
@@ -133,7 +153,10 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
           <TableBody>
             {movimientosFiltrados.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={idcuenta ? 7 : 8} className='text-center text-gray-500 py-6'>
+                <TableCell
+                  colSpan={idcuenta ? 7 : 8}
+                  className='text-center text-gray-500 py-6'
+                >
                   No hay movimientos registrados
                 </TableCell>
               </TableRow>
@@ -141,7 +164,9 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
               movimientosFiltrados.map((movimiento) => (
                 <TableRow key={movimiento.id}>
                   <TableCell>
-                    {format(new Date(movimiento.fecha), 'dd/MM/yyyy HH:mm', { locale: es })}
+                    {format(new Date(movimiento.fecha), 'dd/MM/yyyy HH:mm', {
+                      locale: es,
+                    })}
                   </TableCell>
                   {!idcuenta && (
                     <TableCell className='font-medium'>
@@ -150,9 +175,13 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
                   )}
                   <TableCell>
                     <div>
-                      <div className='font-medium'>{movimiento.descripcion}</div>
+                      <div className='font-medium'>
+                        {movimiento.descripcion}
+                      </div>
                       {movimiento.notas && (
-                        <div className='text-sm text-gray-500'>{movimiento.notas}</div>
+                        <div className='text-sm text-gray-500'>
+                          {movimiento.notas}
+                        </div>
                       )}
                     </div>
                   </TableCell>
@@ -167,8 +196,15 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
                     </Badge>
                   </TableCell>
                   <TableCell className='text-right font-mono'>
-                    <span className={movimiento.tipo === TipoMovimiento.DEBITO ? 'text-red-600' : 'text-green-600'}>
-                      {movimiento.tipo === TipoMovimiento.DEBITO ? '-' : '+'}${movimiento.monto.toLocaleString()}
+                    <span
+                      className={
+                        movimiento.tipo === TipoMovimiento.DEBITO
+                          ? 'text-red-600'
+                          : 'text-green-600'
+                      }
+                    >
+                      {movimiento.tipo === TipoMovimiento.DEBITO ? '-' : '+'}$
+                      {movimiento.monto.toLocaleString()}
                     </span>
                   </TableCell>
                   <TableCell className='text-right font-mono'>
@@ -185,4 +221,4 @@ export function HistorialMovimientos({ idcuenta, titulo = 'Historial de Movimien
       </CardContent>
     </Card>
   )
-} 
+}

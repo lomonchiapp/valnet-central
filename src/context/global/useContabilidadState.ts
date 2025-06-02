@@ -1,11 +1,23 @@
 import { database } from '@/firebase'
 import { AsientoContable } from '@/types/interfaces/contabilidad/asientoContable'
 import { Cuenta } from '@/types/interfaces/contabilidad/cuenta'
+import { Ingreso } from '@/types/interfaces/contabilidad/ingreso'
+import {
+  MovimientoCuenta,
+  TipoMovimiento,
+  OrigenMovimiento,
+} from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { PagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
 import { PagoUnico } from '@/types/interfaces/contabilidad/pagoUnico'
-import { Ingreso } from '@/types/interfaces/contabilidad/ingreso'
-import { MovimientoCuenta, TipoMovimiento, OrigenMovimiento } from '@/types/interfaces/contabilidad/movimientoCuenta'
-import { onSnapshot, collection, addDoc, updateDoc, doc, serverTimestamp, runTransaction } from 'firebase/firestore'
+import {
+  onSnapshot,
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+  runTransaction,
+} from 'firebase/firestore'
 import { create } from 'zustand'
 
 // Este es el estado global de la aplicación
@@ -41,19 +53,25 @@ interface ContabilidadState {
   subscribeToPagosRecurrentes: () => () => void
   subscribeToIngresos: () => () => void
   subscribeToMovimientosCuenta: () => () => void
-  
+
   // Funciones para pagos únicos con contabilidad
-  addPagoUnicoConMovimiento: (pago: Omit<PagoUnico, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>
+  addPagoUnicoConMovimiento: (
+    pago: Omit<PagoUnico, 'id' | 'createdAt' | 'updatedAt'>
+  ) => Promise<string>
   updatePagoUnico: (id: string, pago: Partial<PagoUnico>) => Promise<void>
   deletePagoUnico: (id: string) => Promise<void>
-  
+
   // Funciones para ingresos con contabilidad
-  addIngresoConMovimiento: (ingreso: Omit<Ingreso, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>
+  addIngresoConMovimiento: (
+    ingreso: Omit<Ingreso, 'id' | 'createdAt' | 'updatedAt'>
+  ) => Promise<string>
   updateIngreso: (id: string, ingreso: Partial<Ingreso>) => Promise<void>
   deleteIngreso: (id: string) => Promise<void>
-  
+
   // Funciones para movimientos de cuenta
-  createMovimientoCuenta: (movimiento: Omit<MovimientoCuenta, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>
+  createMovimientoCuenta: (
+    movimiento: Omit<MovimientoCuenta, 'id' | 'createdAt' | 'updatedAt'>
+  ) => Promise<string>
 }
 
 export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
@@ -74,7 +92,8 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
   setPagosUnicos: (pagos) => set({ pagosUnicos: pagos }),
   setPagosRecurrentes: (pagos) => set({ pagosRecurrentes: pagos }),
   setIngresos: (ingresos) => set({ ingresos }),
-  setMovimientosCuenta: (movimientos) => set({ movimientosCuenta: movimientos }),
+  setMovimientosCuenta: (movimientos) =>
+    set({ movimientosCuenta: movimientos }),
   subscribeToCuentas: () => {
     const unsubscribe = onSnapshot(
       collection(database, 'cuentas'),
@@ -141,10 +160,13 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
     const unsubscribe = onSnapshot(
       collection(database, 'pagosUnicos'),
       (snapshot) => {
-        const pagosUnicosData = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }) as PagoUnico)
+        const pagosUnicosData = snapshot.docs.map(
+          (doc) =>
+            ({
+              ...doc.data(),
+              id: doc.id,
+            }) as PagoUnico
+        )
         console.log('Pagos únicos obtenidos de Firestore:', pagosUnicosData)
         set({ pagosUnicos: pagosUnicosData })
       },
@@ -158,10 +180,13 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
     const unsubscribe = onSnapshot(
       collection(database, 'pagosRecurrentes'),
       (snapshot) => {
-        const pagosRecurrentesData = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }) as PagoRecurrente)
+        const pagosRecurrentesData = snapshot.docs.map(
+          (doc) =>
+            ({
+              ...doc.data(),
+              id: doc.id,
+            }) as PagoRecurrente
+        )
         set({ pagosRecurrentes: pagosRecurrentesData })
       },
       (error) => {
@@ -174,10 +199,13 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
     const unsubscribe = onSnapshot(
       collection(database, 'ingresos'),
       (snapshot) => {
-        const ingresosData = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }) as Ingreso)
+        const ingresosData = snapshot.docs.map(
+          (doc) =>
+            ({
+              ...doc.data(),
+              id: doc.id,
+            }) as Ingreso
+        )
         set({ ingresos: ingresosData })
       },
       (error) => {
@@ -190,10 +218,13 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
     const unsubscribe = onSnapshot(
       collection(database, 'movimientosCuenta'),
       (snapshot) => {
-        const movimientosData = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }) as MovimientoCuenta)
+        const movimientosData = snapshot.docs.map(
+          (doc) =>
+            ({
+              ...doc.data(),
+              id: doc.id,
+            }) as MovimientoCuenta
+        )
         set({ movimientosCuenta: movimientosData })
       },
       (error) => {
@@ -202,14 +233,16 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
     )
     return unsubscribe
   },
-  
+
   // Función para crear pago único con movimiento contable
   addPagoUnicoConMovimiento: async (pagoData) => {
     try {
       const result = await runTransaction(database, async (transaction) => {
         const cuentas = get().cuentas
-        const cuentaSeleccionada = cuentas.find(c => c.id === pagoData.idcuenta)
-        
+        const cuentaSeleccionada = cuentas.find(
+          (c) => c.id === pagoData.idcuenta
+        )
+
         if (!cuentaSeleccionada) {
           throw new Error('Cuenta no encontrada')
         }
@@ -232,7 +265,7 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
         const cuentaRef = doc(database, 'cuentas', pagoData.idcuenta)
         transaction.update(cuentaRef, {
           balance: balanceNuevo,
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         })
 
         // 4. Crear movimiento de cuenta
@@ -263,7 +296,7 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
       throw error
     }
   },
-  
+
   updatePagoUnico: async (id, pagoData) => {
     try {
       await updateDoc(doc(database, 'pagosUnicos', id), {
@@ -275,35 +308,44 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
       throw error
     }
   },
-  
+
   deletePagoUnico: async (id) => {
     try {
       await runTransaction(database, async (transaction) => {
         const movimientosCuenta = get().movimientosCuenta
         const cuentas = get().cuentas
-        
+
         // Buscar el movimiento asociado al pago
         const movimientoAsociado = movimientosCuenta.find(
-          m => m.origen === OrigenMovimiento.PAGO_UNICO && m.idOrigen === id
+          (m) => m.origen === OrigenMovimiento.PAGO_UNICO && m.idOrigen === id
         )
-        
+
         if (movimientoAsociado) {
           // Buscar la cuenta afectada
-          const cuentaAfectada = cuentas.find(c => c.id === movimientoAsociado.idcuenta)
-          
+          const cuentaAfectada = cuentas.find(
+            (c) => c.id === movimientoAsociado.idcuenta
+          )
+
           if (cuentaAfectada) {
             // Revertir el movimiento: si fue débito, agregamos el monto de vuelta al balance
-            const balanceRevertido = cuentaAfectada.balance + movimientoAsociado.monto
-            
+            const balanceRevertido =
+              cuentaAfectada.balance + movimientoAsociado.monto
+
             // Actualizar balance de la cuenta
-            const cuentaRef = doc(database, 'cuentas', movimientoAsociado.idcuenta)
+            const cuentaRef = doc(
+              database,
+              'cuentas',
+              movimientoAsociado.idcuenta
+            )
             transaction.update(cuentaRef, {
               balance: balanceRevertido,
-              updatedAt: serverTimestamp()
+              updatedAt: serverTimestamp(),
             })
-            
+
             // Crear movimiento de reversión
-            const movimientoReversionRef = doc(collection(database, 'movimientosCuenta'))
+            const movimientoReversionRef = doc(
+              collection(database, 'movimientosCuenta')
+            )
             const movimientoReversion = {
               id: movimientoReversionRef.id,
               idcuenta: movimientoAsociado.idcuenta,
@@ -320,13 +362,17 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
               updatedAt: serverTimestamp(),
             }
             transaction.set(movimientoReversionRef, movimientoReversion)
-            
+
             // Eliminar el movimiento original
-            const movimientoOriginalRef = doc(database, 'movimientosCuenta', movimientoAsociado.id)
+            const movimientoOriginalRef = doc(
+              database,
+              'movimientosCuenta',
+              movimientoAsociado.id
+            )
             transaction.delete(movimientoOriginalRef)
           }
         }
-        
+
         // Eliminar el pago único
         const pagoRef = doc(database, 'pagosUnicos', id)
         transaction.delete(pagoRef)
@@ -341,8 +387,10 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
     try {
       const result = await runTransaction(database, async (transaction) => {
         const cuentas = get().cuentas
-        const cuentaSeleccionada = cuentas.find(c => c.id === ingresoData.idcuenta)
-        
+        const cuentaSeleccionada = cuentas.find(
+          (c) => c.id === ingresoData.idcuenta
+        )
+
         if (!cuentaSeleccionada) {
           throw new Error('Cuenta no encontrada')
         }
@@ -365,7 +413,7 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
         const cuentaRef = doc(database, 'cuentas', ingresoData.idcuenta)
         transaction.update(cuentaRef, {
           balance: balanceNuevo,
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         })
 
         // 4. Crear movimiento de cuenta
@@ -396,7 +444,7 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
       throw error
     }
   },
-  
+
   updateIngreso: async (id, ingresoData) => {
     try {
       await updateDoc(doc(database, 'ingresos', id), {
@@ -408,35 +456,44 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
       throw error
     }
   },
-  
+
   deleteIngreso: async (id) => {
     try {
       await runTransaction(database, async (transaction) => {
         const movimientosCuenta = get().movimientosCuenta
         const cuentas = get().cuentas
-        
+
         // Buscar el movimiento asociado al ingreso
         const movimientoAsociado = movimientosCuenta.find(
-          m => m.origen === OrigenMovimiento.INGRESO && m.idOrigen === id
+          (m) => m.origen === OrigenMovimiento.INGRESO && m.idOrigen === id
         )
-        
+
         if (movimientoAsociado) {
           // Buscar la cuenta afectada
-          const cuentaAfectada = cuentas.find(c => c.id === movimientoAsociado.idcuenta)
-          
+          const cuentaAfectada = cuentas.find(
+            (c) => c.id === movimientoAsociado.idcuenta
+          )
+
           if (cuentaAfectada) {
             // Revertir el movimiento: si fue crédito, restamos el monto del balance
-            const balanceRevertido = cuentaAfectada.balance - movimientoAsociado.monto
-            
+            const balanceRevertido =
+              cuentaAfectada.balance - movimientoAsociado.monto
+
             // Actualizar balance de la cuenta
-            const cuentaRef = doc(database, 'cuentas', movimientoAsociado.idcuenta)
+            const cuentaRef = doc(
+              database,
+              'cuentas',
+              movimientoAsociado.idcuenta
+            )
             transaction.update(cuentaRef, {
               balance: balanceRevertido,
-              updatedAt: serverTimestamp()
+              updatedAt: serverTimestamp(),
             })
-            
+
             // Crear movimiento de reversión
-            const movimientoReversionRef = doc(collection(database, 'movimientosCuenta'))
+            const movimientoReversionRef = doc(
+              collection(database, 'movimientosCuenta')
+            )
             const movimientoReversion = {
               id: movimientoReversionRef.id,
               idcuenta: movimientoAsociado.idcuenta,
@@ -453,13 +510,17 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
               updatedAt: serverTimestamp(),
             }
             transaction.set(movimientoReversionRef, movimientoReversion)
-            
+
             // Eliminar el movimiento original
-            const movimientoOriginalRef = doc(database, 'movimientosCuenta', movimientoAsociado.id)
+            const movimientoOriginalRef = doc(
+              database,
+              'movimientosCuenta',
+              movimientoAsociado.id
+            )
             transaction.delete(movimientoOriginalRef)
           }
         }
-        
+
         // Eliminar el ingreso
         const ingresoRef = doc(database, 'ingresos', id)
         transaction.delete(ingresoRef)
@@ -477,11 +538,11 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
-      
+
       await updateDoc(doc(database, 'movimientosCuenta', docRef.id), {
         id: docRef.id,
       })
-      
+
       return docRef.id
     } catch (error) {
       console.error('Error al crear movimiento de cuenta:', error)

@@ -1,10 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
+import { format } from 'date-fns'
 import type {
   MetricasSistema,
   Pago,
   Inventario,
   Brigada,
 } from '@/types/interfaces/admin'
+import {
+  EstadoNotificacion,
+  TipoNotificacion,
+  Notificacion,
+} from '@/types/interfaces/notificaciones/notificacion'
+import { es } from 'date-fns/locale'
 import { Timestamp } from 'firebase/firestore'
 import {
   Users,
@@ -16,6 +23,7 @@ import {
   Bell,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -25,12 +33,8 @@ import {
   CardDescription,
   CardFooter,
 } from '@/components/ui/card'
-import { WallNetDashboardWidget } from './SacDashboard'
 import { useObtenerNotificaciones } from '@/features/notificaciones/hooks'
-import { EstadoNotificacion, TipoNotificacion, Notificacion } from '@/types/interfaces/notificaciones/notificacion'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { Badge } from '@/components/ui/badge'
+import { WallNetDashboardWidget } from './SacDashboard'
 
 // Mock data
 const mockMetricas: MetricasSistema = {
@@ -165,7 +169,9 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { obtenerNotificaciones } = useObtenerNotificaciones()
-  const [notificacionesPagos, setNotificacionesPagos] = useState<Notificacion[]>([])
+  const [notificacionesPagos, setNotificacionesPagos] = useState<
+    Notificacion[]
+  >([])
 
   const fetchData = useCallback(async () => {
     try {
@@ -174,9 +180,10 @@ export function AdminDashboard() {
 
       // Obtener notificaciones de pagos
       const notifs = await obtenerNotificaciones(EstadoNotificacion.PENDIENTE)
-      const pagosNotifs = notifs.filter(n => 
-        n.tipo === TipoNotificacion.PAGO_PROXIMO || 
-        n.tipo === TipoNotificacion.PAGO_VENCIDO
+      const pagosNotifs = notifs.filter(
+        (n) =>
+          n.tipo === TipoNotificacion.PAGO_PROXIMO ||
+          n.tipo === TipoNotificacion.PAGO_VENCIDO
       )
       setNotificacionesPagos(pagosNotifs)
 
@@ -195,11 +202,11 @@ export function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }, [ obtenerNotificaciones ])
+  }, [obtenerNotificaciones])
 
   useEffect(() => {
     fetchData()
-  }, [ fetchData ])
+  }, [fetchData])
 
   if (loading) {
     return (
@@ -338,17 +345,28 @@ export function AdminDashboard() {
                   key={notif.id}
                   className='flex items-start gap-3 p-3 rounded-lg border'
                 >
-                  <span className='text-xl'>{getNotificacionIcon(notif.tipo)}</span>
+                  <span className='text-xl'>
+                    {getNotificacionIcon(notif.tipo)}
+                  </span>
                   <div className='flex-1'>
                     <div className='flex items-center justify-between'>
                       <h4 className='font-medium'>{notif.titulo}</h4>
-                      <Badge variant="outline" className={getNotificacionColor(notif.tipo)}>
-                        {notif.tipo === TipoNotificacion.PAGO_VENCIDO ? 'Vencido' : 'Próximo'}
+                      <Badge
+                        variant='outline'
+                        className={getNotificacionColor(notif.tipo)}
+                      >
+                        {notif.tipo === TipoNotificacion.PAGO_VENCIDO
+                          ? 'Vencido'
+                          : 'Próximo'}
                       </Badge>
                     </div>
-                    <p className='text-sm text-muted-foreground mt-1'>{notif.mensaje}</p>
+                    <p className='text-sm text-muted-foreground mt-1'>
+                      {notif.mensaje}
+                    </p>
                     <p className='text-xs text-muted-foreground mt-2'>
-                      {format(new Date(notif.fechaNotificacion), 'PPP', { locale: es })}
+                      {format(new Date(notif.fechaNotificacion), 'PPP', {
+                        locale: es,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -363,7 +381,8 @@ export function AdminDashboard() {
                   <div>
                     <p className='font-medium'>{payment.cliente.nombre}</p>
                     <p className='text-xs text-muted-foreground'>
-                      Vence: {payment.fechaVencimiento.toDate().toLocaleDateString()}
+                      Vence:{' '}
+                      {payment.fechaVencimiento.toDate().toLocaleDateString()}
                     </p>
                   </div>
                   <div className='text-right'>

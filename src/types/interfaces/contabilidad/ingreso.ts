@@ -16,4 +16,4 @@ export interface Ingreso extends BaseModel {
   tipo: TipoIngreso // Tipo de ingreso
   referencia?: string // Referencia externa (factura, recibo, etc.)
   notas?: string // Notas adicionales
-} 
+}

@@ -36,7 +36,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     >
       <SidebarContent className='mt-4 px-0 overflow-y-auto scrollbar-hide'>
         {sidebarData.navGroups.map((props) => (
-          <NavGroup key={props.title} {...props} itemClassName='text-xs px-2 py-1 gap-2 hover:bg-slate-100 hover:text-primary rounded-md transition-colors' titleClassName='text-[0.7rem] font-semibold text-slate-500 uppercase px-2 py-1 mb-1' />
+          <NavGroup
+            key={props.title}
+            {...props}
+            itemClassName='text-xs px-2 py-1 gap-2 hover:bg-slate-100 hover:text-primary rounded-md transition-colors'
+            titleClassName='text-[0.7rem] font-semibold text-slate-500 uppercase px-2 py-1 mb-1'
+          />
         ))}
       </SidebarContent>
       <SidebarFooter className='px-2 py-2'>

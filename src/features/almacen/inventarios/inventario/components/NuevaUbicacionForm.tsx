@@ -3,7 +3,10 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { Ubicacion } from '@/types/interfaces/almacen/ubicacion'
 import { Loader2, Warehouse } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
+import { useAlmacenState } from '@/context/global/useAlmacenState'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -15,9 +18,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useUbicaciones } from '../hooks/useUbicaciones'
-import { useAlmacenState } from '@/context/global/useAlmacenState'
-import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 
 interface NuevaUbicacionFormValues {
   nombre: string
@@ -37,7 +37,8 @@ export function NuevaUbicacionForm({
   onUbicacionCreada,
   ubicacionToEdit,
 }: NuevaUbicacionFormProps) {
-  const { crearUbicacion, actualizarUbicacion, isLoading, error } = useUbicaciones()
+  const { crearUbicacion, actualizarUbicacion, isLoading, error } =
+    useUbicaciones()
   const { inventarios } = useAlmacenState()
 
   const {
@@ -167,7 +168,8 @@ export function NuevaUbicacionForm({
                     key={inventario.id}
                     className={cn(
                       'p-4 cursor-pointer transition-colors hover:bg-accent',
-                      selectedInventario === inventario.id && 'border-primary bg-accent'
+                      selectedInventario === inventario.id &&
+                        'border-primary bg-accent'
                     )}
                     onClick={() => setValue('idInventario', inventario.id)}
                   >

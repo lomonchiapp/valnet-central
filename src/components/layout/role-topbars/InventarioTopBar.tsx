@@ -21,8 +21,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
 } from '@/components/ui/dropdown-menu'
-import { NotificacionesDropdown } from '@/features/notificaciones/components/NotificacionesDropdown'
 import { UserMenu } from '@/components/layout/UserMenu'
+import { NotificacionesDropdown } from '@/features/notificaciones/components/NotificacionesDropdown'
 
 export function InventarioTopBar() {
   const navigate = useNavigate()
@@ -129,68 +129,68 @@ export function InventarioTopBar() {
       : inventarios
 
   return (
-    <header className="w-full bg-[#005BAA] shadow z-50 h-20 flex items-center px-6">
-      <div className="flex-1">
-        <h2 className="text-xl font-medium text-white">
+    <header className='w-full bg-[#005BAA] shadow z-50 h-20 flex items-center px-6'>
+      <div className='flex-1'>
+        <h2 className='text-xl font-medium text-white'>
           Gestión de Inventario
         </h2>
-        <p className="text-sm text-muted-foreground text-gray-100">
+        <p className='text-sm text-muted-foreground text-gray-100'>
           Visualiza y gestiona el stock de productos
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className='flex items-center gap-3'>
         {currentInventario && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="secondary"
-                className="bg-white hover:bg-gray-100"
+                variant='secondary'
+                className='bg-white hover:bg-gray-100'
               >
-                <Warehouse className="mr-2 h-4 w-4 text-[#005BAA]" />
+                <Warehouse className='mr-2 h-4 w-4 text-[#005BAA]' />
                 {currentInventario.nombre}
-                <ChevronDown className="ml-2 h-4 w-4" />
+                <ChevronDown className='ml-2 h-4 w-4' />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <div className="p-2">
-                <div className="flex items-center border rounded-md px-3 py-1 mb-2">
-                  <Search className="h-4 w-4 text-gray-500 mr-2" />
+            <DropdownMenuContent align='end' className='w-64'>
+              <div className='p-2'>
+                <div className='flex items-center border rounded-md px-3 py-1 mb-2'>
+                  <Search className='h-4 w-4 text-gray-500 mr-2' />
                   <input
-                    type="text"
-                    placeholder="Buscar inventario..."
-                    className="border-none outline-none flex-1 text-sm"
+                    type='text'
+                    placeholder='Buscar inventario...'
+                    className='border-none outline-none flex-1 text-sm'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="max-h-60 overflow-y-auto">
+              <div className='max-h-60 overflow-y-auto'>
                 {filteredInventarios && filteredInventarios.length > 0 ? (
                   filteredInventarios.map((inventario) => (
                     <DropdownMenuItem
                       key={inventario.id}
                       onClick={() => handleInventarioChange(inventario)}
-                      className="cursor-pointer"
+                      className='cursor-pointer'
                     >
-                      <Warehouse className="mr-2 h-4 w-4 text-[#005BAA]" />
+                      <Warehouse className='mr-2 h-4 w-4 text-[#005BAA]' />
                       <div>
                         <div>{inventario.nombre}</div>
                         {inventario.descripcion && (
-                          <div className="text-xs text-gray-500">
+                          <div className='text-xs text-gray-500'>
                             {inventario.descripcion}
                           </div>
                         )}
                       </div>
                       {inventario.principal && (
-                        <div className="ml-auto text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">
+                        <div className='ml-auto text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded-full'>
                           Principal
                         </div>
                       )}
                     </DropdownMenuItem>
                   ))
                 ) : (
-                  <div className="px-2 py-1 text-sm text-gray-500 text-center">
+                  <div className='px-2 py-1 text-sm text-gray-500 text-center'>
                     No se encontraron inventarios
                   </div>
                 )}
@@ -203,14 +203,14 @@ export function InventarioTopBar() {
           <DropdownMenuTrigger asChild>
             <Button
               style={{ backgroundColor: '#F37021', borderColor: '#F37021' }}
-              className="hover:bg-orange-500"
+              className='hover:bg-orange-500'
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className='mr-2 h-4 w-4' />
               Crear
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <div className="p-2 text-sm font-medium text-muted-foreground">
+          <DropdownMenuContent align='end' className='w-56'>
+            <div className='p-2 text-sm font-medium text-muted-foreground'>
               Acciones rápidas
             </div>
             <DropdownMenuSeparator />
@@ -218,7 +218,7 @@ export function InventarioTopBar() {
               <DropdownMenuItem
                 key={action.label}
                 onClick={action.action}
-                className="cursor-pointer flex items-center"
+                className='cursor-pointer flex items-center'
               >
                 {action.icon}
                 <span>{action.label}</span>
@@ -229,7 +229,7 @@ export function InventarioTopBar() {
         </DropdownMenu>
 
         <NotificacionesDropdown />
-        <div className="ml-4">
+        <div className='ml-4'>
           <UserMenu />
         </div>
       </div>

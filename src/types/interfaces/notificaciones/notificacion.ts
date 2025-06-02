@@ -26,4 +26,4 @@ export interface Notificacion extends BaseModel {
     tipo: 'IR_A_PAGO' | 'IR_A_CUENTA'
     id: string
   }
-} 
+}

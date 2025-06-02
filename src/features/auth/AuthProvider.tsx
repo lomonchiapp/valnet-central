@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
-import { useAuthStore } from '@/stores/authStore'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
 import { Usuario } from '@/types'
+import { onAuthStateChanged } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
+import { useAuthStore } from '@/stores/authStore'
+import { auth } from '@/lib/firebase'
+import { db } from '@/lib/firebase'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setUser, setLoading } = useAuthStore()
@@ -35,4 +35,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [setUser, setLoading])
 
   return children
-} 
+}

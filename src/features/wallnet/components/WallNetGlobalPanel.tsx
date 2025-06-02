@@ -26,15 +26,15 @@ export function WallNetGlobalPanel() {
         onClick={() => setIsWallNetOpen(!isWallNetOpen)}
         className={cn(
           'fixed right-0 bottom-10 p-2 rounded-l-lg shadow-lg z-50 transition-all duration-300 ease-in-out transform',
-          isWallNetOpen 
-            ? 'bg-red-500 translate-x-0 w-12 h-12' 
+          isWallNetOpen
+            ? 'bg-red-500 translate-x-0 w-12 h-12'
             : 'bg-[#005BAA] translate-x-0 w-32 h-12'
         )}
       >
         {isWallNetOpen ? (
-          <X className="w-8 h-8 text-white" />
+          <X className='w-8 h-8 text-white' />
         ) : (
-          <div className="flex items-center justify-center w-full h-full">
+          <div className='flex items-center justify-center w-full h-full'>
             <img
               src='/wallnet-white.png'
               alt='WallNet'
@@ -45,4 +45,4 @@ export function WallNetGlobalPanel() {
       </button>
     </>
   )
-} 
+}

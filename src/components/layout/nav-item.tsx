@@ -9,7 +9,13 @@ interface NavItemProps {
   className?: string
 }
 
-export function NavItem({ title, url, icon, badge, className = '' }: NavItemProps) {
+export function NavItem({
+  title,
+  url,
+  icon,
+  badge,
+  className = '',
+}: NavItemProps) {
   return (
     <Link
       to={url}
@@ -24,4 +30,4 @@ export function NavItem({ title, url, icon, badge, className = '' }: NavItemProp
       )}
     </Link>
   )
-} 
+}

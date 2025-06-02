@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Marca } from '@/types'
+import { TipoArticulo } from '@/types'
 import { PlusCircle, Trash2, Package } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAlmacenState } from '@/context/global/useAlmacenState'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -21,11 +23,10 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { NuevaMarcaForm } from '@/features/almacen/marcas/components/NuevaMarcaForm'
 import { useEliminarMarca } from '@/features/almacen/marcas/hooks/useEliminarMarca'
-import { Badge } from '@/components/ui/badge'
-import { TipoArticulo } from '@/types'
 
 export default function Marcas() {
-  const { marcas, articulos, subscribeToMarcas, subscribeToArticulos } = useAlmacenState()
+  const { marcas, articulos, subscribeToMarcas, subscribeToArticulos } =
+    useAlmacenState()
   const [showNewForm, setShowNewForm] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [marcaAEliminar, setMarcaAEliminar] = useState<Marca | null>(null)
@@ -46,22 +47,22 @@ export default function Marcas() {
 
   // Obtener los modelos únicos para cada marca
   const marcasConModelos = useMemo(() => {
-    return sortedMarcas.map(marca => {
+    return sortedMarcas.map((marca) => {
       const articulosDeMarca = articulos.filter(
-        articulo => 
-          articulo.marca === marca.id && 
+        (articulo) =>
+          articulo.marca === marca.id &&
           articulo.tipo === TipoArticulo.EQUIPO &&
           articulo.modelo
       )
-      
+
       // Obtener modelos únicos
-      const modelosUnicos = [...new Set(
-        articulosDeMarca.map(articulo => articulo.modelo)
-      )].sort()
+      const modelosUnicos = [
+        ...new Set(articulosDeMarca.map((articulo) => articulo.modelo)),
+      ].sort()
 
       return {
         ...marca,
-        modelos: modelosUnicos
+        modelos: modelosUnicos,
       }
     })
   }, [sortedMarcas, articulos])
@@ -115,10 +116,15 @@ export default function Marcas() {
             <ScrollArea className='h-[500px]'>
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {marcasConModelos.map((marca) => (
-                  <Card key={marca.id} className='hover:shadow-md transition-shadow'>
+                  <Card
+                    key={marca.id}
+                    className='hover:shadow-md transition-shadow'
+                  >
                     <CardHeader className='pb-2'>
                       <div className='flex justify-between items-start'>
-                        <CardTitle className='text-lg'>{marca.nombre}</CardTitle>
+                        <CardTitle className='text-lg'>
+                          {marca.nombre}
+                        </CardTitle>
                         <Button
                           variant='ghost'
                           size='icon'
@@ -132,10 +138,16 @@ export default function Marcas() {
                     <CardContent>
                       {marca.modelos.length > 0 ? (
                         <div className='space-y-2'>
-                          <p className='text-sm text-muted-foreground'>Modelos:</p>
+                          <p className='text-sm text-muted-foreground'>
+                            Modelos:
+                          </p>
                           <div className='flex flex-wrap gap-2'>
                             {marca.modelos.map((modelo) => (
-                              <Badge key={modelo} variant='secondary' className='flex items-center gap-1'>
+                              <Badge
+                                key={modelo}
+                                variant='secondary'
+                                className='flex items-center gap-1'
+                              >
                                 <Package className='h-3 w-3' />
                                 {modelo}
                               </Badge>

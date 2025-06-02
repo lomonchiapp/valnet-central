@@ -1,15 +1,34 @@
+import { addDays, subDays } from 'date-fns'
 import { database } from '@/firebase'
+import {
+  OrigenMovimiento,
+  TipoMovimiento,
+} from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { PagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
-import { doc, updateDoc, deleteDoc, collection, setDoc, getDoc, query, where, getDocs } from 'firebase/firestore'
+import { EstadoPagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
+import {
+  TipoNotificacion,
+  EstadoNotificacion,
+} from '@/types/interfaces/notificaciones/notificacion'
+import {
+  doc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  setDoc,
+  getDoc,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore'
 import { toast } from 'sonner'
 import { useCrearMovimientoCuenta } from '@/features/contabilidad/movimientos/hooks'
-import { OrigenMovimiento, TipoMovimiento } from '@/types/interfaces/contabilidad/movimientoCuenta'
 import { useCrearNotificacion } from '@/features/notificaciones/hooks'
-import { TipoNotificacion, EstadoNotificacion } from '@/types/interfaces/notificaciones/notificacion'
-import { addDays, subDays } from 'date-fns'
-import { EstadoPagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
 
-type PagoRecurrenteInput = Omit<PagoRecurrente, 'id' | 'createdAt' | 'updatedAt'>
+type PagoRecurrenteInput = Omit<
+  PagoRecurrente,
+  'id' | 'createdAt' | 'updatedAt'
+>
 
 export const useCrearPagoRecurrente = () => {
   const { crearMovimientoCuenta } = useCrearMovimientoCuenta()
@@ -35,12 +54,12 @@ export const useCrearPagoRecurrente = () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       }
-      
+
       // Filter out undefined values
       const cleanPagoData = Object.fromEntries(
         Object.entries(pagoData).filter(([, value]) => value !== undefined)
       )
-      
+
       await setDoc(docRef, cleanPagoData)
 
       // 3. Create the account movement
@@ -132,7 +151,10 @@ export const useCrearPagoRecurrente = () => {
 }
 
 export const useActualizarPagoRecurrente = () => {
-  const actualizarPagoRecurrente = async (id: string, pago: Partial<PagoRecurrenteInput>) => {
+  const actualizarPagoRecurrente = async (
+    id: string,
+    pago: Partial<PagoRecurrenteInput>
+  ) => {
     try {
       const pagoRef = doc(database, 'pagosRecurrentes', id)
       await updateDoc(pagoRef, {
@@ -147,10 +169,13 @@ export const useActualizarPagoRecurrente = () => {
     }
   }
 
-  const actualizarEstado = async (id: string, estado: PagoRecurrente['estado']) => {
+  const actualizarEstado = async (
+    id: string,
+    estado: PagoRecurrente['estado']
+  ) => {
     try {
       const pagoRef = doc(database, 'pagosRecurrentes', id)
-      await updateDoc(pagoRef, { 
+      await updateDoc(pagoRef, {
         estado,
         updatedAt: new Date(),
       })
@@ -169,14 +194,14 @@ export const useBorrarPagoRecurrente = () => {
   const borrarPagoRecurrente = async (id: string) => {
     try {
       console.log('Intentando borrar pago recurrente con ID:', id)
-      
+
       // Verificar que el ID no esté vacío
       if (!id || id.trim() === '') {
         throw new Error('ID del pago recurrente no válido')
       }
 
       const pagoRef = doc(database, 'pagosRecurrentes', id)
-      
+
       // Verificar que el documento existe antes de intentar borrarlo
       const pagoDoc = await getDoc(pagoRef)
       if (!pagoDoc.exists()) {
@@ -186,11 +211,11 @@ export const useBorrarPagoRecurrente = () => {
       console.log('Documento encontrado, procediendo a eliminarlo...')
       await deleteDoc(pagoRef)
       console.log('Pago recurrente eliminado exitosamente')
-      
+
       toast.success('Pago recurrente eliminado exitosamente')
     } catch (error) {
       console.error('Error al eliminar el pago recurrente:', error)
-      
+
       // Proporcionar mensajes de error más específicos
       let errorMessage = 'Error al eliminar el pago recurrente'
       if (error instanceof Error) {
@@ -199,12 +224,13 @@ export const useBorrarPagoRecurrente = () => {
         } else if (error.message.includes('not-found')) {
           errorMessage = 'El pago recurrente no fue encontrado'
         } else if (error.message.includes('network')) {
-          errorMessage = 'Error de conexión. Verifica tu internet y vuelve a intentar'
+          errorMessage =
+            'Error de conexión. Verifica tu internet y vuelve a intentar'
         } else {
           errorMessage = error.message
         }
       }
-      
+
       toast.error(errorMessage)
       throw error
     }
@@ -223,13 +249,13 @@ export const useProcesarPagoVariable = () => {
       // 1. Get the recurring payment data
       const pagoRef = doc(database, 'pagosRecurrentes', id)
       const pagoDoc = await getDoc(pagoRef)
-      
+
       if (!pagoDoc.exists()) {
         throw new Error('Pago recurrente no encontrado')
       }
 
       const pago = pagoDoc.data() as PagoRecurrente
-      
+
       if (pago.tipoMonto !== 'VARIABLE') {
         throw new Error('Este pago no es de tipo variable')
       }
@@ -237,7 +263,7 @@ export const useProcesarPagoVariable = () => {
       // 2. Get the current account balance
       const cuentaRef = doc(database, 'cuentas', pago.idcuenta)
       const cuentaDoc = await getDoc(cuentaRef)
-      
+
       if (!cuentaDoc.exists()) {
         throw new Error('Cuenta no encontrada')
       }
@@ -306,12 +332,12 @@ export const useProcesarPagoVariable = () => {
       return true
     } catch (error) {
       console.error('Error al procesar el pago variable:', error)
-      
+
       let errorMessage = 'Error al procesar el pago variable'
       if (error instanceof Error) {
         errorMessage = error.message
       }
-      
+
       toast.error(errorMessage)
       throw error
     }
@@ -334,11 +360,13 @@ export const useObtenerPagosVariablesPendientes = () => {
       }
 
       const querySnapshot = await getDocs(q)
-      const pagosVariables = querySnapshot.docs.map(doc => doc.data() as PagoRecurrente)
+      const pagosVariables = querySnapshot.docs.map(
+        (doc) => doc.data() as PagoRecurrente
+      )
 
       // Filtrar solo los que están próximos o vencidos
       const hoy = new Date()
-      const pagosPendientes = pagosVariables.filter(pago => {
+      const pagosPendientes = pagosVariables.filter((pago) => {
         const fechaProximo = new Date(pago.fechaProximoPago)
         return fechaProximo <= hoy
       })
@@ -351,4 +379,4 @@ export const useObtenerPagosVariablesPendientes = () => {
   }
 
   return { obtenerPagosVariablesPendientes }
-} 
+}

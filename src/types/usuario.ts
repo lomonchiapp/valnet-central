@@ -12,4 +12,4 @@ export interface Usuario {
   bio?: string
   createdAt: Date
   updatedAt: Date
-} 
+}

@@ -1,8 +1,28 @@
 import { useState, useEffect } from 'react'
+import { database } from '@/firebase'
+import { Proveedor } from '@/types/interfaces/compras/proveedor'
+import { TipoCuentaContable } from '@/types/interfaces/contabilidad/cuenta'
+import { PagoUnico } from '@/types/interfaces/contabilidad/pagoUnico'
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
+import { useComprasState } from '@/context/global/useComprasState'
+import { useContabilidadState } from '@/context/global/useContabilidadState'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -16,23 +36,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Plus } from 'lucide-react'
-import { PagoUnico } from '@/types/interfaces/contabilidad/pagoUnico'
-import { Proveedor } from '@/types/interfaces/compras/proveedor'
-import { TipoCuentaContable } from '@/types/interfaces/contabilidad/cuenta'
-import { useComprasState } from '@/context/global/useComprasState'
-import { useContabilidadState } from '@/context/global/useContabilidadState'
-import { usePagosUnicos, type PagoUnicoInput } from '../hooks/usePagosUnicos'
+import { Textarea } from '@/components/ui/textarea'
 import { NuevoProveedorForm } from '@/features/almacen/inventarios/proveedores/NuevoProveedorForm'
-import { database } from '@/firebase'
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore'
-import { toast } from 'sonner'
+import { usePagosUnicos, type PagoUnicoInput } from '../hooks/usePagosUnicos'
 
 interface PagoUnicoFormProps {
   open: boolean
@@ -41,11 +47,16 @@ interface PagoUnicoFormProps {
   onSuccess: (pago: PagoUnico) => void
 }
 
-export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoUnicoFormProps) {
+export function PagoUnicoForm({
+  open,
+  onOpenChange,
+  editPago,
+  onSuccess,
+}: PagoUnicoFormProps) {
   const { proveedores, subscribeToProveedores } = useComprasState()
   const { cuentas, subscribeToCuentas } = useContabilidadState()
   const { isLoading, createPago, updatePago } = usePagosUnicos()
-  
+
   const [formData, setFormData] = useState<PagoUnicoInput>({
     descripcion: '',
     monto: 0,
@@ -57,13 +68,13 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
   // Estados para los modales
   const [showProveedorForm, setShowProveedorForm] = useState(false)
   const [showCuentaForm, setShowCuentaForm] = useState(false)
-  
+
   // Estados para el formulario de cuenta
   const [cuentaFormData, setCuentaFormData] = useState({
     nombre: '',
     tipo: TipoCuentaContable.ACTIVO,
     descripcion: '',
-    balance: 0
+    balance: 0,
   })
   const [isCreatingCuenta, setIsCreatingCuenta] = useState(false)
 
@@ -116,15 +127,18 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
     onOpenChange(false)
   }
 
-  const handleFieldChange = (field: keyof PagoUnicoInput, value: string | number) => {
-    setFormData(prev => ({
+  const handleFieldChange = (
+    field: keyof PagoUnicoInput,
+    value: string | number
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }))
   }
 
   const handleProveedorCreated = (proveedor: Proveedor) => {
-    setFormData(prev => ({ ...prev, idproveedor: proveedor.id }))
+    setFormData((prev) => ({ ...prev, idproveedor: proveedor.id }))
     setShowProveedorForm(false)
   }
 
@@ -141,17 +155,17 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       })
-      
+
       await updateDoc(doc(database, 'cuentas', docRef.id), {
         id: docRef.id,
       })
-      
+
       toast.success('Cuenta creada exitosamente')
       setCuentaFormData({
         nombre: '',
         tipo: TipoCuentaContable.ACTIVO,
         descripcion: '',
-        balance: 0
+        balance: 0,
       })
       setShowCuentaForm(false)
     } catch (error) {
@@ -173,8 +187,14 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
             {editPago ? 'Editar Pago/Gasto' : 'Nuevo Pago/Gasto'}
           </SheetTitle>
         </SheetHeader>
-        
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className='space-y-6'>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSubmit()
+          }}
+          className='space-y-6'
+        >
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* Columna izquierda */}
             <div className='space-y-4'>
@@ -185,7 +205,9 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                 <div className='flex gap-2 mt-1'>
                   <Select
                     value={formData.idproveedor}
-                    onValueChange={(value) => handleFieldChange('idproveedor', value)}
+                    onValueChange={(value) =>
+                      handleFieldChange('idproveedor', value)
+                    }
                     disabled={isLoading}
                   >
                     <SelectTrigger className='flex-1'>
@@ -219,7 +241,9 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                 <div className='flex gap-2 mt-1'>
                   <Select
                     value={formData.idcuenta}
-                    onValueChange={(value) => handleFieldChange('idcuenta', value)}
+                    onValueChange={(value) =>
+                      handleFieldChange('idcuenta', value)
+                    }
                     disabled={isLoading}
                   >
                     <SelectTrigger className='flex-1'>
@@ -229,8 +253,13 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                       {cuentas.map((cuenta) => (
                         <SelectItem key={cuenta.id} value={cuenta.id}>
                           <div className='flex flex-col'>
-                            <span className='font-medium'>{cuenta.nombre} - (${cuenta.balance.toLocaleString()})</span>
-                            <span className='text-xs text-gray-500'>{cuenta.descripcion}</span>
+                            <span className='font-medium'>
+                              {cuenta.nombre} - ($
+                              {cuenta.balance.toLocaleString()})
+                            </span>
+                            <span className='text-xs text-gray-500'>
+                              {cuenta.descripcion}
+                            </span>
                           </div>
                         </SelectItem>
                       ))}
@@ -256,7 +285,9 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                 <Textarea
                   id='descripcion'
                   value={formData.descripcion}
-                  onChange={(e) => handleFieldChange('descripcion', e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange('descripcion', e.target.value)
+                  }
                   placeholder='Describe el concepto del pago o gasto...'
                   disabled={isLoading}
                   rows={3}
@@ -281,7 +312,9 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                     step='0.01'
                     min='0'
                     value={formData.monto}
-                    onChange={(e) => handleFieldChange('monto', Number(e.target.value))}
+                    onChange={(e) =>
+                      handleFieldChange('monto', Number(e.target.value))
+                    }
                     placeholder='0.00'
                     disabled={isLoading}
                     className='pl-8'
@@ -305,24 +338,26 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
 
               {/* Resumen */}
               <div className='p-4 bg-gray-50 rounded-lg border'>
-                <h4 className='text-sm font-medium text-gray-900 mb-2'>Resumen del Pago</h4>
+                <h4 className='text-sm font-medium text-gray-900 mb-2'>
+                  Resumen del Pago
+                </h4>
                 <div className='space-y-1 text-sm text-gray-600'>
                   <div className='flex justify-between'>
                     <span>Proveedor:</span>
                     <span className='font-medium'>
-                      {formData.idproveedor 
-                        ? proveedores.find(p => p.id === formData.idproveedor)?.nombre || 'No seleccionado'
-                        : 'No seleccionado'
-                      }
+                      {formData.idproveedor
+                        ? proveedores.find((p) => p.id === formData.idproveedor)
+                            ?.nombre || 'No seleccionado'
+                        : 'No seleccionado'}
                     </span>
                   </div>
                   <div className='flex justify-between'>
                     <span>Cuenta:</span>
                     <span className='font-medium'>
-                      {formData.idcuenta 
-                        ? cuentas.find(c => c.id === formData.idcuenta)?.nombre || 'No seleccionada'
-                        : 'No seleccionada'
-                      }
+                      {formData.idcuenta
+                        ? cuentas.find((c) => c.id === formData.idcuenta)
+                            ?.nombre || 'No seleccionada'
+                        : 'No seleccionada'}
                     </span>
                   </div>
                   {formData.idcuenta && formData.monto > 0 && (
@@ -331,7 +366,11 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                         <div className='flex justify-between text-xs'>
                           <span>Balance actual:</span>
                           <span className='font-medium'>
-                            ${(cuentas.find(c => c.id === formData.idcuenta)?.balance || 0).toLocaleString()}
+                            $
+                            {(
+                              cuentas.find((c) => c.id === formData.idcuenta)
+                                ?.balance || 0
+                            ).toLocaleString()}
                           </span>
                         </div>
                         <div className='flex justify-between text-xs'>
@@ -342,12 +381,21 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                         </div>
                         <div className='flex justify-between text-xs font-semibold border-t border-gray-200 pt-1 mt-1'>
                           <span>Balance resultante:</span>
-                          <span className={`${
-                            ((cuentas.find(c => c.id === formData.idcuenta)?.balance || 0) - formData.monto) < 0 
-                              ? 'text-red-600' 
-                              : 'text-green-600'
-                          }`}>
-                            ${((cuentas.find(c => c.id === formData.idcuenta)?.balance || 0) - formData.monto).toLocaleString()}
+                          <span
+                            className={`${
+                              (cuentas.find((c) => c.id === formData.idcuenta)
+                                ?.balance || 0) -
+                                formData.monto <
+                              0
+                                ? 'text-red-600'
+                                : 'text-green-600'
+                            }`}
+                          >
+                            $
+                            {(
+                              (cuentas.find((c) => c.id === formData.idcuenta)
+                                ?.balance || 0) - formData.monto
+                            ).toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -355,7 +403,9 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                   )}
                   <div className='border-t border-gray-200 pt-2 mt-3'>
                     <div className='flex justify-between items-center'>
-                      <span className='font-semibold text-gray-700'>Total del Pago:</span>
+                      <span className='font-semibold text-gray-700'>
+                        Total del Pago:
+                      </span>
                       <span className='font-bold text-2xl text-primary'>
                         ${formData.monto.toLocaleString()}
                       </span>
@@ -400,16 +450,26 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
               <Input
                 id='nombre-cuenta'
                 value={cuentaFormData.nombre}
-                onChange={(e) => setCuentaFormData(prev => ({ ...prev, nombre: e.target.value }))}
+                onChange={(e) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    nombre: e.target.value,
+                  }))
+                }
                 placeholder='Nombre de la cuenta'
                 disabled={isCreatingCuenta}
               />
             </div>
             <div>
               <Label htmlFor='tipo-cuenta'>Tipo *</Label>
-              <Select 
-                value={cuentaFormData.tipo} 
-                onValueChange={(value) => setCuentaFormData(prev => ({ ...prev, tipo: value as TipoCuentaContable }))}
+              <Select
+                value={cuentaFormData.tipo}
+                onValueChange={(value) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    tipo: value as TipoCuentaContable,
+                  }))
+                }
                 disabled={isCreatingCuenta}
               >
                 <SelectTrigger>
@@ -429,7 +489,12 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
               <Input
                 id='descripcion-cuenta'
                 value={cuentaFormData.descripcion}
-                onChange={(e) => setCuentaFormData(prev => ({ ...prev, descripcion: e.target.value }))}
+                onChange={(e) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    descripcion: e.target.value,
+                  }))
+                }
                 placeholder='Descripción de la cuenta'
                 disabled={isCreatingCuenta}
               />
@@ -440,7 +505,12 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
                 id='balance-cuenta'
                 type='number'
                 value={cuentaFormData.balance}
-                onChange={(e) => setCuentaFormData(prev => ({ ...prev, balance: Number(e.target.value) }))}
+                onChange={(e) =>
+                  setCuentaFormData((prev) => ({
+                    ...prev,
+                    balance: Number(e.target.value),
+                  }))
+                }
                 placeholder='0.00'
                 disabled={isCreatingCuenta}
               />
@@ -463,4 +533,4 @@ export function PagoUnicoForm({ open, onOpenChange, editPago, onSuccess }: PagoU
       </Dialog>
     </Sheet>
   )
-} 
+}

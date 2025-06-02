@@ -39,7 +39,7 @@ export function NotificacionesDropdown() {
       console.error('Error al cargar notificaciones:', error)
     }
   }, [obtenerNotificaciones])
-  
+
   useEffect(() => {
     loadNotificaciones()
     // Refresh notifications every minute
