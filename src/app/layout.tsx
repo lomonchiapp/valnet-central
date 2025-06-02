@@ -1,6 +1,6 @@
-import { NotificacionesDropdown } from '@/features/notificaciones/components/NotificacionesDropdown'
-import { AppSidebar } from '@/components/layout/app-sidebar'
 import { Link } from 'react-router-dom'
+import { AppSidebar } from '@/components/layout/app-sidebar'
+import { NotificacionesDropdown } from '@/features/notificaciones/components/NotificacionesDropdown'
 
 export default function RootLayout({
   children,
