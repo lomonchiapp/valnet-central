@@ -1,28 +1,30 @@
 import { useState, useEffect, useCallback } from 'react'
-import { format } from 'date-fns'
-import type {
-  MetricasSistema,
-  Pago,
-  Inventario,
-  Brigada,
-} from '@/types/interfaces/admin'
+import { format, differenceInDays, isBefore } from 'date-fns'
+import { EstadoPagoRecurrente } from '@/types/interfaces/contabilidad/pagoRecurrente'
 import {
   EstadoNotificacion,
   TipoNotificacion,
   Notificacion,
 } from '@/types/interfaces/notificaciones/notificacion'
 import { es } from 'date-fns/locale'
-import { Timestamp } from 'firebase/firestore'
 import {
-  Users,
-  Package,
   Wrench,
   Ticket,
   AlertCircle,
   RefreshCw,
   Bell,
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  CreditCard,
+  Banknote,
+  Clock,
+  CheckCircle2,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useComprasState } from '@/context/global/useComprasState'
+import { useContabilidadState } from '@/context/global/useContabilidadState'
+import { useCoordinacionState } from '@/context/global/useCoordinacionState'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,141 +37,29 @@ import {
 } from '@/components/ui/card'
 import { useObtenerNotificaciones } from '@/features/notificaciones/hooks'
 
-// Mock data
-const mockMetricas: MetricasSistema = {
-  usuariosActivos: 156,
-  inventarioTotal: 1245,
-  ticketsAbiertos: 23,
-  brigadasActivas: 8,
-  pagosPendientes: 12,
-  ingresosMensuales: 45000000,
-  tendencias: {
-    usuarios: 12.5,
-    inventario: -2.3,
-    tickets: 5.7,
-    brigadas: 0,
-    pagos: 8.2,
-    ingresos: 15.3,
-  },
-}
-
-const mockPagos: Pago[] = [
-  {
-    id: '1',
-    cliente: {
-      id: '1',
-      nombre: 'Cliente A',
-      email: 'cliente@a.com',
-    },
-    monto: 1500000,
-    concepto: 'Mensualidad Enero',
-    fechaVencimiento: Timestamp.fromDate(new Date(Date.now() + 86400000 * 2)), // 2 días
-    estado: 'pendiente',
-  },
-  {
-    id: '2',
-    cliente: {
-      id: '2',
-      nombre: 'Cliente B',
-      email: 'cliente@b.com',
-    },
-    monto: 2300000,
-    concepto: 'Mensualidad Enero',
-    fechaVencimiento: Timestamp.fromDate(new Date(Date.now() + 86400000 * 5)), // 5 días
-    estado: 'pendiente',
-  },
-]
-
-const mockInventario: Inventario[] = [
-  {
-    id: '1',
-    nombre: 'Router TP-Link',
-    descripcion: 'Router inalámbrico de alta velocidad',
-    categoria: 'Redes',
-    stock: 5,
-    threshold: 10,
-    precio: 150000,
-    proveedor: 'TP-Link',
-    ultimaActualizacion: Timestamp.now(),
-  },
-  {
-    id: '2',
-    nombre: 'Cable UTP Cat6',
-    descripcion: 'Cable de red categoría 6',
-    categoria: 'Cables',
-    stock: 50,
-    threshold: 100,
-    precio: 25000,
-    proveedor: 'Belden',
-    ultimaActualizacion: Timestamp.now(),
-  },
-  {
-    id: '3',
-    nombre: 'Switch 24 Puertos',
-    descripcion: 'Switch de red 24 puertos',
-    categoria: 'Redes',
-    stock: 2,
-    threshold: 5,
-    precio: 450000,
-    proveedor: 'Cisco',
-    ultimaActualizacion: Timestamp.now(),
-  },
-]
-
-const mockBrigadas: Brigada[] = [
-  {
-    id: '1',
-    nombre: 'Brigada Norte',
-    miembros: [
-      { id: '1', nombre: 'Juan Pérez', rol: 'Técnico' },
-      { id: '2', nombre: 'María García', rol: 'Técnico' },
-    ],
-    tareas: [
-      {
-        id: '1',
-        descripcion: 'Instalación cliente nuevo',
-        estado: 'pendiente',
-        fechaAsignacion: Timestamp.now(),
-      },
-      {
-        id: '2',
-        descripcion: 'Mantenimiento preventivo',
-        estado: 'en_proceso',
-        fechaAsignacion: Timestamp.now(),
-      },
-    ],
-    estado: 'activo',
-  },
-  {
-    id: '2',
-    nombre: 'Brigada Sur',
-    miembros: [
-      { id: '3', nombre: 'Carlos López', rol: 'Técnico' },
-      { id: '4', nombre: 'Ana Martínez', rol: 'Técnico' },
-    ],
-    tareas: [
-      {
-        id: '3',
-        descripcion: 'Reparación de falla',
-        estado: 'pendiente',
-        fechaAsignacion: Timestamp.now(),
-      },
-    ],
-    estado: 'activo',
-  },
-]
-
 export function AdminDashboard() {
   const navigate = useNavigate()
-  const [metricas, setMetricas] = useState<MetricasSistema>(mockMetricas)
-  const [pagos, setPagos] = useState<Pago[]>(mockPagos)
-  const [inventario, setInventario] = useState<Inventario[]>(mockInventario)
-  const [brigadas, setBrigadas] = useState<Brigada[]>(mockBrigadas)
   const [error, setError] = useState<string | null>(null)
   const { obtenerNotificaciones } = useObtenerNotificaciones()
   const [notificacionesPagos, setNotificacionesPagos] = useState<
     Notificacion[]
   >([])
+
+  // Zustand stores
+  const {
+    cuentas,
+    ingresos,
+    pagosRecurrentes,
+    subscribeToCuentas,
+    subscribeToIngresos,
+    subscribeToPagosRecurrentes,
+    subscribeToMovimientosCuenta,
+  } = useContabilidadState()
+
+  const { proveedores, subscribeToProveedores } = useComprasState()
+
+  const { tickets, brigadas, subscribeToTickets, subscribeToBrigadas } =
+    useCoordinacionState()
 
   const fetchData = useCallback(async () => {
     try {
@@ -183,12 +73,6 @@ export function AdminDashboard() {
           n.tipo === TipoNotificacion.PAGO_VENCIDO
       )
       setNotificacionesPagos(pagosNotifs)
-
-      // Por ahora usamos los datos mock
-      setMetricas(mockMetricas)
-      setPagos(mockPagos)
-      setInventario(mockInventario)
-      setBrigadas(mockBrigadas)
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -201,7 +85,35 @@ export function AdminDashboard() {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData])
+
+    // Suscribirse a todos los stores
+    const unsubscribeCuentas = subscribeToCuentas()
+    const unsubscribeIngresos = subscribeToIngresos()
+    const unsubscribePagosRecurrentes = subscribeToPagosRecurrentes()
+    const unsubscribeMovimientos = subscribeToMovimientosCuenta()
+    const unsubscribeProveedores = subscribeToProveedores()
+    const unsubscribeTickets = subscribeToTickets()
+    const unsubscribeBrigadas = subscribeToBrigadas()
+
+    return () => {
+      unsubscribeCuentas()
+      unsubscribeIngresos()
+      unsubscribePagosRecurrentes()
+      unsubscribeMovimientos()
+      unsubscribeProveedores()
+      unsubscribeTickets()
+      unsubscribeBrigadas()
+    }
+  }, [
+    fetchData,
+    subscribeToCuentas,
+    subscribeToIngresos,
+    subscribeToPagosRecurrentes,
+    subscribeToMovimientosCuenta,
+    subscribeToProveedores,
+    subscribeToTickets,
+    subscribeToBrigadas,
+  ])
 
   if (error) {
     return (
@@ -219,32 +131,63 @@ export function AdminDashboard() {
     )
   }
 
-  const metrics = [
-    {
-      label: 'Usuarios Activos',
-      value: metricas.usuariosActivos,
-      icon: <Users className='h-4 w-4 text-muted-foreground' />,
-      trend: metricas.tendencias.usuarios,
-    },
-    {
-      label: 'Inventario Total',
-      value: metricas.inventarioTotal,
-      icon: <Package className='h-4 w-4 text-muted-foreground' />,
-      trend: metricas.tendencias.inventario,
-    },
-    {
-      label: 'Tickets Abiertos',
-      value: metricas.ticketsAbiertos,
-      icon: <Ticket className='h-4 w-4 text-muted-foreground' />,
-      trend: metricas.tendencias.tickets,
-    },
-    {
-      label: 'Brigadas Activas',
-      value: metricas.brigadasActivas,
-      icon: <Wrench className='h-4 w-4 text-muted-foreground' />,
-      trend: metricas.tendencias.brigadas,
-    },
-  ]
+  // Cálculos dinámicos
+  const hoy = new Date()
+
+  // Pagos recurrentes próximos
+  const pagosProximos = pagosRecurrentes.filter((pago) => {
+    const fechaProximo = new Date(pago.fechaProximoPago)
+    const diasRestantes = differenceInDays(fechaProximo, hoy)
+    return (
+      diasRestantes >= 0 &&
+      diasRestantes <= 7 &&
+      pago.estado === EstadoPagoRecurrente.ACTIVO
+    )
+  })
+
+  const pagosVencidos = pagosRecurrentes.filter((pago) => {
+    const fechaProximo = new Date(pago.fechaProximoPago)
+    return (
+      isBefore(fechaProximo, hoy) && pago.estado === EstadoPagoRecurrente.ACTIVO
+    )
+  })
+
+  // Balance total de cuentas
+  const balanceTotal = cuentas.reduce((sum, cuenta) => sum + cuenta.balance, 0)
+
+  // Últimos ingresos (últimos 7 días)
+  const ultimosIngresos = ingresos
+    .filter((ingreso) => {
+      const fechaIngreso = new Date(ingreso.fecha)
+      const diasAtras = differenceInDays(hoy, fechaIngreso)
+      return diasAtras <= 7
+    })
+    .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+    .slice(0, 5)
+
+  // Tickets pendientes - using correct enum values
+  const ticketsPendientes = tickets.filter(
+    (ticket) => ticket.estado === 'Abierto'
+  )
+  const ticketsEnProceso = tickets.filter(
+    (ticket) => ticket.estado === 'Respondido'
+  )
+
+  // Brigadas activas - checking if brigadas array exists and has items
+  const brigadasActivas = brigadas.filter((brigada) => brigada.nombre) // Simple existence check
+
+  const getCuentaNombre = (idcuenta: string) => {
+    return (
+      cuentas.find((c) => c.id === idcuenta)?.nombre || 'Cuenta desconocida'
+    )
+  }
+
+  const getProveedorNombre = (idproveedor: string) => {
+    return (
+      proveedores.find((p) => p.id === idproveedor)?.nombre ||
+      'Proveedor desconocido'
+    )
+  }
 
   const getNotificacionIcon = (tipo: TipoNotificacion) => {
     switch (tipo) {
@@ -272,8 +215,16 @@ export function AdminDashboard() {
 
   return (
     <div className='space-y-8 px-4 md:px-8 py-6'>
-      {/* Botón de actualización */}
-      <div className='flex justify-end'>
+      {/* Header con botón de actualización */}
+      <div className='flex justify-between items-center'>
+        <div>
+          <h1 className='text-3xl font-bold tracking-tight'>
+            Panel de Administración
+          </h1>
+          <p className='text-muted-foreground'>
+            Resumen ejecutivo del estado del sistema
+          </p>
+        </div>
         <Button
           variant='outline'
           size='sm'
@@ -286,47 +237,385 @@ export function AdminDashboard() {
       </div>
 
       {/* Métricas principales */}
-      <div className='grid gap-4 md:grid-cols-4'>
-        {metrics.map((metric) => (
-          <Card key={metric.label}>
-            <CardHeader className='flex flex-row items-center justify-between pb-2 space-y-0'>
-              <CardTitle className='text-sm font-medium'>
-                {metric.label}
-              </CardTitle>
-              {metric.icon}
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{metric.value}</div>
-              <p
-                className={`text-xs ${
-                  metric.trend > 0
-                    ? 'text-green-500'
-                    : metric.trend < 0
-                      ? 'text-red-500'
-                      : 'text-muted-foreground'
-                }`}
-              >
-                {metric.trend > 0 ? '+' : ''}
-                {metric.trend.toFixed(1)}% desde el mes pasado
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+        <Card className='border-green-200 bg-green-50'>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium text-green-700'>
+              Balance Total
+            </CardTitle>
+            <DollarSign className='h-4 w-4 text-green-600' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-green-900'>
+              ${balanceTotal.toLocaleString()}
+            </div>
+            <p className='text-xs text-green-600'>
+              {cuentas.length} cuentas activas
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className='border-red-200 bg-red-50'>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium text-red-700'>
+              Pagos Urgentes
+            </CardTitle>
+            <AlertCircle className='h-4 w-4 text-red-600' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-red-900'>
+              {pagosVencidos.length + pagosProximos.length}
+            </div>
+            <p className='text-xs text-red-600'>
+              {pagosVencidos.length} vencidos, {pagosProximos.length} próximos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className='border-blue-200 bg-blue-50'>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium text-blue-700'>
+              Tickets Activos
+            </CardTitle>
+            <Ticket className='h-4 w-4 text-blue-600' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-blue-900'>
+              {ticketsPendientes.length + ticketsEnProceso.length}
+            </div>
+            <p className='text-xs text-blue-600'>
+              {ticketsPendientes.length} abiertos, {ticketsEnProceso.length}{' '}
+              respondidos
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className='border-purple-200 bg-purple-50'>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium text-purple-700'>
+              Brigadas Registradas
+            </CardTitle>
+            <Wrench className='h-4 w-4 text-purple-600' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-purple-900'>
+              {brigadasActivas.length}
+            </div>
+            <p className='text-xs text-purple-600'>Brigadas en el sistema</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className='grid gap-6 md:grid-cols-2'>
-        {/* Pagos próximos con notificaciones */}
+      {/* Widgets dinámicos */}
+      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+        {/* Pagos Recurrentes Próximos */}
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Calendar className='h-4 w-4' />
+              Pagos Próximos
+            </CardTitle>
+            <CardDescription>
+              Pagos recurrentes en los próximos 7 días
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-3'>
+              {[...pagosVencidos, ...pagosProximos].slice(0, 5).map((pago) => {
+                const diasRestantes = differenceInDays(
+                  new Date(pago.fechaProximoPago),
+                  hoy
+                )
+                const isVencido = diasRestantes < 0
+
+                return (
+                  <div
+                    key={pago.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border ${
+                      isVencido
+                        ? 'border-red-200 bg-red-50'
+                        : 'border-yellow-200 bg-yellow-50'
+                    }`}
+                  >
+                    <div className='flex-1'>
+                      <p className='font-medium text-sm'>{pago.descripcion}</p>
+                      <p className='text-xs text-muted-foreground'>
+                        {getProveedorNombre(pago.idproveedor)}
+                      </p>
+                    </div>
+                    <div className='text-right'>
+                      <p className='font-semibold'>
+                        ${pago.monto.toLocaleString()}
+                      </p>
+                      <Badge
+                        variant={isVencido ? 'destructive' : 'default'}
+                        className='text-xs'
+                      >
+                        {isVencido
+                          ? `Vencido ${Math.abs(diasRestantes)}d`
+                          : `${diasRestantes}d`}
+                      </Badge>
+                    </div>
+                  </div>
+                )
+              })}
+              {[...pagosVencidos, ...pagosProximos].length === 0 && (
+                <div className='text-center py-6'>
+                  <CheckCircle2 className='mx-auto h-8 w-8 text-green-500 mb-2' />
+                  <p className='text-sm text-muted-foreground'>
+                    No hay pagos próximos
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant='ghost'
+              className='w-full'
+              onClick={() => navigate('/compras/pagos-recurrentes')}
+            >
+              Ver todos los pagos
+            </Button>
+          </CardFooter>
+        </Card>
+
+        {/* Balance de Cuentas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <CreditCard className='h-4 w-4' />
+              Balance de Cuentas
+            </CardTitle>
+            <CardDescription>
+              Estado financiero de las cuentas principales
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-3'>
+              {cuentas
+                .sort((a, b) => b.balance - a.balance)
+                .slice(0, 5)
+                .map((cuenta) => (
+                  <div
+                    key={cuenta.id}
+                    className='flex items-center justify-between p-3 rounded-lg border'
+                  >
+                    <div className='flex-1'>
+                      <p className='font-medium text-sm'>{cuenta.nombre}</p>
+                      <p className='text-xs text-muted-foreground'>
+                        {cuenta.tipo}
+                      </p>
+                    </div>
+                    <div className='text-right'>
+                      <p
+                        className={`font-semibold ${
+                          cuenta.balance >= 0
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }`}
+                      >
+                        ${cuenta.balance.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              {cuentas.length === 0 && (
+                <div className='text-center py-6'>
+                  <CreditCard className='mx-auto h-8 w-8 text-gray-400 mb-2' />
+                  <p className='text-sm text-muted-foreground'>
+                    No hay cuentas registradas
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant='ghost'
+              className='w-full'
+              onClick={() => navigate('/contabilidad/cuentas')}
+            >
+              Ver todas las cuentas
+            </Button>
+          </CardFooter>
+        </Card>
+
+        {/* Últimos Ingresos */}
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Banknote className='h-4 w-4' />
+              Últimos Ingresos
+            </CardTitle>
+            <CardDescription>Ingresos de los últimos 7 días</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-3'>
+              {ultimosIngresos.map((ingreso) => (
+                <div
+                  key={ingreso.id}
+                  className='flex items-center justify-between p-3 rounded-lg border border-green-200 bg-green-50'
+                >
+                  <div className='flex-1'>
+                    <p className='font-medium text-sm'>{ingreso.descripcion}</p>
+                    <p className='text-xs text-muted-foreground'>
+                      {getCuentaNombre(ingreso.idcuenta)} •{' '}
+                      {format(new Date(ingreso.fecha), 'dd MMM', {
+                        locale: es,
+                      })}
+                    </p>
+                  </div>
+                  <div className='text-right'>
+                    <p className='font-semibold text-green-600'>
+                      +${ingreso.monto.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {ultimosIngresos.length === 0 && (
+                <div className='text-center py-6'>
+                  <TrendingUp className='mx-auto h-8 w-8 text-gray-400 mb-2' />
+                  <p className='text-sm text-muted-foreground'>
+                    No hay ingresos recientes
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant='ghost'
+              className='w-full'
+              onClick={() => navigate('/contabilidad/ingresos')}
+            >
+              Ver todos los ingresos
+            </Button>
+          </CardFooter>
+        </Card>
+
+        {/* Tickets y Soporte */}
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Ticket className='h-4 w-4' />
+              Tickets de Soporte
+            </CardTitle>
+            <CardDescription>Estado actual de tickets</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-3'>
+              {[...ticketsPendientes, ...ticketsEnProceso]
+                .slice(0, 4)
+                .map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className='flex items-center justify-between p-3 rounded-lg border'
+                  >
+                    <div className='flex-1'>
+                      <p className='font-medium text-sm'>{ticket.asunto}</p>
+                      <p className='text-xs text-muted-foreground'>
+                        {ticket.solicitante} • {ticket.cedula}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={
+                        ticket.estado === 'Abierto' ? 'destructive' : 'default'
+                      }
+                    >
+                      {ticket.estado}
+                    </Badge>
+                  </div>
+                ))}
+              {tickets.length === 0 && (
+                <div className='text-center py-6'>
+                  <CheckCircle2 className='mx-auto h-8 w-8 text-green-500 mb-2' />
+                  <p className='text-sm text-muted-foreground'>
+                    No hay tickets activos
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant='ghost'
+              className='w-full'
+              onClick={() => navigate('/coordinacion/tickets')}
+            >
+              Ver todos los tickets
+            </Button>
+          </CardFooter>
+        </Card>
+
+        {/* Brigadas Registradas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className='flex items-center gap-2'>
+              <Wrench className='h-4 w-4' />
+              Brigadas del Sistema
+            </CardTitle>
+            <CardDescription>
+              Brigadas registradas en el sistema
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className='space-y-3'>
+              {brigadasActivas.slice(0, 4).map((brigada) => (
+                <div
+                  key={brigada.id}
+                  className='flex items-center justify-between p-3 rounded-lg border'
+                >
+                  <div className='flex-1'>
+                    <p className='font-medium text-sm'>{brigada.nombre}</p>
+                    <p className='text-xs text-muted-foreground'>
+                      Matrícula: {brigada.matricula}
+                    </p>
+                  </div>
+                  <div className='text-right'>
+                    <Badge
+                      variant='default'
+                      className='bg-green-100 text-green-800'
+                    >
+                      Registrada
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+              {brigadasActivas.length === 0 && (
+                <div className='text-center py-6'>
+                  <Clock className='mx-auto h-8 w-8 text-gray-400 mb-2' />
+                  <p className='text-sm text-muted-foreground'>
+                    No hay brigadas registradas
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant='ghost'
+              className='w-full'
+              onClick={() => navigate('/coordinacion/brigadas')}
+            >
+              Ver todas las brigadas
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+
+      {/* Notificaciones de Pagos */}
+      {notificacionesPagos.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
               <Bell className='h-4 w-4' />
-              Pagos y Notificaciones
+              Notificaciones de Pagos
             </CardTitle>
-            <CardDescription>Próximos pagos y alertas</CardDescription>
+            <CardDescription>Alertas importantes del sistema</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='space-y-4'>
-              {/* Notificaciones de pagos */}
+            <div className='space-y-3'>
               {notificacionesPagos.map((notif) => (
                 <div
                   key={notif.id}
@@ -358,139 +647,10 @@ export function AdminDashboard() {
                   </div>
                 </div>
               ))}
-
-              {/* Pagos regulares */}
-              {pagos.map((payment) => (
-                <div
-                  key={payment.id}
-                  className='flex justify-between items-center p-3 rounded-lg border'
-                >
-                  <div>
-                    <p className='font-medium'>{payment.cliente.nombre}</p>
-                    <p className='text-xs text-muted-foreground'>
-                      Vence:{' '}
-                      {payment.fechaVencimiento.toDate().toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className='text-right'>
-                    <p className='font-semibold'>
-                      ${payment.monto.toLocaleString()}
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      {payment.estado}
-                    </p>
-                  </div>
-                </div>
-              ))}
             </div>
           </CardContent>
-          <CardFooter>
-            <Button
-              variant='ghost'
-              className='w-full'
-              onClick={() => navigate('/compras/pagos-recurrentes')}
-            >
-              Ver todos los pagos
-            </Button>
-          </CardFooter>
         </Card>
-
-        {/* Alertas de inventario */}
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <AlertCircle className='h-4 w-4 text-red-500' />
-              Alertas de Inventario
-            </CardTitle>
-            <CardDescription>Productos con stock bajo</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-2'>
-              {inventario.map((item) => (
-                <div
-                  key={item.id}
-                  className='flex justify-between items-center p-2 border-b'
-                >
-                  <div>
-                    <p className='font-medium'>{item.nombre}</p>
-                    <p className='text-xs text-muted-foreground'>
-                      Stock mínimo: {item.threshold}
-                    </p>
-                  </div>
-                  <div className='text-right'>
-                    <p
-                      className={`font-semibold ${
-                        item.stock <= item.threshold * 0.5
-                          ? 'text-red-500'
-                          : 'text-yellow-500'
-                      }`}
-                    >
-                      {item.stock} unidades
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      {item.stock <= item.threshold * 0.5 ? 'Crítico' : 'Bajo'}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button
-              variant='ghost'
-              className='w-full'
-              onClick={() => navigate('/admin/inventario')}
-            >
-              Ver inventario completo
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Brigadas activas */}
-        <Card className='md:col-span-2'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Wrench className='h-4 w-4' />
-              Brigadas Activas
-            </CardTitle>
-            <CardDescription>Equipos en campo</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-2'>
-              {brigadas.map((brigade) => (
-                <div
-                  key={brigade.id}
-                  className='flex justify-between items-center p-2 border-b'
-                >
-                  <div>
-                    <p className='font-medium'>{brigade.nombre}</p>
-                    <p className='text-xs text-muted-foreground'>
-                      {brigade.miembros.length} miembros
-                    </p>
-                  </div>
-                  <div className='text-right'>
-                    <p className='font-semibold'>
-                      {brigade.tareas.length} tareas
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      {brigade.estado}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button
-              variant='ghost'
-              className='w-full'
-              onClick={() => navigate('/admin/brigadas')}
-            >
-              Ver todas las brigadas
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
+      )}
     </div>
   )
 }
