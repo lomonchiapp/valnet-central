@@ -1,4 +1,6 @@
 import { NotificacionesDropdown } from '@/features/notificaciones/components/NotificacionesDropdown'
+import { AppSidebar } from '@/components/layout/app-sidebar'
+import { Link } from 'react-router-dom'
 
 export default function RootLayout({
   children,
@@ -7,15 +9,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang='es'>
-      <body className={inter.className}>
+      <body>
         <div className='min-h-screen bg-background'>
           <div className='flex'>
-            <Sidebar />
+            <AppSidebar />
             <div className='flex-1'>
               <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
                 <div className='container flex h-14 items-center'>
                   <div className='mr-4 flex'>
-                    <Link href='/' className='mr-6 flex items-center space-x-2'>
+                    <Link to='/' className='mr-6 flex items-center space-x-2'>
                       <span className='font-bold'>Valnet Central</span>
                     </Link>
                   </div>
