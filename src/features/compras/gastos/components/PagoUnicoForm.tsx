@@ -86,7 +86,7 @@ export function PagoUnicoForm({
       unsubscribeCuentas()
       unsubscribeProveedores()
     }
-  }, [subscribeToCuentas, subscribeToProveedores])
+  }, [])
 
   useEffect(() => {
     if (editPago) {

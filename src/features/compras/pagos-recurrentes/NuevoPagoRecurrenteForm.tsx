@@ -83,7 +83,7 @@ export default function NuevoPagoRecurrenteForm({
       unsubscribeCuentas()
       unsubscribeProveedores()
     }
-  }, [subscribeToCuentas, subscribeToProveedores])
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

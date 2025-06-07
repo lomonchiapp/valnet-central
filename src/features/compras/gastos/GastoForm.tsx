@@ -61,7 +61,7 @@ export function GastoForm({
       unsubscribeProveedores()
       unsubscribeCuentas()
     }
-  }, [subscribeToProveedores, subscribeToCuentas])
+  }, [])
 
   // Debug: Log para verificar las cuentas
   useEffect(() => {

@@ -16,6 +16,8 @@ import {
   Clock,
   Edit,
   DollarSign,
+  Zap,
+  RefreshCw,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useComprasState } from '@/context/global/useComprasState'
@@ -69,7 +71,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import NuevoPagoRecurrenteForm from './NuevoPagoRecurrenteForm'
-import { useBorrarPagoRecurrente, useProcesarPagoVariable } from './hooks'
+import { useBorrarPagoRecurrente, useProcesarPagoVariable, useProcesarPagoFijo } from './hooks'
 
 export default function PagosRecurrentes() {
   const {
@@ -81,12 +83,14 @@ export default function PagosRecurrentes() {
   const { cuentas } = useContabilidadState()
   const { borrarPagoRecurrente } = useBorrarPagoRecurrente()
   const { procesarPagoVariable } = useProcesarPagoVariable()
+  const { procesarPagoFijo } = useProcesarPagoFijo()
   const [showNewForm, setShowNewForm] = useState(false)
   const [editPago, setEditPago] = useState<PagoRecurrente | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(
     null
   )
+  const [processingAllPayments, setProcessingAllPayments] = useState(false)
   const [variablePaymentDialog, setVariablePaymentDialog] = useState<{
     show: boolean
     pago: PagoRecurrente | null
@@ -121,6 +125,15 @@ export default function PagosRecurrentes() {
     const fechaProximo = new Date(pago.fechaProximoPago)
     return (
       isBefore(fechaProximo, hoy) && pago.estado === EstadoPagoRecurrente.ACTIVO
+    )
+  })
+
+  const pagosPendientes = [...pagosVencidos, ...pagosProximos]
+  const pagosAlDia = pagosRecurrentes.filter((pago: PagoRecurrente) => {
+    const fechaProximo = new Date(pago.fechaProximoPago)
+    const diasRestantes = differenceInDays(fechaProximo, hoy)
+    return (
+      diasRestantes > 7 && pago.estado === EstadoPagoRecurrente.ACTIVO
     )
   })
 
@@ -239,6 +252,42 @@ export default function PagosRecurrentes() {
       console.error('Error al procesar pago variable:', error)
     } finally {
       setProcessingPaymentId(null)
+    }
+  }
+
+  const handleProcessFixedPayment = async (pago: PagoRecurrente) => {
+    try {
+      setProcessingPaymentId(pago.id)
+      await procesarPagoFijo(pago.id)
+    } catch (error) {
+      console.error('Error al procesar pago fijo:', error)
+    } finally {
+      setProcessingPaymentId(null)
+    }
+  }
+
+  const handleCatchUpAllPayments = async () => {
+    try {
+      setProcessingAllPayments(true)
+      
+      for (const pago of pagosPendientes) {
+        if (pago.tipoMonto === TipoMonto.VARIABLE) {
+          // Para pagos variables, usar el último monto si existe
+          if (pago.ultimoMonto) {
+            await procesarPagoVariable(pago.id, pago.ultimoMonto)
+          }
+        } else {
+          // Para pagos fijos, procesar directamente
+          await procesarPagoFijo(pago.id)
+        }
+      }
+      
+      toast.success(`Se procesaron ${pagosPendientes.length} pagos pendientes`)
+    } catch (error) {
+      console.error('Error al procesar todos los pagos:', error)
+      toast.error('Error al procesar algunos pagos')
+    } finally {
+      setProcessingAllPayments(false)
     }
   }
 
@@ -383,14 +432,27 @@ export default function PagosRecurrentes() {
             Gestiona y monitorea los pagos recurrentes de la empresa
           </p>
         </div>
-        <Button onClick={() => setShowNewForm(true)} size='lg'>
-          <PlusCircle className='mr-2 h-5 w-5' />
-          Nuevo Pago Recurrente
-        </Button>
+        <div className='flex gap-3'>
+          {pagosPendientes.length > 0 && (
+            <Button 
+              onClick={handleCatchUpAllPayments} 
+              disabled={processingAllPayments}
+              variant="outline"
+              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+            >
+              <Zap className="mr-2 h-4 w-4" />
+              {processingAllPayments ? 'Procesando...' : `Ponerse al día (${pagosPendientes.length})`}
+            </Button>
+          )}
+          <Button onClick={() => setShowNewForm(true)} size='lg'>
+            <PlusCircle className='mr-2 h-5 w-5' />
+            Nuevo Pago Recurrente
+          </Button>
+        </div>
       </div>
 
       {/* Dashboard de estadísticas */}
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
+      <div className='grid grid-cols-1 md:grid-cols-5 gap-6'>
         <Card className='border-red-200 bg-red-50'>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium text-red-700'>
@@ -425,12 +487,32 @@ export default function PagosRecurrentes() {
           </CardContent>
         </Card>
 
+        <Card className='border-emerald-200 bg-emerald-50'>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium text-emerald-700'>
+              Al Día
+            </CardTitle>
+            <CheckCircle2 className='h-4 w-4 text-emerald-600' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold text-emerald-900'>
+              {pagosAlDia.length}
+            </div>
+            <p className='text-xs text-emerald-600'>
+              {pagosAlDia.length === pagosRecurrentes.filter(p => p.estado === EstadoPagoRecurrente.ACTIVO).length && pagosPendientes.length === 0 
+                ? '¡Todos al día!' 
+                : 'Pagos programados'
+              }
+            </p>
+          </CardContent>
+        </Card>
+
         <Card className='border-green-200 bg-green-50'>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium text-green-700'>
               Activos
             </CardTitle>
-            <CheckCircle2 className='h-4 w-4 text-green-600' />
+            <RefreshCw className='h-4 w-4 text-green-600' />
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold text-green-900'>
@@ -460,6 +542,25 @@ export default function PagosRecurrentes() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Banner de éxito cuando todos los pagos están al día */}
+      {pagosPendientes.length === 0 && pagosRecurrentes.filter(p => p.estado === EstadoPagoRecurrente.ACTIVO).length > 0 && (
+        <Card className='border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50'>
+          <CardContent className='pt-6'>
+            <div className='flex items-center justify-center gap-3'>
+              <CheckCircle2 className='h-8 w-8 text-emerald-600' />
+              <div className='text-center'>
+                <h3 className='text-lg font-semibold text-emerald-800'>
+                  ¡Felicitaciones! Todos los pagos están al día
+                </h3>
+                <p className='text-sm text-emerald-600'>
+                  No tienes pagos vencidos ni próximos. Tu gestión financiera está excelente.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lista de pagos recurrentes */}
       <Card>
@@ -546,6 +647,31 @@ export default function PagosRecurrentes() {
                       <TableCell>{getEstadoBadge(pago)}</TableCell>
                       <TableCell>
                         <div className='flex gap-1 justify-end'>
+                          {/* Botón para procesar pago fijo */}
+                          {pago.tipoMonto !== TipoMonto.VARIABLE && 
+                           (getDiasRestantes(pago.fechaProximoPago) <= 7) && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size='icon'
+                                  variant='outline'
+                                  onClick={() => handleProcessFixedPayment(pago)}
+                                  disabled={processingPaymentId === pago.id}
+                                  className='h-8 w-8 bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
+                                >
+                                  {processingPaymentId === pago.id ? (
+                                    <RefreshCw className='w-3 h-3 animate-spin' />
+                                  ) : (
+                                    <CheckCircle2 className='w-3 h-3' />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {processingPaymentId === pago.id ? 'Procesando...' : 'Marcar como pagado'}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button

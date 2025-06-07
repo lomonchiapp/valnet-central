@@ -1,12 +1,16 @@
+import type { ComponentType } from 'react'
+
 interface BaseNavItem {
   title: string
   badge?: string
   icon?: React.ElementType
 }
 
-type NavLink = BaseNavItem & {
+export type NavLink = {
+  type: 'link'
+  title: string
   url: string
-  items?: never
+  icon?: ComponentType<any>
 }
 
 type NavCollapsible = BaseNavItem & {
@@ -14,15 +18,18 @@ type NavCollapsible = BaseNavItem & {
   url?: never
 }
 
-type NavItem = NavCollapsible | NavLink
+export type NavItem = NavLink | NavCollapsible | NavGroup
 
-interface NavGroup {
+export type NavGroup = {
+  type: 'group'
   title: string
-  items: NavItem[]
+  icon?: ComponentType<any>
+  children: NavItem[]
 }
 
-interface SidebarData {
-  navGroups: NavGroup[]
+export type SidebarData = {
+  navGroups: {
+    title: string
+    items: NavItem[]
+  }[]
 }
-
-export type { SidebarData, NavGroup, NavItem, NavCollapsible, NavLink }

@@ -20,6 +20,7 @@ interface ListarFacturasResponse {
 
 /**
  * Hook para listar facturas desde Mikrowisp
+ * 0 = Pagadas, 1 = No pagadas, 2 = Anuladas, vacio = Cualquier estado
  */
 export const useListarFacturas = () => {
   const [loading, setLoading] = useState(false)

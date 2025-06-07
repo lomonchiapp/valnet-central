@@ -97,7 +97,7 @@ export default function RegistroCombustibleDialog({
   }
 
   return (
-    <DialogContent className='sm:max-w-[500px]'>
+    <DialogContent>
       <DialogHeader>
         <DialogTitle>
           {modo === 'editar'

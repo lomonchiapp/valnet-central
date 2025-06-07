@@ -100,7 +100,7 @@ export default function Cuentas() {
   useEffect(() => {
     const unsubscribe = subscribeToCuentas()
     return () => unsubscribe()
-  }, [subscribeToCuentas])
+  }, [])
 
   useEffect(() => {
     const cargarPagosVariablesPendientes = async () => {
@@ -731,14 +731,14 @@ export default function Cuentas() {
 
       {/* Modal de Historial de Movimientos */}
       <Dialog open={showHistorial} onOpenChange={handleCloseHistorial}>
-        <DialogContent className='max-w-6xl max-h-[80vh] overflow-hidden'>
+        <DialogContent className='max-w-6xl max-h-[80vh] flex flex-col'>
           <DialogHeader>
             <DialogTitle className='flex items-center gap-2'>
               <History className='h-5 w-5 text-blue-600' />
               Historial de Movimientos - {cuentaHistorial?.nombre}
             </DialogTitle>
           </DialogHeader>
-          <div className='overflow-y-auto'>
+          <div className='flex-1 overflow-y-auto min-h-0'>
             {cuentaHistorial && (
               <HistorialMovimientos
                 idcuenta={cuentaHistorial.id}

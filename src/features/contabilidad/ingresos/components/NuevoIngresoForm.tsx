@@ -89,7 +89,7 @@ export function NuevoIngresoForm({
     return () => {
       unsubscribeCuentas()
     }
-  }, [subscribeToCuentas])
+  }, [])
 
   useEffect(() => {
     if (editIngreso) {

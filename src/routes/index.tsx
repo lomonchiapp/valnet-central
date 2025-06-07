@@ -1,4 +1,5 @@
 import { PerfilPage } from '@/pages/PerfilPage'
+import { TareasPage } from '@/pages/TareasPage'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout'
@@ -24,6 +25,7 @@ import Cuentas from '@/features/contabilidad/cuentas'
 import DiarioGeneral from '@/features/contabilidad/diario-general'
 import LibroDiario from '@/features/contabilidad/libro-diario'
 import Reportes from '@/features/contabilidad/reportes'
+import FacturasPorCliente from '@/features/contabilidad/ingresos/facturas'
 // Coordinacion
 import Brigadas from '@/features/coordinacion/brigadas'
 import BrigadaDetail from '@/features/coordinacion/brigadas/BrigadaDetail'
@@ -146,6 +148,10 @@ export function AppRoutes() {
         <Route path='/contabilidad/cuentas' element={<Cuentas />} />
         <Route path='/contabilidad/libro-diario' element={<LibroDiario />} />
         <Route path='/contabilidad/reportes' element={<Reportes />} />
+        {/* Ingresos */}
+        <Route path='/ingresos/facturas' element={<FacturasPorCliente />} />
+        {/* Tareas */}
+        <Route path='/tareas' element={<TareasPage />} />
         {/* Perfil */}
         <Route path='/perfil' element={<PerfilPage />} />
       </Route>

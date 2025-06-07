@@ -361,6 +361,107 @@ export const useProcesarPagoVariable = () => {
   return { procesarPagoVariable }
 }
 
+export const useProcesarPagoFijo = () => {
+  const { crearMovimientoCuenta } = useCrearMovimientoCuenta()
+
+  const procesarPagoFijo = async (id: string) => {
+    try {
+      console.log('Procesando pago fijo:', { id })
+
+      // 1. Get the recurring payment data
+      const pagoRef = doc(database, 'pagosRecurrentes', id)
+      const pagoDoc = await getDoc(pagoRef)
+
+      if (!pagoDoc.exists()) {
+        throw new Error('Pago recurrente no encontrado')
+      }
+
+      const pago = pagoDoc.data() as PagoRecurrente
+
+      if (pago.tipoMonto === 'VARIABLE') {
+        throw new Error('Use procesarPagoVariable para pagos variables')
+      }
+
+      // 2. Get the current account balance
+      const cuentaRef = doc(database, 'cuentas', pago.idcuenta)
+      const cuentaDoc = await getDoc(cuentaRef)
+
+      if (!cuentaDoc.exists()) {
+        throw new Error('Cuenta no encontrada')
+      }
+
+      const cuenta = cuentaDoc.data()
+      const balanceAnterior = cuenta.balance || 0
+      const balanceNuevo = balanceAnterior - pago.monto
+
+      // 3. Create the account movement with the fixed amount
+      await crearMovimientoCuenta({
+        idcuenta: pago.idcuenta,
+        tipo: TipoMovimiento.DEBITO,
+        monto: pago.monto,
+        fecha: new Date().toISOString(),
+        descripcion: `${pago.descripcion} (Pago Realizado)`,
+        origen: OrigenMovimiento.PAGO_RECURRENTE,
+        idOrigen: id,
+        balanceAnterior,
+        balanceNuevo,
+        ...(pago.notas && pago.notas.trim() && { notas: pago.notas.trim() }),
+      })
+
+      // 4. Update the account balance
+      await updateDoc(cuentaRef, {
+        balance: balanceNuevo,
+        updatedAt: new Date(),
+      })
+
+      // 5. Calculate next payment date based on frequency
+      const fechaActual = new Date()
+      const fechaProximoPago = new Date(fechaActual)
+
+      switch (pago.frecuencia) {
+        case 'DIARIO':
+          fechaProximoPago.setDate(fechaProximoPago.getDate() + 1)
+          break
+        case 'SEMANAL':
+          fechaProximoPago.setDate(fechaProximoPago.getDate() + 7)
+          break
+        case 'MENSUAL':
+          fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1)
+          break
+        case 'ANUAL':
+          fechaProximoPago.setFullYear(fechaProximoPago.getFullYear() + 1)
+          break
+        default:
+          fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1)
+      }
+
+      // 6. Update the recurring payment with the new date
+      const updateData = {
+        fechaProximoPago: fechaProximoPago.toISOString(),
+        ultimaFechaPago: fechaActual.toISOString(),
+        updatedAt: new Date(),
+      }
+
+      await updateDoc(pagoRef, updateData)
+
+      toast.success(`Pago realizado: $${pago.monto.toLocaleString()}`)
+      return true
+    } catch (error) {
+      console.error('Error al procesar el pago fijo:', error)
+
+      let errorMessage = 'Error al procesar el pago'
+      if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
+      toast.error(errorMessage)
+      throw error
+    }
+  }
+
+  return { procesarPagoFijo }
+}
+
 export const useObtenerPagosVariablesPendientes = () => {
   const obtenerPagosVariablesPendientes = async (idcuenta?: string) => {
     try {

@@ -99,8 +99,6 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
       collection(database, 'cuentas'),
       (snapshot) => {
         const cuentasData = snapshot.docs.map((doc) => doc.data() as Cuenta)
-        console.log('Cuentas obtenidas de Firestore:', cuentasData)
-        console.log('Total de cuentas:', cuentasData.length)
         set({ cuentas: cuentasData })
       },
       (error) => {
@@ -167,7 +165,6 @@ export const useContabilidadState = create<ContabilidadState>()((set, get) => ({
               id: doc.id,
             }) as PagoUnico
         )
-        console.log('Pagos únicos obtenidos de Firestore:', pagosUnicosData)
         set({ pagosUnicos: pagosUnicosData })
       },
       (error) => {

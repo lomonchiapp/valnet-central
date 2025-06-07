@@ -105,9 +105,9 @@ export function AdminDashboard() {
       unsubscribeBrigadas()
     }
   }, [
-    fetchData,
     subscribeToCuentas,
     subscribeToIngresos,
+    fetchData,
     subscribeToPagosRecurrentes,
     subscribeToMovimientosCuenta,
     subscribeToProveedores,

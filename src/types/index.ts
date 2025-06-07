@@ -16,3 +16,23 @@ export * from './interfaces/contabilidad/pagoUnico'
 export * from './interfaces/contabilidad/pagoRecurrente'
 export * from './interfaces/compras/ordenCompra'
 export * from './interfaces/compras/gastoMenor'
+
+export type { Usuario } from './usuario'
+
+export type {
+  Tarea,
+  EstadoTarea,
+  PrioridadTarea,
+  ComentarioTarea,
+  ArchivoAdjunto,
+  FiltroTareas,
+  EstadisticasTareas,
+} from './tarea'
+
+// Firebase types
+export interface FirebaseUser {
+  uid: string
+  email: string | null
+  displayName: string | null
+  photoURL: string | null
+}

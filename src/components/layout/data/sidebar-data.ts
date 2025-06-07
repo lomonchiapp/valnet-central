@@ -16,6 +16,7 @@ export const sidebarData: SidebarData = {
       title: 'Dashboard',
       items: [
         {
+          type: 'link',
           title: 'Panel Principal',
           url: '/',
           icon: IconLayoutDashboard,
@@ -26,6 +27,7 @@ export const sidebarData: SidebarData = {
       title: 'Almacen',
       items: [
         {
+          type: 'link',
           title: 'Inventarios',
           url: '/almacen/inventarios',
           icon: IconLayoutDashboard,
@@ -33,59 +35,85 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Compras',
-      items: [
-        {
-          title: 'Gastos / Pagos',
-          url: '/compras/gastos',
-          icon: IconReceipt2,
-        },
-        {
-          title: 'Pagos Recurrentes',
-          url: '/compras/pagos-recurrentes',
-          icon: IconChecklist,
-        },
-        {
-          title: 'Ordenes de Compra',
-          url: '/compras/ordenes',
-          icon: IconReportMoney,
-        },
-        {
-          title: 'Gastos Menores',
-          url: '/compras/gastos-menores',
-          icon: IconGasStation,
-        },
-        {
-          title: 'Proveedores',
-          url: '/compras/proveedores',
-          icon: IconUser,
-        },
-      ],
-    },
-    {
       title: 'Contabilidad',
       items: [
         {
+          type: 'group',
+          title: 'Ingresos',
+          icon: IconReportMoney,
+          children: [
+            {
+              type: 'link',
+              title: 'Facturas',
+              url: '/ingresos/facturas',
+              icon: IconReceipt2,
+            },
+            // Puedes agregar más ítems de ingresos aquí
+          ],
+        },
+        {
+          type: 'group',
+          title: 'Compras',
+          icon: IconChecklist,
+          children: [
+            {
+              type: 'link',
+              title: 'Gastos / Pagos',
+              url: '/compras/gastos',
+              icon: IconReceipt2,
+            },
+            {
+              type: 'link',
+              title: 'Pagos Recurrentes',
+              url: '/compras/pagos-recurrentes',
+              icon: IconChecklist,
+            },
+            {
+              type: 'link',
+              title: 'Ordenes de Compra',
+              url: '/compras/ordenes',
+              icon: IconReportMoney,
+            },
+            {
+              type: 'link',
+              title: 'Gastos Menores',
+              url: '/compras/gastos-menores',
+              icon: IconGasStation,
+            },
+            {
+              type: 'link',
+              title: 'Proveedores',
+              url: '/compras/proveedores',
+              icon: IconUser,
+            },
+          ],
+        },
+        {
+          type: 'link',
           title: 'Diario General',
           url: '/contabilidad/diario-general',
           icon: IconChecklist,
         },
         {
+          type: 'link',
           title: 'Asientos Contables',
           url: '/contabilidad/asientos',
           icon: IconReportMoney,
         },
         {
+          type: 'link',
           title: 'Cuentas',
           url: '/contabilidad/cuentas',
           icon: IconReceipt2,
         },
         {
+          type: 'link',
           title: 'Libro Diario',
           url: '/contabilidad/libro-diario',
           icon: IconMapPin,
         },
         {
+          type: 'link',
           title: 'Reportes',
           url: '/contabilidad/reportes',
           icon: IconLayoutDashboard,
@@ -96,16 +124,19 @@ export const sidebarData: SidebarData = {
       title: 'Coordinacion',
       items: [
         {
+          type: 'link',
           title: 'Brigadas',
           url: '/coordinacion/brigadas',
           icon: IconMapPin,
         },
         {
+          type: 'link',
           title: 'Combustible',
           url: '/coordinacion/combustible',
           icon: IconGasStation,
         },
         {
+          type: 'link',
           title: 'Averías / Encargos',
           url: '/coordinacion/tickets',
           icon: TicketIcon,
@@ -116,6 +147,7 @@ export const sidebarData: SidebarData = {
       title: 'Soporte',
       items: [
         {
+          type: 'link',
           title: 'Tickets',
           url: '/soporte/tickets',
           icon: TicketIcon,
@@ -126,11 +158,13 @@ export const sidebarData: SidebarData = {
       title: 'Ventas',
       items: [
         {
+          type: 'link',
           title: 'Pre-Registros',
           url: '/ventas/pre-registros/todos',
           icon: IconChecklist,
         },
         {
+          type: 'link',
           title: 'Mis Ventas',
           url: '/ventas/pre-registros',
           icon: IconReportMoney,
@@ -141,11 +175,13 @@ export const sidebarData: SidebarData = {
       title: 'Valnet',
       items: [
         {
+          type: 'link',
           title: 'Clientes / Instalaciones',
           url: '/instalaciones',
           icon: IconMapPin,
         },
         {
+          type: 'link',
           title: 'Configurar WallNet',
           url: '/valnet/wallnet/config',
           icon: IconChecklist,
@@ -156,6 +192,7 @@ export const sidebarData: SidebarData = {
       title: 'Configuración',
       items: [
         {
+          type: 'link',
           title: 'Usuarios Valnet',
           url: '/valnet/usuarios',
           icon: IconUser,

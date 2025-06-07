@@ -60,6 +60,7 @@ export const useGetCliente = () => {
   /**
    * Obtiene los detalles del cliente por cédula
    */
+
   const getClientePorCedula = async (cedula: string) => {
     setLoading(true)
     setError(null)
@@ -119,6 +120,69 @@ export const useGetCliente = () => {
     }
   }
 
+   /**
+   * Obtiene los detalles del cliente por cédula
+   */
+
+   const getClientePorId = async (idcliente: number) => {
+    setLoading(true)
+    setError(null)
+    setClientes([])
+    setClienteSeleccionado(null)
+
+    try {
+      const requestBody = {
+        token: API_TOKEN,
+        idcliente,
+      }
+
+      const response = await apiClient.post<GetClienteResponse>(
+        ENDPOINTS.CLIENTE_DETALLES,
+        requestBody
+      )
+
+      if (
+        response.estado === 'exito' &&
+        response.datos &&
+        Array.isArray(response.datos)
+      ) {
+        setClientes(response.datos)
+
+        // Si solo hay un cliente, lo seleccionamos automáticamente
+        if (response.datos.length === 1) {
+          setClienteSeleccionado(response.datos[0])
+        }
+
+        return {
+          success: true,
+          clientes: response.datos,
+          mensaje: `Se encontraron ${response.datos.length} cliente(s)`,
+        }
+      } else {
+        const errorMsg = 'No se encontraron clientes con esa cédula'
+        setError(errorMsg)
+
+        return {
+          success: false,
+          mensaje: errorMsg,
+          clientes: [],
+        }
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Error desconocido'
+      setError(`Error de conexión: ${errorMessage}`)
+
+      return {
+        success: false,
+        mensaje: errorMessage,
+        clientes: [],
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   /**
    * Selecciona un cliente de la lista de resultados
    */
@@ -128,6 +192,7 @@ export const useGetCliente = () => {
 
   return {
     getClientePorCedula,
+    getClientePorId,
     seleccionarCliente,
     clientes,
     clienteSeleccionado,

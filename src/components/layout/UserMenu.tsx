@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
+import { useTareasStore } from '@/stores/tareasStore'
 import { auth } from '@/lib/firebase'
 import { useToast } from '@/hooks/use-toast'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -31,34 +32,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-// Mock data - replace with real data hooks
-const mockTasks = [
-  {
-    id: '1',
-    title: 'Revisar inventario de routers',
-    description: 'Verificar stock disponible para instalaciones',
-    dueDate: '2024-12-20',
-    priority: 'high',
-    status: 'pending',
-  },
-  {
-    id: '2',
-    title: 'Actualizar documentación técnica',
-    description: 'Documentar nuevos procedimientos de instalación',
-    dueDate: '2024-12-22',
-    priority: 'medium',
-    status: 'in_progress',
-  },
-  {
-    id: '3',
-    title: 'Reunión con equipo de brigadas',
-    description: 'Planificación semanal de rutas',
-    dueDate: '2024-12-18',
-    priority: 'high',
-    status: 'completed',
-  },
-]
 
 const mockWallNetMessages = [
   {
@@ -114,10 +87,15 @@ const mockNotifications = [
 export function UserMenu() {
   const navigate = useNavigate()
   const { user, clearUser } = useAuthStore()
+  const { getTareasPorUsuario, getTareasVencidas } = useTareasStore()
   const { toast } = useToast()
   const [isOpen, setIsOpen] = useState(false)
 
   if (!user) return null
+
+  // Get user's tasks
+  const userTasks = getTareasPorUsuario(user.id)
+  const overdueTasks = getTareasVencidas()
 
   const getInitials = (name: string, lastName: string) => {
     return `${name.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
@@ -143,35 +121,61 @@ export function UserMenu() {
     }
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
+  const getPrioridadColor = (prioridad: string) => {
+    switch (prioridad) {
+      case 'urgente':
         return 'bg-red-100 text-red-800'
-      case 'medium':
+      case 'alta':
+        return 'bg-orange-100 text-orange-800'
+      case 'media':
         return 'bg-yellow-100 text-yellow-800'
-      case 'low':
+      case 'baja':
         return 'bg-green-100 text-green-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
+  const getStatusIcon = (estado: string) => {
+    switch (estado) {
+      case 'completada':
         return <CheckCircle className='h-4 w-4 text-green-500' />
-      case 'in_progress':
+      case 'en_progreso':
         return <Clock className='h-4 w-4 text-blue-500' />
-      case 'pending':
+      case 'pendiente':
         return <AlertCircle className='h-4 w-4 text-orange-500' />
       default:
         return <Clock className='h-4 w-4 text-gray-500' />
     }
   }
 
+  const getPrioridadLabel = (prioridad: string) => {
+    switch (prioridad) {
+      case 'urgente':
+        return 'Urgente'
+      case 'alta':
+        return 'Alta'
+      case 'media':
+        return 'Media'
+      case 'baja':
+        return 'Baja'
+      default:
+        return prioridad
+    }
+  }
+
+  const formatFecha = (fecha: Date) => {
+    return new Date(fecha).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+  }
+
   const unreadCount =
     mockWallNetMessages.filter((m) => m.isUnread).length +
-    mockNotifications.filter((n) => !n.isRead).length
+    mockNotifications.filter((n) => !n.isRead).length +
+    overdueTasks.length
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -214,7 +218,7 @@ export function UserMenu() {
               </SheetTitle>
               <p className='text-sm text-muted-foreground'>{user.email}</p>
               <Badge variant='outline' className='text-xs'>
-                {user.role || 'Usuario'}
+                {user.rol || 'Usuario'}
               </Badge>
             </div>
           </div>
@@ -230,7 +234,7 @@ export function UserMenu() {
             </TabsTrigger>
             <TabsTrigger value='tasks' className='text-xs'>
               <CheckSquare className='h-4 w-4 mr-1' />
-              Tareas
+              Tareas ({userTasks.length})
             </TabsTrigger>
             <TabsTrigger value='wallnet' className='text-xs'>
               <MessageSquare className='h-4 w-4 mr-1' />
@@ -280,36 +284,58 @@ export function UserMenu() {
 
             <TabsContent value='tasks' className='space-y-3'>
               <div className='space-y-3'>
-                {mockTasks.map((task) => (
-                  <Card key={task.id}>
-                    <CardContent className='p-4'>
-                      <div className='space-y-2'>
-                        <div className='flex items-center justify-between'>
-                          <h4 className='text-sm font-medium'>{task.title}</h4>
-                          {getStatusIcon(task.status)}
-                        </div>
-                        <p className='text-xs text-muted-foreground'>
-                          {task.description}
-                        </p>
-                        <div className='flex items-center justify-between'>
-                          <div className='flex items-center gap-2'>
-                            <Calendar className='h-3 w-3 text-muted-foreground' />
-                            <span className='text-xs text-muted-foreground'>
-                              {task.dueDate}
-                            </span>
-                          </div>
-                          <Badge className={getPriorityColor(task.priority)}>
-                            {task.priority === 'high'
-                              ? 'Alta'
-                              : task.priority === 'medium'
-                                ? 'Media'
-                                : 'Baja'}
-                          </Badge>
-                        </div>
-                      </div>
+                {userTasks.length === 0 ? (
+                  <Card>
+                    <CardContent className='p-4 text-center'>
+                      <p className='text-sm text-muted-foreground'>
+                        No tienes tareas asignadas
+                      </p>
                     </CardContent>
                   </Card>
-                ))}
+                ) : (
+                  userTasks.slice(0, 5).map((task) => (
+                    <Card key={task.id}>
+                      <CardContent className='p-4'>
+                        <div className='space-y-2'>
+                          <div className='flex items-center justify-between'>
+                            <h4 className='text-sm font-medium'>{task.titulo}</h4>
+                            {getStatusIcon(task.estado)}
+                          </div>
+                          <p className='text-xs text-muted-foreground line-clamp-2'>
+                            {task.descripcion}
+                          </p>
+                          <div className='flex items-center justify-between'>
+                            <div className='flex items-center gap-2'>
+                              <Calendar className='h-3 w-3 text-muted-foreground' />
+                              <span className='text-xs text-muted-foreground'>
+                                {task.fechaVencimiento 
+                                  ? formatFecha(task.fechaVencimiento)
+                                  : 'Sin fecha'
+                                }
+                              </span>
+                            </div>
+                            <Badge className={getPrioridadColor(task.prioridad)}>
+                              {getPrioridadLabel(task.prioridad)}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+                {userTasks.length > 5 && (
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='w-full'
+                    onClick={() => {
+                      navigate('/tareas')
+                      setIsOpen(false)
+                    }}
+                  >
+                    Ver todas las tareas ({userTasks.length})
+                  </Button>
+                )}
               </div>
             </TabsContent>
 
@@ -348,6 +374,17 @@ export function UserMenu() {
         <Separator className='my-6' />
 
         <div className='space-y-2'>
+          <Button
+            variant='ghost'
+            className='w-full justify-start'
+            onClick={() => {
+              navigate('/tareas')
+              setIsOpen(false)
+            }}
+          >
+            <CheckSquare className='mr-2 h-4 w-4' />
+            Gestión de Tareas
+          </Button>
           <Button
             variant='ghost'
             className='w-full justify-start'

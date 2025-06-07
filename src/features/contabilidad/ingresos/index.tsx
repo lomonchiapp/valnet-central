@@ -68,7 +68,7 @@ export default function Ingresos() {
     return () => {
       unsubscribeIngresos()
     }
-  }, [subscribeToIngresos])
+  }, [])
 
   const [editIngreso, setEditIngreso] = useState<Ingreso | null>(null)
   const [search, setSearch] = useState('')
