@@ -4,8 +4,13 @@ export const API_URL = import.meta.env.VITE_API_URL || (
     ? 'http://38.57.232.66:3031' // URL directa en producción
     : '/mikrowisp-api' // Proxy en desarrollo
 )
-export const API_TOKEN =
-  import.meta.env.VITE_MIKROWISP_TOKEN || 'dEFDMWVjNFIyRXF0UFpCS0thTThtUT09'
+export const API_TOKEN = import.meta.env.VITE_MIKROWISP_TOKEN
+
+// Validación de seguridad
+if (!API_TOKEN) {
+  console.error('❌ VITE_MIKROWISP_TOKEN no está configurado')
+  console.error('🔧 Configura la variable de entorno VITE_MIKROWISP_TOKEN')
+}
 
 // API Endpoints
 export const ENDPOINTS = {
