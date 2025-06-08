@@ -14,14 +14,25 @@ export const apiClient = {
     endpoint: string,
     body: B
   ): Promise<T> => {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const fullUrl = `${API_URL}${endpoint}`
+    console.log('🌐 API CLIENT DEBUG:')
+    console.log('API_URL:', API_URL)
+    console.log('Endpoint:', endpoint)
+    console.log('Full URL:', fullUrl)
+    console.log('Environment:', import.meta.env.PROD ? 'PRODUCTION' : 'DEVELOPMENT')
+    
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-      credentials: 'same-origin',
+      mode: import.meta.env.PROD ? 'cors' : 'same-origin',
+      credentials: import.meta.env.PROD ? 'omit' : 'same-origin',
     })
+    
+    console.log('📡 Response status:', response.status)
+    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
 
     const data = await response.json()
 

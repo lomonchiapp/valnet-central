@@ -1,4 +1,10 @@
 [[redirects]]
+  from = "/mikrowisp-api/*"
+  to = "http://38.57.232.66:3031/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200

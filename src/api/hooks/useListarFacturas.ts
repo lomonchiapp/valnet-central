@@ -41,8 +41,11 @@ export const useListarFacturas = () => {
           idcliente: params.idcliente || '',
         }
 
-        // console.log('Enviando solicitud a:', `${API_TOKEN}${ENDPOINTS.FACTURAS}`);
-        // console.log('Datos de solicitud:', JSON.stringify(requestBody));
+        console.log('🔍 FACTURAS DEBUG:')
+        console.log('API_URL:', `${import.meta.env.PROD ? 'PROD' : 'DEV'}`)
+        console.log('URL completa:', `${import.meta.env.VITE_API_URL || '/mikrowisp-api'}${ENDPOINTS.FACTURAS}`)
+        console.log('Endpoint:', ENDPOINTS.FACTURAS)
+        console.log('Request body:', JSON.stringify(requestBody))
 
         const response = await apiClient.post<ListarFacturasResponse>(
           ENDPOINTS.FACTURAS,

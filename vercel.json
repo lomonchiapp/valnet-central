@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/mikrowisp-api/:match*",
+      "destination": "http://38.57.232.66:3031/:match*"
+    }
+  ]
+} 

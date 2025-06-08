@@ -1,5 +1,9 @@
 // API Configuration
-export const API_URL = '/mikrowisp-api' // Usamos el proxy configurado en vite.config.ts
+export const API_URL = import.meta.env.VITE_API_URL || (
+  import.meta.env.PROD 
+    ? 'http://38.57.232.66:3031' // URL directa en producción
+    : '/mikrowisp-api' // Proxy en desarrollo
+)
 export const API_TOKEN =
   import.meta.env.VITE_MIKROWISP_TOKEN || 'dEFDMWVjNFIyRXF0UFpCS0thTThtUT09'
 
