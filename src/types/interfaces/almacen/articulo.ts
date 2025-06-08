@@ -21,6 +21,7 @@ export interface Articulo extends BaseModel {
   descripcion: string
   //parametros para materiales
   cantidad: number
+  cantidad_minima?: number //cantidad minima para pedir un nuevo pedido
   costo: number //costo unitario
   unidad: Unidad
   modelo: string

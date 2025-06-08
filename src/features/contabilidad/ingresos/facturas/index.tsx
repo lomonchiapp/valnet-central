@@ -58,9 +58,11 @@ export default function FacturasPorCliente() {
     let filtrados = clientesAgrupados
     if (busqueda.trim()) {
       const term = busqueda.toLowerCase()
-      filtrados = filtrados.filter(c =>
-        c.idcliente.toLowerCase().includes(term)
-      )
+      filtrados = filtrados.filter(c => {
+        const idMatch = String(c.idcliente).toLowerCase().includes(term)
+        const nombreMatch = clientesInfo[c.idcliente]?.nombre?.toLowerCase().includes(term)
+        return idMatch || nombreMatch
+      })
     }
     if (minFacturas !== '' && !isNaN(Number(minFacturas))) {
       filtrados = filtrados.filter(c => c.facturas.length >= Number(minFacturas))
@@ -69,7 +71,7 @@ export default function FacturasPorCliente() {
       filtrados = filtrados.filter(c => c.facturas.length <= Number(maxFacturas))
     }
     return filtrados
-  }, [clientesAgrupados, busqueda, minFacturas, maxFacturas])
+  }, [clientesAgrupados, busqueda, minFacturas, maxFacturas, clientesInfo])
 
   // Paginación
   const totalPaginas = Math.ceil(clientesFiltrados.length / elementosPorPagina)

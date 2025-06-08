@@ -24,7 +24,7 @@ export function useMovimientosCuenta(): UseMovimientosCuentaReturn {
   useEffect(() => {
     const unsubscribe = subscribeToMovimientosCuenta()
     return () => unsubscribe()
-  }, [subscribeToMovimientosCuenta])
+  }, [])
 
   const movimientosPorCuenta = useMemo(() => {
     return (idcuenta: string) => {

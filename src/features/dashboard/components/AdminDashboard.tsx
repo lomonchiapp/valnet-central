@@ -81,7 +81,7 @@ export function AdminDashboard() {
       setError(errorMessage)
       console.error('Error en fetchData:', err)
     }
-  }, [obtenerNotificaciones])
+  }, [])
 
   useEffect(() => {
     fetchData()
@@ -104,16 +104,7 @@ export function AdminDashboard() {
       unsubscribeTickets()
       unsubscribeBrigadas()
     }
-  }, [
-    subscribeToCuentas,
-    subscribeToIngresos,
-    fetchData,
-    subscribeToPagosRecurrentes,
-    subscribeToMovimientosCuenta,
-    subscribeToProveedores,
-    subscribeToTickets,
-    subscribeToBrigadas,
-  ])
+  }, [])
 
   if (error) {
     return (

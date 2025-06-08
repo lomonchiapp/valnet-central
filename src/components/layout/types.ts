@@ -1,3 +1,4 @@
+import { IconProps } from '@tabler/icons-react'
 import type { ComponentType } from 'react'
 
 interface BaseNavItem {
@@ -10,7 +11,7 @@ export type NavLink = {
   type: 'link'
   title: string
   url: string
-  icon?: ComponentType<any>
+  icon?: ComponentType<IconProps>
 }
 
 type NavCollapsible = BaseNavItem & {
@@ -23,7 +24,7 @@ export type NavItem = NavLink | NavCollapsible | NavGroup
 export type NavGroup = {
   type: 'group'
   title: string
-  icon?: ComponentType<any>
+  icon?: ComponentType<IconProps>
   children: NavItem[]
 }
 

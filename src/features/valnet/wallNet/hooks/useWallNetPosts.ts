@@ -64,7 +64,7 @@ export function useWallNetPosts() {
       setLoading(false)
     })
     return () => unsubscribe()
-  }, [setPosts, setLoading])
+  }, [])
 
   // Publicar un nuevo post
   const postMessage = async (

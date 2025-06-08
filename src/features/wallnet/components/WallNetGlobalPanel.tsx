@@ -11,7 +11,7 @@ export function WallNetGlobalPanel() {
       {/* WallNet Sliding Panel */}
       <div
         className={cn(
-          'fixed right-0 top-0 h-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-40',
+          'fixed right-0 top-[10%] h-full bg-transparent transform transition-transform duration-300 ease-in-out z-40',
           'w-full md:w-1/3',
           isWallNetOpen ? 'translate-x-0' : 'translate-x-full'
         )}

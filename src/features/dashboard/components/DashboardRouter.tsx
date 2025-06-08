@@ -52,7 +52,7 @@ export function DashboardRouter() {
     if (user?.role === RoleUsuario.VENDEDOR) {
       fetchVendedorData()
     }
-  }, [user, fetchVendedorData])
+  }, [user])
 
   if (loading) {
     return (

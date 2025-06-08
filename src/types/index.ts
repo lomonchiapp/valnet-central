@@ -16,8 +16,7 @@ export * from './interfaces/contabilidad/pagoUnico'
 export * from './interfaces/contabilidad/pagoRecurrente'
 export * from './interfaces/compras/ordenCompra'
 export * from './interfaces/compras/gastoMenor'
-
-export type { Usuario } from './usuario'
+export * from './interfaces/valnet/usuario'
 
 export type {
   Tarea,

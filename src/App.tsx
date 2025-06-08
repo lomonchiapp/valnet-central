@@ -10,6 +10,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { AuthProvider } from '@/features/auth/AuthProvider'
 import { WallNetGlobalPanel } from '@/features/wallnet/components/WallNetGlobalPanel'
 import { ThemeProvider } from './context/theme-context'
+import { FirebaseMonitor } from '@/components/debug/FirebaseMonitor'
 
 function WallNetGlobalNotifier() {
   const { toast } = useToast()
@@ -80,6 +81,9 @@ export default function App() {
           <WallNetGlobalPanel />
           <AppRoutes />
           <Toaster />
+          
+          {/* Monitor de Firebase - Solo en desarrollo */}
+          <FirebaseMonitor />
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

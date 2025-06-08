@@ -10,7 +10,6 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { Dialog } from '@/components/ui/dialog'
 import {
   TooltipProvider,
   Tooltip,
@@ -109,22 +108,20 @@ export default function BrigadaDetail() {
         <CombustiblePanel brigada={brigada} />
       </CardContent>
       {/* Dialog de Inventario */}
-      <Dialog open={openInventario} onOpenChange={setOpenInventario}>
         <InventarioBrigadaDialog
           open={openInventario}
           onOpenChange={setOpenInventario}
           inventarioId={brigada.inventarioId || null}
           brigadaNombre={brigada.nombre || ''}
         />
-      </Dialog>
       {/* Dialog de Registro de Combustible */}
-      <Dialog open={openRegistro} onOpenChange={setOpenRegistro}>
         <RegistroCombustibleDialog
           brigada={brigada}
-          onClose={() => setOpenRegistro(false)}
+          open={openRegistro}
+          onOpenChange={setOpenRegistro}
           modo='crear'
         />
-      </Dialog>
+      {/* Dialog de Registro de Combustible */}
     </Card>
   )
 }

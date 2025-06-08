@@ -75,6 +75,7 @@ import {
   NuevoArticuloData,
 } from '../hooks/useAgregarArticulo'
 import { NuevaUbicacionForm } from './NuevaUbicacionForm'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 interface NuevoArticuloFormProps {
   open: boolean
@@ -955,6 +956,29 @@ export function NuevoArticuloForm({
                   {errors.cantidad && (
                     <p className='text-xs text-destructive mt-1'>
                       {errors.cantidad.message}
+                    </p>
+                  )}
+                </div>
+                <div className='flex-1 flex flex-col'>
+                  <Label htmlFor='cantidad_minima' className='mb-1'>
+                    Cantidad Mínima (Stock de alerta)
+                  </Label>
+                  <Input
+                    id='cantidad_minima'
+                    type='number'
+                    min={0}
+                    step={1}
+                    inputMode='numeric'
+                    placeholder='Ej: 5'
+                    {...register('cantidad_minima', {
+                      valueAsNumber: true,
+                      min: { value: 0, message: 'No puede ser negativo.' },
+                    })}
+                    disabled={isLoading}
+                  />
+                  {errors.cantidad_minima && (
+                    <p className='text-xs text-destructive mt-1'>
+                      {errors.cantidad_minima.message}
                     </p>
                   )}
                 </div>
@@ -2104,6 +2128,12 @@ SN345678'
         return <div>Paso desconocido</div>
     }
   }
+
+  useHotkeys('esc', () => onOpenChange(false), [onOpenChange])
+  useHotkeys('ctrl+s, command+s', (e) => {
+    e.preventDefault()
+    handleSubmit(onSubmitHandler)()
+  }, [handleSubmit, onSubmitHandler])
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>

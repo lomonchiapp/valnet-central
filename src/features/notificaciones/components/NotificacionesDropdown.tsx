@@ -50,7 +50,7 @@ export function NotificacionesDropdown() {
     } catch (error) {
       console.error('Error al cargar notificaciones:', error)
     }
-  }, [obtenerNotificaciones, user])
+  }, [user])
 
   useEffect(() => {
     if (user) {
@@ -59,7 +59,7 @@ export function NotificacionesDropdown() {
       const interval = setInterval(loadNotificaciones, 60000)
       return () => clearInterval(interval)
     }
-  }, [loadNotificaciones, user])
+  }, [user])
 
   const handleNotificacionClick = async (notificacion: Notificacion) => {
     try {

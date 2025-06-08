@@ -60,6 +60,7 @@
     "react-dom": "^19.0.0",
     "react-grid-layout": "^1.5.1",
     "react-hook-form": "^7.54.0",
+    "react-hotkeys-hook": "^5.1.0",
     "react-input-mask": "^2.0.4",
     "react-input-mask-next": "3.0.0-alpha.12",
     "react-leaflet": "^5.0.0",

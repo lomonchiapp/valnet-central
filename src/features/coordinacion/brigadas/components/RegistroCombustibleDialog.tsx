@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  Dialog,
 } from '@/components/ui/dialog'
 import {
   Form,
@@ -28,6 +29,8 @@ interface RegistroCombustibleDialogProps {
   registro?: ControlCombustible | null
   modo?: 'crear' | 'editar'
   onClose?: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 type FormValues = Omit<
@@ -38,6 +41,8 @@ type FormValues = Omit<
 export default function RegistroCombustibleDialog({
   brigada,
   registro,
+  open,
+  onOpenChange,
   modo = 'crear',
   onClose,
 }: RegistroCombustibleDialogProps) {
@@ -97,6 +102,7 @@ export default function RegistroCombustibleDialog({
   }
 
   return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent>
       <DialogHeader>
         <DialogTitle>
@@ -230,5 +236,6 @@ export default function RegistroCombustibleDialog({
         </form>
       </Form>
     </DialogContent>
+    </Dialog>
   )
 }

@@ -31,6 +31,7 @@ export interface NuevoArticuloData {
   codigoBarras?: string
   categoriaEquipo?: string
   wirelessKey?: string
+  cantidad_minima?: number
 }
 
 interface AgregarArticuloParams extends NuevoArticuloData {
