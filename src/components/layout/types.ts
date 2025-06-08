@@ -1,5 +1,6 @@
 import { IconProps } from '@tabler/icons-react'
 import type { ComponentType } from 'react'
+import type { LucideIcon } from 'lucide-react'
 
 interface BaseNavItem {
   title: string
@@ -11,7 +12,14 @@ export type NavLink = {
   type: 'link'
   title: string
   url: string
-  icon?: ComponentType<IconProps>
+  icon?: ComponentType<IconProps> | LucideIcon
+}
+
+export type NavGroup = {
+  type: 'group'
+  title: string
+  icon?: ComponentType<IconProps> | LucideIcon
+  children: NavLink[]
 }
 
 type NavCollapsible = BaseNavItem & {
@@ -20,13 +28,6 @@ type NavCollapsible = BaseNavItem & {
 }
 
 export type NavItem = NavLink | NavCollapsible | NavGroup
-
-export type NavGroup = {
-  type: 'group'
-  title: string
-  icon?: ComponentType<IconProps>
-  children: NavItem[]
-}
 
 export type SidebarData = {
   navGroups: {

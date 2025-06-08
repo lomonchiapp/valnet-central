@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button'
 import { NavItem } from '@/components/layout/nav-item'
 import { NavGroup as NavGroupType } from './types'
 
-interface NavGroupProps extends NavGroupType {
+interface NavGroupProps extends Omit<NavGroupType, 'type'> {
   itemClassName?: string
   titleClassName?: string
 }
 
 export const NavGroup: React.FC<NavGroupProps> = ({
   title,
-  items,
+  children,
   itemClassName = '',
   titleClassName = '',
 }) => {
@@ -34,18 +34,20 @@ export const NavGroup: React.FC<NavGroupProps> = ({
       </Button>
       {expanded && (
         <div className='mt-2 space-y-1'>
-          {items.map((item) => {
-            if (!item.url) return null
-            return (
-              <NavItem
-                key={item.url}
-                title={item.title}
-                url={item.url}
-                icon={item.icon as React.ComponentType<{ className?: string }>}
-                badge={item.badge}
-                className={itemClassName}
-              />
-            )
+          {children.map((item) => {
+            if ('url' in item && item.url) {
+              return (
+                <NavItem
+                  key={item.url}
+                  title={item.title}
+                  url={item.url}
+                  icon={item.icon as React.ComponentType<{ className?: string }>}
+                  badge={undefined}
+                  className={itemClassName}
+                />
+              )
+            }
+            return null
           })}
         </div>
       )}

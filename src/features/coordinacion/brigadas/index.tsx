@@ -176,14 +176,14 @@ export default function Brigadas() {
         brigadaNombre={selectedBrigada?.nombre || ''}
       />
       {/* Dialog de Registro de Combustible */}
-      <Dialog open={openRegistro} onOpenChange={setOpenRegistro}>
-        {selectedBrigada && (
-          <RegistroCombustibleDialog
-            brigada={selectedBrigada}
-            onClose={() => setOpenRegistro(false)}
-          />
-        )}
-      </Dialog>
+      {selectedBrigada && (
+        <RegistroCombustibleDialog
+          brigada={selectedBrigada}
+          open={openRegistro}
+          onOpenChange={setOpenRegistro}
+          onClose={() => setOpenRegistro(false)}
+        />
+      )}
       {/* Dialog de Nueva/Editar Brigada */}
       <Dialog open={openBrigadaDialog} onOpenChange={setOpenBrigadaDialog}>
         <DialogContent className='sm:max-w-[500px]'>

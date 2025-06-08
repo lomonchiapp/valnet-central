@@ -218,7 +218,7 @@ export function UserMenu() {
               </SheetTitle>
               <p className='text-sm text-muted-foreground'>{user.email}</p>
               <Badge variant='outline' className='text-xs'>
-                {user.rol || 'Usuario'}
+                {user.role || 'Usuario'}
               </Badge>
             </div>
           </div>

@@ -380,16 +380,14 @@ export default function CombustiblePanel({ brigada }: CombustiblePanelProps) {
         </div>
       )}
       {/* Dialog de edición */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className='sm:max-w-[500px]'>
-          <RegistroCombustibleDialog
-            brigada={brigada}
-            registro={registroAEditar}
-            modo='editar'
-            onClose={handleEditClose}
-          />
-        </DialogContent>
-      </Dialog>
+      <RegistroCombustibleDialog
+        brigada={brigada}
+        registro={registroAEditar}
+        modo='editar'
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onClose={handleEditClose}
+      />
       {/* Dialog de eliminación */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className='max-w-md'>

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/command'
 import { sidebarData } from './layout/data/sidebar-data'
 import { ScrollArea } from './ui/scroll-area'
+import { type NavItem } from './layout/types'
 
 export function CommandMenu() {
   const navigate = useNavigate()
@@ -37,7 +38,7 @@ export function CommandMenu() {
           {sidebarData.navGroups.map((group) => (
             <CommandGroup key={group.title} heading={group.title}>
               {group.items.map((navItem, i) => {
-                if (navItem.url)
+                if ('url' in navItem && navItem.url)
                   return (
                     <CommandItem
                       key={`${navItem.url}-${i}`}
@@ -50,17 +51,26 @@ export function CommandMenu() {
                     </CommandItem>
                   )
 
-                return navItem.items?.map((subItem, i) => (
-                  <CommandItem
-                    key={`${subItem.url}-${i}`}
-                    value={subItem.title}
-                    onSelect={() => {
-                      runCommand(() => navigate(subItem.url))
-                    }}
-                  >
-                    {subItem.title}
-                  </CommandItem>
-                ))
+                if ('children' in navItem && navItem.children) {
+                  return navItem.children.map((subItem: NavItem, j: number) => {
+                    if ('url' in subItem && subItem.url) {
+                      return (
+                        <CommandItem
+                          key={`${subItem.url}-${j}`}
+                          value={subItem.title}
+                          onSelect={() => {
+                            runCommand(() => navigate(subItem.url))
+                          }}
+                        >
+                          {subItem.title}
+                        </CommandItem>
+                      )
+                    }
+                    return null
+                  })
+                }
+
+                return null
               })}
             </CommandGroup>
           ))}
