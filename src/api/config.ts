@@ -1,9 +1,5 @@
 // API Configuration
-export const API_URL = import.meta.env.VITE_API_URL || (
-  import.meta.env.PROD 
-    ? 'http://38.57.232.66:3031' // URL directa en producción
-    : '/mikrowisp-api' // Proxy en desarrollo
-)
+export const API_URL = import.meta.env.VITE_API_URL || '/mikrowisp-api'
 export const API_TOKEN = import.meta.env.VITE_MIKROWISP_TOKEN
 
 // Validación de seguridad

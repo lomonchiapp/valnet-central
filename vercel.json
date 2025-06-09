@@ -1,8 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/mikrowisp-api/:match*",
-      "destination": "http://38.57.232.66:3031/:match*"
+      "source": "/mikrowisp-api/:path*",
+      "destination": "http://38.57.232.66:3031/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  ]
+  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite"
 } 
