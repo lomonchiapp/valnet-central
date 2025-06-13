@@ -11,7 +11,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface ArticulosTableProps {
   articulos: Articulo[]
-  onEliminarArticulo?: (articulo: Articulo) => void
+  onVer?: (articulo: Articulo) => void
+  onEditar?: (articulo: Articulo) => void
+  onTransferir?: (articulo: Articulo) => void
+  onEliminar?: (articulo: Articulo) => void
 }
 
 // Extensión de Articulo para incluir campos opcionales como cantidad_minima
@@ -24,9 +27,7 @@ interface ExtendedArticulo extends Articulo {
   imagenUrl?: string
 }
 
-
-
-export function ArticulosTable({ articulos, onEliminarArticulo }: ArticulosTableProps) {
+export function ArticulosTable({ articulos, onVer, onEditar, onTransferir, onEliminar }: ArticulosTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'todos' | 'equipos' | 'materiales'>('todos')
   const [displayStyle, setDisplayStyle] = useState<'tabla' | 'tarjetas'>('tabla')
@@ -52,7 +53,6 @@ export function ArticulosTable({ articulos, onEliminarArticulo }: ArticulosTable
     const brand = marcas.find((m) => m.id === brandId)
     return brand ? brand.nombre : brandId
   }
-
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-MX', {
@@ -136,22 +136,23 @@ export function ArticulosTable({ articulos, onEliminarArticulo }: ArticulosTable
   }
 
   const handleVer = (articulo: Articulo) => {
-    // Aquí puedes abrir un modal o navegar a la vista de detalle
-    alert('Ver detalles de: ' + articulo.nombre)
+    if (onVer) {
+      onVer(articulo)
+    }
   }
   const handleEditar = (articulo: Articulo) => {
-    // Aquí puedes abrir un modal de edición
-    alert('Editar: ' + articulo.nombre)
+    if (onEditar) {
+      onEditar(articulo)
+    }
   }
   const handleTransferir = (articulo: Articulo) => {
-    // Aquí puedes abrir un modal de transferencia
-    alert('Transferir: ' + articulo.nombre)
+    if (onTransferir) {
+      onTransferir(articulo)
+    }
   }
   const handleEliminar = (articulo: Articulo) => {
-    if (window.confirm('¿Seguro que deseas eliminar este artículo?')) {
-      if (onEliminarArticulo) {
-        onEliminarArticulo(articulo)
-      }
+    if (onEliminar) {
+      onEliminar(articulo)
     }
   }
 

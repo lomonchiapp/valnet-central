@@ -276,10 +276,18 @@ export default function InventarioPage() {
         <CardContent className='p-6'>
           <ArticulosTable 
             articulos={articulosInventario} 
-            onEliminar={articulo => eliminarArticulo(articulo.id)}
-            onVer={articulo => alert('Ver detalles de: ' + articulo.nombre)}
-            onEditar={articulo => alert('Editar: ' + articulo.nombre)}
-            onTransferir={articulo => alert('Transferir: ' + articulo.nombre)}
+            onEliminar={async (articulo: Articulo) => {
+              if (window.confirm('¿Seguro que deseas eliminar este artículo?')) {
+                try {
+                  await eliminarArticulo(articulo.id)
+                } catch (error) {
+                  console.error('Error al eliminar artículo:', error)
+                }
+              }
+            }}
+            onVer={(articulo: Articulo) => alert('Ver detalles de: ' + articulo.nombre)}
+            onEditar={(articulo: Articulo) => alert('Editar: ' + articulo.nombre)}
+            onTransferir={(articulo: Articulo) => alert('Transferir: ' + articulo.nombre)}
           />
         </CardContent>
       </Card>

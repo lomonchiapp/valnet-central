@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { FacturaMikrowisp } from '@/types/interfaces/facturacion/factura'
 
 // Tipos del backend
 interface ClienteAgrupado {
@@ -41,26 +42,6 @@ interface SyncStatus {
   success: boolean
   error?: string
   syncType: 'pagadas' | 'pendientes'
-}
-
-interface FacturaMikrowisp {
-  id: string
-  legal: number
-  idcliente: string
-  emitido: string
-  vencimiento: string
-  total: string
-  estado: string
-  cobrado: string
-  impuesto: string
-  oxxo_referencia: string
-  barcode_cobro_digital: string
-  fechapago: string
-  subtotal: string
-  subtotal2: string
-  total2: string
-  impuesto2: string
-  formapago: string
 }
 
 // Hook principal

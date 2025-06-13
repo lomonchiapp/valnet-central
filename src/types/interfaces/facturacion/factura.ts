@@ -13,16 +13,17 @@ export interface FacturaMikrowisp {
   idcliente: string
   emitido: string
   vencimiento: string
-  total: number
+  total: string
   estado: string
-  cobrado: number
-  impuesto: number
+  cobrado: string
+  impuesto: string
+  oxxo_referencia: string
   barcode_cobro_digital: string
   fechapago: string
-  subtotal: number
-  subtotal2: number
-  total2: number
-  impuesto2: number
+  subtotal: string
+  subtotal2: string
+  total2: string
+  impuesto2: string
   formapago: string
 }
 

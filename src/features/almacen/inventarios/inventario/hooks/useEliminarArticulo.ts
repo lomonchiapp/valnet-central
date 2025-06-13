@@ -6,7 +6,7 @@ export function useEliminarArticulo() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const eliminarArticulo = async (articuloId: string) => {
+  const eliminarArticulo = async (articuloId: string): Promise<void> => {
     setIsLoading(true)
     setError(null)
     try {
@@ -17,6 +17,7 @@ export function useEliminarArticulo() {
       } else {
         setError('Error al eliminar el artículo')
       }
+      throw err
     } finally {
       setIsLoading(false)
     }
