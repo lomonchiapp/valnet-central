@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Grid3X3, List, ArrowUpDown } from 'lucide-react'
+import { Search, Grid3X3, List, ArrowUpDown, Eye, Pencil, Repeat, Trash2 } from 'lucide-react'
 import { Articulo, TipoArticulo } from 'shared-types'
 import { useAlmacenState } from '@/context/global/useAlmacenState'
 import { Badge } from '@/components/ui/badge'
@@ -8,10 +8,10 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 interface ArticulosTableProps {
   articulos: Articulo[]
+  onEliminarArticulo?: (articulo: Articulo) => void
 }
 
 // Extensión de Articulo para incluir campos opcionales como cantidad_minima
@@ -26,7 +26,7 @@ interface ExtendedArticulo extends Articulo {
 
 
 
-export function ArticulosTable({ articulos }: ArticulosTableProps) {
+export function ArticulosTable({ articulos, onEliminarArticulo }: ArticulosTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'todos' | 'equipos' | 'materiales'>('todos')
   const [displayStyle, setDisplayStyle] = useState<'tabla' | 'tarjetas'>('tabla')
@@ -53,11 +53,6 @@ export function ArticulosTable({ articulos }: ArticulosTableProps) {
     return brand ? brand.nombre : brandId
   }
 
-  const getUbicacionNombre = (ubicacionId: string): string => {
-    if (!ubicacionId) return ''
-    const ubicacion = ubicaciones.find((u) => u.id === ubicacionId)
-    return ubicacion ? ubicacion.nombre : ubicacionId
-  }
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-MX', {
@@ -123,6 +118,12 @@ export function ArticulosTable({ articulos }: ArticulosTableProps) {
     }
   }
 
+  const getUbicacionNombre = (ubicacionId: string): string => {
+    if (!ubicacionId) return 'Sin ubicación'
+    const ubicacion = ubicaciones.find((u) => u.id === ubicacionId)
+    return ubicacion ? ubicacion.nombre : 'Sin ubicación'
+  }
+
   const renderSortIcon = (field: string) => {
     if (sortField !== field) {
       return <ArrowUpDown className='ml-1 h-3 w-3 text-muted-foreground opacity-50' />
@@ -132,6 +133,26 @@ export function ArticulosTable({ articulos }: ArticulosTableProps) {
         className={`ml-1 h-3 w-3 text-primary ${sortDirection === 'desc' ? 'rotate-180' : ''}`} 
       />
     )
+  }
+
+  const handleVer = (articulo: Articulo) => {
+    // Aquí puedes abrir un modal o navegar a la vista de detalle
+    alert('Ver detalles de: ' + articulo.nombre)
+  }
+  const handleEditar = (articulo: Articulo) => {
+    // Aquí puedes abrir un modal de edición
+    alert('Editar: ' + articulo.nombre)
+  }
+  const handleTransferir = (articulo: Articulo) => {
+    // Aquí puedes abrir un modal de transferencia
+    alert('Transferir: ' + articulo.nombre)
+  }
+  const handleEliminar = (articulo: Articulo) => {
+    if (window.confirm('¿Seguro que deseas eliminar este artículo?')) {
+      if (onEliminarArticulo) {
+        onEliminarArticulo(articulo)
+      }
+    }
   }
 
   if (articulos.length === 0) {
@@ -144,6 +165,37 @@ export function ArticulosTable({ articulos }: ArticulosTableProps) {
           </CardDescription>
         </CardHeader>
       </Card>
+    )
+  }
+
+  // Vista de tarjetas
+  if (displayStyle === 'tarjetas') {
+    return (
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
+        {sortedArticulos.map((articulo) => (
+          <Card key={articulo.id} className='flex flex-col'>
+            <CardHeader>
+              <CardTitle>{articulo.nombre}</CardTitle>
+              <CardDescription>{articulo.descripcion}</CardDescription>
+            </CardHeader>
+            <div className='flex-1 p-4'>
+              <div className='mb-2'><Badge variant={getBadgeVariant(articulo.tipo)}>{articulo.tipo}</Badge></div>
+              <div>Marca: {getBrandName(articulo.marca)}</div>
+              <div>Modelo: {articulo.modelo}</div>
+              <div>Serial: {articulo.serial || 'N/A'}</div>
+              <div>Cantidad: {articulo.cantidad}</div>
+              <div>Costo: {formatCurrency(articulo.costo)}</div>
+              <div>Ubicación: {getUbicacionNombre(articulo.ubicacion)}</div>
+            </div>
+            <div className='flex gap-2 p-4 border-t'>
+              <Button variant='ghost' size='icon' onClick={() => handleVer(articulo)}><Eye className='w-4 h-4' /></Button>
+              <Button variant='ghost' size='icon' onClick={() => handleEditar(articulo)}><Pencil className='w-4 h-4' /></Button>
+              <Button variant='ghost' size='icon' onClick={() => handleTransferir(articulo)}><Repeat className='w-4 h-4' /></Button>
+              <Button variant='ghost' size='icon' onClick={() => handleEliminar(articulo)}><Trash2 className='w-4 h-4 text-red-600' /></Button>
+            </div>
+          </Card>
+        ))}
+      </div>
     )
   }
 
@@ -272,23 +324,12 @@ export function ArticulosTable({ articulos }: ArticulosTableProps) {
                   <TableCell className='text-right'>{formatCurrency(articulo.costo)}</TableCell>
                   <TableCell>{getUbicacionNombre(articulo.ubicacion)}</TableCell>
                   <TableCell className='text-center'>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant='ghost' size='sm'>
-                          Acciones
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        <DropdownMenuLabel>Opciones</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-                        <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem>Transferir</DropdownMenuItem>
-                        <DropdownMenuItem className='text-destructive'>
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className='flex gap-2 justify-center'>
+                      <Button variant='ghost' size='icon' onClick={() => handleVer(articulo)}><Eye className='w-4 h-4' /></Button>
+                      <Button variant='ghost' size='icon' onClick={() => handleEditar(articulo)}><Pencil className='w-4 h-4' /></Button>
+                      <Button variant='ghost' size='icon' onClick={() => handleTransferir(articulo)}><Repeat className='w-4 h-4' /></Button>
+                      <Button variant='ghost' size='icon' onClick={() => handleEliminar(articulo)}><Trash2 className='w-4 h-4 text-red-600' /></Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

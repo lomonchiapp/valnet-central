@@ -3,10 +3,11 @@ import { useListarFacturas } from '@/api/hooks/useListarFacturas'
 import { useGetCliente } from '@/api/hooks/useGetCliente'
 import type { FacturaMikrowisp } from '@/types/interfaces/facturacion/factura'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Main } from '@/components/layout/main'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, FileDown } from 'lucide-react'
 import type { ClienteDetalle } from '@/api/hooks/useGetCliente'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 
@@ -17,7 +18,7 @@ interface ClienteAgrupado {
   estado: 'AL_DIA' | 'DEUDOR'
 }
 
-export default function FacturasPorCliente() {
+export default function FacturasPendientes() {
   const { listarFacturas, facturas, loading, error } = useListarFacturas()
   const { getClientePorId } = useGetCliente()
   const [busqueda, setBusqueda] = useState('')
@@ -27,9 +28,11 @@ export default function FacturasPorCliente() {
   const [maxFacturas, setMaxFacturas] = useState<number | ''>('')
   // Estado para cachear info de clientes
   const [clientesInfo, setClientesInfo] = useState<Record<string, ClienteDetalle>>({})
+  // Estado para la exportación
+  const [exportando, setExportando] = useState(false)
 
   useEffect(() => {
-    listarFacturas({ limit: 2500, estado: 1 })
+    listarFacturas({ limit: 25000, estado: 1 })
   }, [listarFacturas])
 
   // Agrupar facturas por cliente
@@ -112,14 +115,135 @@ export default function FacturasPorCliente() {
   const totalDeudores = clientesAgrupados.length
   const deudaTotal = clientesAgrupados.reduce((sum, c) => sum + (Number(c.totalAdeudado) || 0), 0)
 
+  // Función para exportar a Excel
+  const exportarAExcel = async () => {
+    if (!facturas || facturas.length === 0) {
+      alert('No hay datos para exportar')
+      return
+    }
+    
+    setExportando(true)
+    
+    try {
+      // Obtener información de todos los clientes únicos de las facturas
+      const clientesUnicos = [...new Set(facturas.map(f => f.idcliente).filter(Boolean))]
+      const clientesCompletos: Record<string, ClienteDetalle> = { ...clientesInfo }
+      
+      // Obtener info de clientes faltantes
+      console.log(`Obteniendo información de ${clientesUnicos.length} clientes...`)
+      
+      for (const idCliente of clientesUnicos) {
+        if (!clientesCompletos[idCliente]) {
+          try {
+            const res = await getClientePorId(Number(idCliente))
+            if (res && res.clientes && res.clientes[0]) {
+              clientesCompletos[idCliente] = res.clientes[0]
+            }
+          } catch (error) {
+            console.log(`Error obteniendo cliente ${idCliente}:`, error)
+          }
+        }
+      }
+
+      // Preparar datos para Excel
+      const datosExcel = []
+      
+      // Headers
+      datosExcel.push([
+        'ID Cliente',
+        'Nombre Cliente',
+        'Cédula',
+        'Dirección',
+        'Teléfono',
+        'Móvil',
+        'Correo',
+        'ID Factura',
+        'Fecha Emisión',
+        'Fecha Vencimiento',
+        'Total Factura',
+        'Estado',
+        'Cobrado',
+        'Pendiente',
+        'Forma Pago',
+        'Código de Barras'
+      ])
+
+      // Datos de facturas con información del cliente
+      for (const factura of facturas) {
+        const clienteInfo = clientesCompletos[factura.idcliente || '']
+        const pendiente = Number(factura.total || 0) - Number(factura.cobrado || 0)
+        
+        datosExcel.push([
+          factura.idcliente || 'N/A',
+          clienteInfo?.nombre || 'Cliente no encontrado',
+          clienteInfo?.cedula || 'N/A',
+          clienteInfo?.direccion_principal || 'N/A',
+          clienteInfo?.telefono || 'N/A',
+          clienteInfo?.movil || 'N/A',
+          clienteInfo?.correo || 'N/A',
+          factura.id,
+          new Date(factura.emitido).toLocaleDateString('es-DO'),
+          new Date(factura.vencimiento).toLocaleDateString('es-DO'),
+          Number(factura.total || 0),
+          factura.estado || 'Pendiente',
+          Number(factura.cobrado || 0),
+          pendiente,
+          factura.formapago || 'N/A',
+          factura.barcode_cobro_digital || 'N/A'
+        ])
+      }
+
+      // Crear contenido CSV (compatible con Excel)
+      const csvContent = datosExcel.map(row => 
+        row.map(cell => {
+          if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"'))) {
+            return `"${cell.replace(/"/g, '""')}"`
+          }
+          return cell
+        }).join(',')
+      ).join('\n')
+
+      // Crear y descargar archivo
+      const BOM = '\ufeff' // Byte Order Mark para UTF-8
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      const fecha = new Date().toISOString().split('T')[0]
+      link.setAttribute('href', url)
+      link.setAttribute('download', `facturas_pendientes_${fecha}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      console.log(`Excel generado con ${facturas.length} facturas`)
+      
+    } catch (error) {
+      console.error('Error al exportar:', error)
+      alert('Error al generar el reporte. Intenta nuevamente.')
+    } finally {
+      setExportando(false)
+    }
+  }
+
   return (
     <Main>
       <div className='mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
         <div>
-          <h2 className='text-2xl font-bold'>Facturas por Cliente</h2>
-          <p className='text-muted-foreground'>Visualiza y gestiona las facturas agrupadas por cliente. Todos los clientes listados son deudores.</p>
+          <h2 className='text-2xl font-bold'>Facturas Pendientes</h2>
+          <p className='text-muted-foreground'>Visualiza y gestiona las facturas pendientes agrupadas por cliente. Todos los clientes listados son deudores.</p>
         </div>
-        <div className='flex gap-2 flex-wrap'>
+        <div className='flex gap-2 flex-wrap items-center'>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportarAExcel}
+            className="flex items-center gap-2"
+            disabled={exportando}
+          >
+            <FileDown className='w-4 h-4' />
+            {exportando ? 'Generando...' : 'Exportar Excel'}
+          </Button>
           <Badge className='bg-red-100 text-red-800'>Deudores: {totalDeudores}</Badge>
           <Badge className='bg-blue-100 text-blue-800'>Total deuda: {deudaTotal.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' })}</Badge>
         </div>

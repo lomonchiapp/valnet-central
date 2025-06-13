@@ -83,6 +83,7 @@ export default function NuevoPagoRecurrenteForm({
       unsubscribeCuentas()
       unsubscribeProveedores()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

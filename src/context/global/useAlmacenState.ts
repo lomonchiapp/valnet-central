@@ -39,7 +39,7 @@ export const useAlmacenState = create<AlmacenState>()((set) => ({
     const unsubscribe = onSnapshot(
       collection(database, 'articulos'),
       (snapshot) => {
-        set({ articulos: snapshot.docs.map((doc) => doc.data() as Articulo) })
+        set({ articulos: snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Articulo) })
       }
     )
     return unsubscribe
@@ -49,7 +49,7 @@ export const useAlmacenState = create<AlmacenState>()((set) => ({
       collection(database, 'inventarios'),
       (snapshot) => {
         set({
-          inventarios: snapshot.docs.map((doc) => doc.data() as Inventario),
+          inventarios: snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Inventario),
         })
       }
     )
@@ -59,7 +59,7 @@ export const useAlmacenState = create<AlmacenState>()((set) => ({
     const unsubscribe = onSnapshot(
       collection(database, 'marcas'),
       (snapshot) => {
-        set({ marcas: snapshot.docs.map((doc) => doc.data() as Marca) })
+        set({ marcas: snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Marca) })
       }
     )
     return unsubscribe

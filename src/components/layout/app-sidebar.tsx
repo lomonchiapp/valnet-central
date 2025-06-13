@@ -25,17 +25,19 @@ function SidebarItem({ item, collapsed, level = 0 }: { item: NavItem; collapsed:
     return (
       <Link
         to={item.url}
-        className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-100 transition-colors text-xs ${level > 0 ? 'pl-6' : ''}`}
-        style={{ marginLeft: level > 0 ? 8 : 0 }}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 transition-all duration-200 text-sm text-slate-700 hover:text-slate-900 group ${
+          level > 0 ? 'ml-6 pl-4 bg-slate-50/50 border-l-2 border-slate-200' : ''
+        }`}
       >
-        {item.icon && <item.icon className='w-4 h-4' />}
-        <span className={collapsed ? 'hidden' : 'block'}>{item.title}</span>
+        {item.icon && <item.icon className='w-4 h-4 flex-shrink-0 group-hover:text-blue-600 transition-colors' />}
+        <span className={collapsed ? 'hidden' : 'block font-medium'}>{item.title}</span>
       </Link>
     )
   }
 
   if (isNavGroup(item)) {
     const hasChildren = Array.isArray(item.children) && item.children.length > 0
+    
     // Si collapsed, usar flyout (como antes)
     if (collapsed) {
       return (
@@ -45,41 +47,51 @@ function SidebarItem({ item, collapsed, level = 0 }: { item: NavItem; collapsed:
           onMouseLeave={() => setOpen(false)}
         >
           <div
-            className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-100 transition-colors font-semibold`}
+            className='flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 transition-all duration-200 font-semibold text-slate-700'
           >
             {item.icon && <item.icon className='w-4 h-4' />}
             <span className='hidden'>{item.title}</span>
-            {hasChildren && <span className='ml-auto'>▼</span>}
+            {hasChildren && <span className='ml-auto text-xs'>▼</span>}
           </div>
           {hasChildren && (
             <div
-              className={`absolute left-full top-0 z-20 min-w-[180px] bg-white border rounded shadow-lg ${open ? 'block' : 'hidden'}`}
-              style={{ display: open ? 'block' : 'none' }}
+              className={`absolute left-full top-0 z-30 min-w-[200px] bg-white border border-slate-200 rounded-lg shadow-lg ml-2 ${
+                open ? 'block' : 'hidden'
+              }`}
             >
-              {item.children.map((child: NavItem) => (
-                <SidebarItem key={child.title} item={child} collapsed={false} level={level + 1} />
-              ))}
+              <div className='p-2'>
+                {item.children.map((child: NavItem) => (
+                  <SidebarItem key={child.title} item={child} collapsed={false} level={level + 1} />
+                ))}
+              </div>
             </div>
           )}
         </div>
       )
     }
+    
     // Si no collapsed, acordeón hacia abajo
     return (
-      <div>
+      <div className='mb-1'>
         <div
-          className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-100 transition-colors font-semibold`}
+          className='flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-100 transition-all duration-200 font-semibold text-slate-700 hover:text-slate-900 group'
           onClick={() => setOpen((o) => !o)}
         >
-          {item.icon && <item.icon className='w-4 h-4' />}
-          <span>{item.title}</span>
-          {hasChildren && <span className='ml-auto'>{open ? '▲' : '▼'}</span>}
+          {item.icon && <item.icon className='w-4 h-4 group-hover:text-blue-600 transition-colors' />}
+          <span className='flex-1'>{item.title}</span>
+          {hasChildren && (
+            <span className={`text-xs transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
+              ▼
+            </span>
+          )}
         </div>
-        {hasChildren && open && (
-          <div className='ml-4 border-l border-slate-200 pl-2 bg-slate-50 rounded-md mt-1'>
-            {item.children.map((child: NavItem) => (
-              <SidebarItem key={child.title} item={child} collapsed={false} level={level + 1} />
-            ))}
+        {hasChildren && (
+          <div className={`overflow-hidden transition-all duration-200 ${open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className='ml-3 mt-1 space-y-1 border-l border-slate-200 pl-4'>
+              {item.children.map((child: NavItem) => (
+                <SidebarItem key={child.title} item={child} collapsed={false} level={level + 1} />
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -118,13 +130,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       variant='floating'
       {...props}
     >
-      <SidebarContent className='mt-4 px-0 overflow-y-auto scrollbar-hide'>
+      <SidebarContent className='mt-6 px-4 overflow-y-auto scrollbar-hide'>
         {sidebarData.navGroups.map((group) => (
-          <div key={group.title} className='mb-2'>
-            <div className='text-[0.7rem] font-semibold text-slate-500 uppercase px-2 py-1 mb-1'>{group.title}</div>
-            {group.items.map((item) => (
-              <SidebarItem key={item.title} item={item} collapsed={collapsed} />
-            ))}
+          <div key={group.title} className='mb-6'>
+            <div className='text-xs font-bold text-slate-500 uppercase tracking-wider px-1 py-2 mb-3 border-b border-slate-100'>
+              {group.title}
+            </div>
+            <div className='space-y-1'>
+              {group.items.map((item) => (
+                <SidebarItem key={item.title} item={item} collapsed={collapsed} />
+              ))}
+            </div>
           </div>
         ))}
       </SidebarContent>

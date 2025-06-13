@@ -6,6 +6,8 @@ import {
   IconReceipt2,
   IconReportMoney,
   IconUser,
+  IconClock,
+  IconCircleCheck,
 } from '@tabler/icons-react'
 import { Ticket as TicketIcon } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -44,11 +46,16 @@ export const sidebarData: SidebarData = {
           children: [
             {
               type: 'link',
-              title: 'Facturas',
-              url: '/ingresos/facturas',
-              icon: IconReceipt2,
+              title: 'Facturas Pendientes',
+              url: '/ingresos/facturas/pendientes',
+              icon: IconClock,
             },
-            // Puedes agregar más ítems de ingresos aquí
+            {
+              type: 'link',
+              title: 'Facturas Pagadas',
+              url: '/ingresos/facturas/pagadas',
+              icon: IconCircleCheck,
+            },
           ],
         },
         {

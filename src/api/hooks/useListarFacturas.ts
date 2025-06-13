@@ -7,6 +7,8 @@ interface ListarFacturasParams {
   limit?: number
   estado?: number
   idcliente?: string
+  fechapago?: string
+  formapago?: string
 }
 
 // Estructura de respuesta del API de Mikrowisp
@@ -36,9 +38,11 @@ export const useListarFacturas = () => {
       try {
         const requestBody = {
           token: API_TOKEN,
-          limit: params.limit || 10,
+          limit: params.limit,
           estado: params.estado !== undefined ? params.estado : 1,
           idcliente: params.idcliente || '',
+          fechapago: params.fechapago || '',
+          formapago: params.formapago || '',
         }
 
         // console.log('🔍 FACTURAS DEBUG:')

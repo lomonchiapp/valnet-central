@@ -29,4 +29,5 @@ export interface Articulo extends BaseModel {
   marca: string
   serial: string
   ubicacion: string
+  imagenUrl?: string
 }

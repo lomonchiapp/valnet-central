@@ -25,7 +25,6 @@ import Cuentas from '@/features/contabilidad/cuentas'
 import DiarioGeneral from '@/features/contabilidad/diario-general'
 import LibroDiario from '@/features/contabilidad/libro-diario'
 import Reportes from '@/features/contabilidad/reportes'
-import FacturasPorCliente from '@/features/contabilidad/ingresos/facturas'
 // Coordinacion
 import Brigadas from '@/features/coordinacion/brigadas'
 import BrigadaDetail from '@/features/coordinacion/brigadas/BrigadaDetail'
@@ -40,6 +39,8 @@ import { WallNetConfig } from '@/features/valnet/wallNet'
 import Ventas from '@/features/ventas'
 import NuevoPreRegistro from '@/features/ventas/components/NuevoPreRegistro'
 import PreRegistros from '@/features/ventas/pre-registros'
+import FacturasPagadas from '@/features/contabilidad/ingresos/facturas/pagadas'
+import FacturasPendientes from '@/features/contabilidad/ingresos/facturas/pendientes'
 
 // Componente para manejar rutas protegidas
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -149,7 +150,8 @@ export function AppRoutes() {
         <Route path='/contabilidad/libro-diario' element={<LibroDiario />} />
         <Route path='/contabilidad/reportes' element={<Reportes />} />
         {/* Ingresos */}
-        <Route path='/ingresos/facturas' element={<FacturasPorCliente />} />
+        <Route path='/ingresos/facturas/pendientes' element={<FacturasPendientes />} />
+        <Route path='/ingresos/facturas/pagadas' element={<FacturasPagadas />} />
         {/* Tareas */}
         <Route path='/tareas' element={<TareasPage />} />
         {/* Perfil */}

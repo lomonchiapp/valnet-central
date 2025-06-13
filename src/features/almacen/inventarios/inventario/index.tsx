@@ -20,17 +20,20 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ArticulosTable } from './components/ArticulosTable'
 import { NuevoArticuloForm } from './components/NuevoArticuloForm'
+import { useEliminarArticulo } from './hooks/useEliminarArticulo'
 
 export default function InventarioPage() {
-  const { inventarioId } = useParams<{ inventarioId: string }>()
+  const { id: inventarioId } = useParams<{ id: string }>()
   const [openNewForm, setOpenNewForm] = useState(false)
   
   const {
-    inventarios,
+    inventarios,  
     articulos,
     subscribeToInventarios,
     subscribeToArticulos,
   } = useAlmacenState()
+
+  const { eliminarArticulo, error: errorEliminar } = useEliminarArticulo()
 
   useEffect(() => {
     const unsubscribeInventarios = subscribeToInventarios()
@@ -41,6 +44,10 @@ export default function InventarioPage() {
       unsubscribeArticulos()
     }
   }, [subscribeToInventarios, subscribeToArticulos])
+
+  // DEBUG: Mostrar inventarios y el id buscado
+  console.log('INVENTARIOS:', inventarios)
+  console.log('inventarioId recibido:', inventarioId)
 
   const inventario = inventarios.find((inv: Inventario) => inv.id === inventarioId)
   const articulosInventario = articulos.filter((art: Articulo) => art.idinventario === inventarioId)
@@ -90,6 +97,15 @@ export default function InventarioPage() {
 
   return (
     <div className='container mx-auto p-6 space-y-8'>
+      {/* Mostrar error al eliminar */}
+      {errorEliminar && (
+        <Alert className='border-red-200 bg-red-50 shadow-lg mb-4'>
+          <AlertTriangle className='h-5 w-5 text-red-600' />
+          <AlertDescription className='text-red-800'>
+            Error al eliminar artículo: {errorEliminar}
+          </AlertDescription>
+        </Alert>
+      )}
       {/* Header Principal */}
       <div className='bg-gradient-to-r from-white to-blue-50 border border-gray-200 rounded-xl p-6 shadow-lg'>
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>
@@ -258,7 +274,13 @@ export default function InventarioPage() {
         </CardHeader>
         
         <CardContent className='p-6'>
-          <ArticulosTable articulos={articulosInventario} />
+          <ArticulosTable 
+            articulos={articulosInventario} 
+            onEliminar={articulo => eliminarArticulo(articulo.id)}
+            onVer={articulo => alert('Ver detalles de: ' + articulo.nombre)}
+            onEditar={articulo => alert('Editar: ' + articulo.nombre)}
+            onTransferir={articulo => alert('Transferir: ' + articulo.nombre)}
+          />
         </CardContent>
       </Card>
 
