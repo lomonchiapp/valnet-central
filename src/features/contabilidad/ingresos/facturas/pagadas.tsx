@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Main } from '@/components/layout/main'
-import { ChevronLeft, ChevronRight, Search, FileText, Printer, Eye, RefreshCw, TrendingUp, Users, DollarSign, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, FileText, Printer, Eye, TrendingUp, Users, DollarSign, Clock } from 'lucide-react'
 import type { ClienteDetalle } from '@/api/hooks/useGetCliente'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { 
@@ -34,8 +34,8 @@ export default function FacturasPagadas() {
   const [maxFacturas, setMaxFacturas] = useState<number | ''>('')
   
   // Estados del nuevo backend
-  const { data: backendData, loading, error, refresh } = useFacturasPagadas(paginaActual, 50, busqueda)
-  const { syncStatus, forceSync, loading: syncLoading } = useFacturasBackend()
+  const { data: backendData, loading, error } = useFacturasPagadas(paginaActual, 50, busqueda)
+  const { syncStatus } = useFacturasBackend()
   
   // Estado para cachear info de clientes
   const [clientesInfo, setClientesInfo] = useState<Record<string, ClienteDetalle>>({})
@@ -102,10 +102,6 @@ export default function FacturasPagadas() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientesPaginados])
-
-  // Estadísticas
-  const totalClientes = clientesAgrupados.length
-  const ingresoTotal = clientesAgrupados.reduce((sum, c) => sum + (Number(c.totalPagado) || 0), 0)
 
   // Función para abrir el detalle de facturas
   const abrirDetalleFacturas = (cliente: ClienteAgrupado) => {
@@ -203,13 +199,13 @@ export default function FacturasPagadas() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cargandoPorClientes && todasLasFacturas.length === 0 ? (
+            {loading && clientesPaginados.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className='text-center py-8'>
                   <div className="flex flex-col items-center gap-2">
                     <span>🚀 Carga robusta en progreso...</span>
                     <span className="text-sm text-gray-600">
-                      Cliente {progresoClientes.actual} de {progresoClientes.total}
+                      Cliente {paginaActual} de {totalPaginas}
                     </span>
                     <span className="text-xs text-gray-500">
                       Estrategia: Consulta individual por cliente
