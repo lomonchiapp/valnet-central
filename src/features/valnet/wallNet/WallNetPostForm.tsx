@@ -205,6 +205,11 @@ const WallNetPostForm = () => {
   const currentPriority = PRIORITY_OPTIONS.find((p) => p.value === priority)
   const currentCategory = categories.find((c) => c.id === categoryId)
 
+  // No renderizar si no hay usuario autenticado
+  if (!user) {
+    return null
+  }
+
   return (
     <form onSubmit={handleSubmit} className='flex gap-3 items-start relative'>
       {/* Avatar */}
@@ -222,7 +227,7 @@ const WallNetPostForm = () => {
             fontSize: 20,
           }}
         >
-          {user ? user.nombres[0] : '?'}
+          {user?.nombres?.[0] || '?'}
         </div>
       </div>
       {/* Formulario */}

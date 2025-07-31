@@ -130,22 +130,34 @@ export function InventarioTopBar() {
 
   return (
     <header className='w-full bg-[#005BAA] shadow z-50 h-20 flex items-center px-6'>
-      <div className='flex-1'>
-        <h2 className='text-xl font-medium text-white'>
-          Gestión de Inventario
-        </h2>
-        <p className='text-sm text-muted-foreground text-gray-100'>
-          Visualiza y gestiona el stock de productos
-        </p>
+      {/* Logo */}
+      <div className='flex items-center min-w-[160px]'>
+        <img src='/valdesk-white.png' alt='logo' className='w-36 h-auto' />
       </div>
 
-      <div className='flex items-center gap-3'>
+      {/* Buscador centrado */}
+      <div className='flex-1 flex justify-center'>
+        <div className='w-full max-w-xl flex items-center bg-gray-100 rounded-md px-4 py-2'>
+          <Search className='h-5 w-5 text-gray-400 mr-2' />
+          <input
+            type='text'
+            placeholder='Buscar artículos en inventario...'
+            className='bg-transparent outline-none border-none w-full text-gray-700 placeholder-gray-400'
+            disabled
+          />
+        </div>
+      </div>
+
+      {/* Botones de acción a la derecha */}
+      <div className='flex items-center gap-3 ml-6'>
+        <NotificacionesDropdown />
+
         {currentInventario && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant='secondary'
-                className='bg-white hover:bg-gray-100'
+                className='bg-white hover:bg-gray-100 border border-gray-200'
               >
                 <Warehouse className='mr-2 h-4 w-4 text-[#005BAA]' />
                 {currentInventario.nombre}
@@ -203,7 +215,7 @@ export function InventarioTopBar() {
           <DropdownMenuTrigger asChild>
             <Button
               style={{ backgroundColor: '#F37021', borderColor: '#F37021' }}
-              className='hover:bg-orange-500'
+              className='hover:bg-orange-500 text-white border-none'
             >
               <Plus className='mr-2 h-4 w-4' />
               Crear
@@ -228,7 +240,6 @@ export function InventarioTopBar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <NotificacionesDropdown />
         <div className='ml-4'>
           <UserMenu />
         </div>

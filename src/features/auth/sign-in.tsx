@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
-import { database } from '@/firebase'
 import { FIREBASE_AUTH } from '@/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { doc, updateDoc } from 'firebase/firestore'
 import { motion } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useUpdateUser } from '@/hooks/auth/updateUser'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -17,6 +16,7 @@ export default function SignIn() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuthStore()
+  const { updateUserStatus } = useUpdateUser()
 
   useEffect(() => {
     if (user) {
@@ -37,7 +37,7 @@ export default function SignIn() {
       )
       // Actualizar status a 'Online' en Firestore
       const { user } = userCredential
-      await updateDoc(doc(database, 'usuarios', user.uid), { status: 'Online' })
+      await updateUserStatus(user.uid, 'Online')
       // La redirección se manejará en el useEffect cuando el usuario se actualice
     } catch (error) {
       console.error('Error al iniciar sesión:', error)

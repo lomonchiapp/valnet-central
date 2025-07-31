@@ -17,6 +17,7 @@ export const getUser = async (uid: string): Promise<Usuario | null> => {
       nombres: userData.nombres,
       apellidos: userData.apellidos,
       email: userData.email,
+      avatar: userData.avatar || '',
       cedula: userData.cedula,
       status: userData.status,
       telefono: userData.telefono,
@@ -25,6 +26,10 @@ export const getUser = async (uid: string): Promise<Usuario | null> => {
       role: userData.role,
       createdAt: userData.createdAt,
       updatedAt: userData.updatedAt,
+      brigadaId: userData.brigadaId,
+      nivelVendedor: userData.nivelVendedor,
+      contratosMes: userData.contratosMes,
+      bonoExtra: userData.bonoExtra,
     } as Usuario
   } catch (error) {
     console.error('Error fetching user:', error)
