@@ -9,6 +9,12 @@ import {
   PackageMinus,
   ArrowLeftRight,
   ClipboardCheck,
+  Table2,
+  Box,
+  Cpu,
+  Eye,
+  History,
+  AlertTriangle,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAlmacenState } from '@/context/global/useAlmacenState'
@@ -23,6 +29,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { UserMenu } from '@/components/layout/UserMenu'
 import { NotificacionesDropdown } from '@/features/notificaciones/components/NotificacionesDropdown'
+import { InventarioTableDialog } from './InventarioTableDialog'
+import { InventarioStockBajoDialog } from './InventarioStockBajoDialog'
+import { NuevoMaterialForm } from '@/features/almacen/inventarios/inventario/components/NuevoMaterialForm'
+import { NuevoEquipoForm } from '@/features/almacen/inventarios/inventario/components/NuevoEquipoForm'
 
 export function InventarioTopBar() {
   const navigate = useNavigate()
@@ -31,6 +41,10 @@ export function InventarioTopBar() {
     null
   )
   const [searchTerm, setSearchTerm] = useState('')
+  const [isTableDialogOpen, setIsTableDialogOpen] = useState(false)
+  const [isStockBajoDialogOpen, setIsStockBajoDialogOpen] = useState(false)
+  const [isMaterialDialogOpen, setIsMaterialDialogOpen] = useState(false)
+  const [isEquipoDialogOpen, setIsEquipoDialogOpen] = useState(false)
 
   useEffect(() => {
     // Subscribe to inventarios from Firestore
@@ -56,61 +70,136 @@ export function InventarioTopBar() {
   // Acciones para el botón "Crear" con íconos y atajos
   const createActions = [
     {
-      label: 'Entrada de artículos',
-      icon: <PackageOpen className='mr-2 h-4 w-4' />,
-      shortcut: '⌘E',
-      action: () => navigate('/almacen/entradas/nuevo'),
+      label: 'Agregar Material',
+      icon: <Box className='mr-2 h-4 w-4' />,
+      shortcut: '⌘M',
+      action: () => {
+        if (currentInventario?.id) {
+          setIsMaterialDialogOpen(true)
+        } else {
+          navigate('/almacen/inventarios')
+        }
+      },
     },
     {
-      label: 'Salida de artículos',
-      icon: <PackageMinus className='mr-2 h-4 w-4' />,
-      shortcut: '⌘S',
-      action: () => navigate('/almacen/salidas/nuevo'),
+      label: 'Agregar Equipo',
+      icon: <Cpu className='mr-2 h-4 w-4' />,
+      shortcut: '⌘Q',
+      action: () => {
+        if (currentInventario?.id) {
+          setIsEquipoDialogOpen(true)
+        } else {
+          navigate('/almacen/inventarios')
+        }
+      },
+    },
+  ]
+
+  // Acciones para el botón "Ver" (ojo)
+  const viewActions = [
+    {
+      label: 'Ver Tabla de Artículos',
+      icon: <Table2 className='mr-2 h-4 w-4' />,
+      shortcut: '⌘V',
+      action: () => {
+        if (currentInventario) {
+          setIsTableDialogOpen(true)
+        } else {
+          navigate('/almacen/inventarios')
+        }
+      },
     },
     {
-      label: 'Transferencia',
-      icon: <ArrowLeftRight className='mr-2 h-4 w-4' />,
-      shortcut: '⌘T',
-      action: () => navigate('/almacen/transferencias/nuevo'),
+      label: 'Ver Movimientos',
+      icon: <History className='mr-2 h-4 w-4' />,
+      shortcut: '⌘H',
+      action: () => {
+        if (currentInventario?.id) {
+          navigate(`/almacen/inventarios/${currentInventario.id}/movimientos`)
+        } else {
+          navigate('/almacen/inventarios')
+        }
+      },
     },
     {
-      label: 'Selección de inventario',
-      icon: <ClipboardCheck className='mr-2 h-4 w-4' />,
-      shortcut: '⌘I',
-      action: () => navigate('/almacen/inventarios'),
+      label: 'Stock Bajo',
+      icon: <AlertTriangle className='mr-2 h-4 w-4' />,
+      shortcut: '⌘B',
+      action: () => {
+        if (currentInventario) {
+          setIsStockBajoDialogOpen(true)
+        } else {
+          navigate('/almacen/inventarios')
+        }
+      },
     },
   ]
 
   // Register keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey) {
+      // Prevenir si el usuario está escribiendo en un input
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return
+      }
+
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
         switch (e.key.toLowerCase()) {
-          case 'e':
+          case 'm':
             e.preventDefault()
-            navigate('/almacen/entradas/nuevo')
+            e.stopPropagation()
+            if (currentInventario?.id) {
+              setIsMaterialDialogOpen(true)
+            } else {
+              navigate('/almacen/inventarios')
+            }
             break
-          case 's':
+          case 'q':
             e.preventDefault()
-            navigate('/almacen/salidas/nuevo')
+            e.stopPropagation()
+            if (currentInventario?.id) {
+              setIsEquipoDialogOpen(true)
+            } else {
+              navigate('/almacen/inventarios')
+            }
             break
-          case 't':
+          case 'v':
             e.preventDefault()
-            navigate('/almacen/transferencias/nuevo')
+            e.stopPropagation()
+            if (currentInventario) {
+              setIsTableDialogOpen(true)
+            } else {
+              navigate('/almacen/inventarios')
+            }
             break
-          case 'i':
+          case 'h':
             e.preventDefault()
-            navigate('/almacen/inventarios')
+            e.stopPropagation()
+            if (currentInventario?.id) {
+              navigate(`/almacen/inventarios/${currentInventario.id}/movimientos`)
+            } else {
+              navigate('/almacen/inventarios')
+            }
+            break
+          case 'b':
+            e.preventDefault()
+            e.stopPropagation()
+            if (currentInventario) {
+              setIsStockBajoDialogOpen(true)
+            } else {
+              navigate('/almacen/inventarios')
+            }
             break
         }
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown, { capture: true })
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleKeyDown, { capture: true })
     }
-  }, [navigate])
+  }, [navigate, currentInventario])
 
   const handleInventarioChange = (inventario: Inventario) => {
     setCurrentInventario(inventario)
@@ -211,19 +300,54 @@ export function InventarioTopBar() {
           </DropdownMenu>
         )}
 
+        {/* Botón Ver (ojo) */}
+        {currentInventario && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant='secondary'
+                size='icon'
+                className='bg-white hover:bg-gray-100 border border-gray-200'
+                title='Ver inventario'
+              >
+                <Eye className='h-4 w-4 text-[#005BAA]' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end' className='w-56'>
+              <div className='p-2 text-sm font-medium text-muted-foreground'>
+                Ver Inventario
+              </div>
+              <DropdownMenuSeparator />
+              {viewActions.map((action) => (
+                <DropdownMenuItem
+                  key={action.label}
+                  onClick={action.action}
+                  className='cursor-pointer flex items-center'
+                >
+                  {action.icon}
+                  <span>{action.label}</span>
+                  <DropdownMenuShortcut>{action.shortcut}</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {/* Botón Crear (solo +) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               style={{ backgroundColor: '#F37021', borderColor: '#F37021' }}
               className='hover:bg-orange-500 text-white border-none'
+              size='icon'
+              title='Crear'
             >
-              <Plus className='mr-2 h-4 w-4' />
-              Crear
+              <Plus className='h-4 w-4' />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-56'>
             <div className='p-2 text-sm font-medium text-muted-foreground'>
-              Acciones rápidas
+              Crear
             </div>
             <DropdownMenuSeparator />
             {createActions.map((action) => (
@@ -244,6 +368,32 @@ export function InventarioTopBar() {
           <UserMenu />
         </div>
       </div>
+
+      {/* Dialogs */}
+      {currentInventario && (
+        <>
+          <InventarioTableDialog
+            open={isTableDialogOpen}
+            onOpenChange={setIsTableDialogOpen}
+            inventario={currentInventario}
+          />
+          <InventarioStockBajoDialog
+            open={isStockBajoDialogOpen}
+            onOpenChange={setIsStockBajoDialogOpen}
+            inventario={currentInventario}
+          />
+          <NuevoMaterialForm
+            inventarioId={currentInventario.id!}
+            open={isMaterialDialogOpen}
+            onOpenChange={setIsMaterialDialogOpen}
+          />
+          <NuevoEquipoForm
+            inventarioId={currentInventario.id!}
+            open={isEquipoDialogOpen}
+            onOpenChange={setIsEquipoDialogOpen}
+          />
+        </>
+      )}
     </header>
   )
 }

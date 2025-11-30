@@ -4,6 +4,7 @@ import { TipoMovimiento } from '@/types/interfaces/almacen/movimiento'
 import {
   addDoc,
   collection,
+  doc,
   serverTimestamp,
   updateDoc,
   query,
@@ -13,6 +14,7 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { TipoArticulo, Unidad } from 'shared-types'
 import { getAuthState } from '@/stores/authStore'
+import { validateNewArticle, findDuplicateArticle } from '../utils/inventarioValidations'
 
 export interface NuevoArticuloData {
   nombre: string
@@ -32,6 +34,7 @@ export interface NuevoArticuloData {
   categoriaEquipo?: string
   wirelessKey?: string
   cantidad_minima?: number
+  codigo?: string // SKU
 }
 
 interface AgregarArticuloParams extends NuevoArticuloData {
@@ -76,48 +79,44 @@ export function useAgregarArticulo(inventarioId: string) {
         cantidad: data.tipo === TipoArticulo.EQUIPO ? 1 : Number(data.cantidad),
         ...(data.categoriaEquipo && { categoriaEquipo: data.categoriaEquipo }),
         ...(data.wirelessKey && { wirelessKey: data.wirelessKey }),
+        ...(data.codigo && { codigo: data.codigo }), // Guardar código si existe
       }
 
       // Get current user ID from auth store
       const { user } = getAuthState()
       const userId = user?.id || 'unknown'
 
-      // Si es MATERIAL, buscar si ya existe uno con el mismo nombre en el mismo inventario
-      if (data.tipo === TipoArticulo.MATERIAL && articuloPayload.nombre) {
-        const articulosRef = collection(database, 'articulos')
-        const q = query(
-          articulosRef,
-          where('idinventario', '==', inventarioId),
-          where('nombre', '==', articuloPayload.nombre.trim()),
-          where('tipo', '==', TipoArticulo.MATERIAL)
-        )
+      // Validar datos antes de proceder
+      const validation = await validateNewArticle(articuloPayload, inventarioId)
+      if (!validation.isValid) {
+        setError(validation.error ? new Error(validation.error) : new Error('Error de validación'))
+        return null
+      }
 
-        const querySnapshot = await getDocs(q)
-
-        if (!querySnapshot.empty) {
-          // Artículo material existente encontrado
-          const articuloExistenteDoc = querySnapshot.docs[0]
-          const articuloExistenteData = articuloExistenteDoc.data()
-          const cantidadActual = Number(articuloExistenteData.cantidad) || 0
+      // Si es MATERIAL, buscar si ya existe uno con la misma clave (SKU o nombre+unidad+marca+modelo)
+      if (data.tipo === TipoArticulo.MATERIAL) {
+        const duplicate = await findDuplicateArticle(articuloPayload, inventarioId)
+        
+        if (duplicate) {
+          // Artículo material existente encontrado - agregar stock
+          const cantidadActual = Number(duplicate.cantidad) || 0
           const cantidadAAgregar = Number(articuloPayload.cantidad) || 0
           const nuevaCantidad = cantidadActual + cantidadAAgregar
 
-          const { ...otrosDatosDelPayload } = articuloPayload
-
+          // Actualizar con los datos más recientes del formulario (costo, descripción, etc.)
           const updateData = {
-            ...otrosDatosDelPayload, // Contiene costo, unidad, descripcion, etc. actualizados del form
+            ...articuloPayload,
             cantidad: nuevaCantidad,
             updatedAt: serverTimestamp(),
-            // imagenUrl ya está en otrosDatosDelPayload si se actualizó
           }
 
-          await updateDoc(articuloExistenteDoc.ref, updateData)
+          await updateDoc(doc(database, 'articulos', duplicate.id!), updateData)
 
           // Crear registro de movimiento para la entrada
           const movimientoData = {
             idinventario_origen: null,
             idinventario_destino: inventarioId,
-            idarticulo: articuloExistenteDoc.id,
+            idarticulo: duplicate.id,
             idusuario: userId,
             cantidad: cantidadAAgregar,
             tipo: TipoMovimiento.ENTRADA,
@@ -133,11 +132,19 @@ export function useAgregarArticulo(inventarioId: string) {
           )
 
           // Actualizar el documento recién creado para incluir su propio ID
-          await updateDoc(movimientoRef, {
+          await updateDoc(doc(database, 'movimientos', movimientoRef.id), {
             id: movimientoRef.id,
           })
 
-          return articuloExistenteDoc.id // Devolver ID del artículo actualizado
+          return duplicate.id // Devolver ID del artículo actualizado
+        }
+      } else if (data.tipo === TipoArticulo.EQUIPO) {
+        // Para equipos, verificar que no exista otro con el mismo serial
+        const duplicate = await findDuplicateArticle(articuloPayload, inventarioId)
+        
+        if (duplicate) {
+          setError(new Error(`Ya existe un equipo con el serial "${articuloPayload.serial}". El serial debe ser único.`))
+          return null
         }
       }
 

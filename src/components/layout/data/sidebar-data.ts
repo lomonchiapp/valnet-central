@@ -8,6 +8,8 @@ import {
   IconUser,
   IconClock,
   IconCircleCheck,
+  IconDeviceDesktop,
+  IconCash,
 } from '@tabler/icons-react'
 import { Ticket as TicketIcon } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -29,10 +31,47 @@ export const sidebarData: SidebarData = {
       title: 'Almacen',
       items: [
         {
-          type: 'link',
+          type: 'group',
           title: 'Inventarios',
-          url: '/almacen/inventarios',
           icon: IconLayoutDashboard,
+          url: '/almacen/inventarios',
+          children: [
+            {
+              type: 'link',
+              title: 'Ubicaciones',
+              url: '/almacen/inventarios/ubicaciones',
+              icon: IconMapPin,
+            },
+            {
+              type: 'link',
+              title: 'Marcas/Modelos',
+              url: '/almacen/inventarios/marcas',
+              icon: IconChecklist,
+            },
+            {
+              type: 'link',
+              title: 'Proveedores',
+              url: '/almacen/inventarios/proveedores',
+              icon: IconUser,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Cajas',
+      items: [
+        {
+          type: 'link',
+          title: 'Punto de Venta',
+          url: '/cajas/pos',
+          icon: IconDeviceDesktop,
+        },
+        {
+          type: 'link',
+          title: 'Sesiones / Cierres',
+          url: '/cajas/sesiones',
+          icon: IconCash,
         },
       ],
     },

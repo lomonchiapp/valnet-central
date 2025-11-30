@@ -4,12 +4,14 @@ import {
   Package, 
   AlertTriangle, 
   TrendingUp, 
-  Calendar, 
   Plus,
   FileText,
   Download,
+  BarChart3,
   Search,
-  BarChart3
+  Cpu,
+  Box,
+  ArrowLeft
 } from 'lucide-react'
 import { Inventario } from '@/types/interfaces/almacen/inventario'
 import { Articulo, TipoArticulo } from '@/types/interfaces/almacen/articulo'
@@ -18,13 +20,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ArticulosTable } from './components/ArticulosTable'
-import { NuevoArticuloForm } from './components/NuevoArticuloForm'
+import { ArticulosDataTable } from './components/ArticulosDataTable'
+import { NuevoMaterialForm } from './components/NuevoMaterialForm'
+import { NuevoEquipoForm } from './components/NuevoEquipoForm'
 import { useEliminarArticulo } from './hooks/useEliminarArticulo'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export default function InventarioPage() {
   const { id: inventarioId } = useParams<{ id: string }>()
-  const [openNewForm, setOpenNewForm] = useState(false)
+  const [openMaterialForm, setOpenMaterialForm] = useState(false)
+  const [openEquipoForm, setOpenEquipoForm] = useState(false)
   
   const {
     inventarios,  
@@ -33,7 +43,7 @@ export default function InventarioPage() {
     subscribeToArticulos,
   } = useAlmacenState()
 
-  const { eliminarArticulo, error: errorEliminar } = useEliminarArticulo()
+  const { error: errorEliminar } = useEliminarArticulo()
 
   useEffect(() => {
     const unsubscribeInventarios = subscribeToInventarios()
@@ -86,14 +96,6 @@ export default function InventarioPage() {
     }).format(value)
   }
 
-  const formatDate = (dateString: string | Date) => {
-    const date = dateString instanceof Date ? dateString : new Date(dateString)
-    return date.toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
 
   return (
     <div className='container mx-auto p-6 space-y-8'>
@@ -111,6 +113,11 @@ export default function InventarioPage() {
         <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>
           <div className='flex-1'>
             <div className='flex items-center gap-3 mb-2'>
+              <Button variant='ghost' size='icon' asChild className='-ml-2'>
+                <Link to='/almacen/inventarios'>
+                  <ArrowLeft className='h-5 w-5' />
+                </Link>
+              </Button>
               <div className='p-2 bg-primary/10 rounded-lg'>
                 <Package className='h-6 w-6 text-primary' />
               </div>
@@ -127,10 +134,6 @@ export default function InventarioPage() {
                     <Package className='h-4 w-4' />
                     Tipo: {inventario.tipo}
                   </span>
-                  <span className='flex items-center gap-1'>
-                    <Calendar className='h-4 w-4' />
-                    {formatDate(inventario.createdAt)}
-                  </span>
                 </div>
               </div>
             </div>
@@ -145,10 +148,24 @@ export default function InventarioPage() {
               <BarChart3 className='h-4 w-4 mr-2' />
               Reportes
             </Button>
-            <Button onClick={() => setOpenNewForm(true)} size='sm'>
-              <Plus className='h-4 w-4 mr-2' />
-              Agregar Material
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size='sm'>
+                  <Plus className='h-4 w-4 mr-2' />
+                  Agregar Artículo
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setOpenMaterialForm(true)}>
+                  <Box className='h-4 w-4 mr-2' />
+                  Agregar Material
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setOpenEquipoForm(true)}>
+                  <Cpu className='h-4 w-4 mr-2' />
+                  Agregar Equipo
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -274,29 +291,22 @@ export default function InventarioPage() {
         </CardHeader>
         
         <CardContent className='p-6'>
-          <ArticulosTable 
+          <ArticulosDataTable 
             articulos={articulosInventario} 
-            onEliminar={async (articulo: Articulo) => {
-              if (window.confirm('¿Seguro que deseas eliminar este artículo?')) {
-                try {
-                  await eliminarArticulo(articulo.id)
-                } catch (error) {
-                  console.error('Error al eliminar artículo:', error)
-                }
-              }
-            }}
-            onVer={(articulo: Articulo) => alert('Ver detalles de: ' + articulo.nombre)}
-            onEditar={(articulo: Articulo) => alert('Editar: ' + articulo.nombre)}
-            onTransferir={(articulo: Articulo) => alert('Transferir: ' + articulo.nombre)}
           />
         </CardContent>
       </Card>
 
-      {/* Modal de nuevo artículo */}
-      <NuevoArticuloForm
+      {/* Modales de formularios */}
+      <NuevoMaterialForm
         inventarioId={inventario.id}
-        open={openNewForm}
-        onOpenChange={setOpenNewForm}
+        open={openMaterialForm}
+        onOpenChange={setOpenMaterialForm}
+      />
+      <NuevoEquipoForm
+        inventarioId={inventario.id}
+        open={openEquipoForm}
+        onOpenChange={setOpenEquipoForm}
       />
     </div>
   )

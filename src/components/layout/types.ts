@@ -19,6 +19,7 @@ export type NavGroup = {
   type: 'group'
   title: string
   icon?: ComponentType<IconProps> | LucideIcon
+  url?: string
   children: NavLink[]
 }
 

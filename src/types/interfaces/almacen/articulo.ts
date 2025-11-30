@@ -19,6 +19,7 @@ export interface Articulo extends BaseModel {
   idinventario: string
   nombre: string
   descripcion: string
+  codigo?: string // SKU / Código Interno (Opcional para compatibilidad, pero recomendado)
   //parametros para materiales
   cantidad: number
   cantidad_minima?: number //cantidad minima para pedir un nuevo pedido

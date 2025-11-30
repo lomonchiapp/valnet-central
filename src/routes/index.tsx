@@ -8,6 +8,8 @@ import TicketDetail from '@/features/SAC/tickets/TicketDetail'
 import Inventarios from '@/features/almacen/inventarios'
 // Almacen
 import Inventario from '@/features/almacen/inventarios/inventario'
+import MovimientosInventario from '@/features/almacen/inventarios/inventario/movimientos'
+import ArticuloPage from '@/features/almacen/inventarios/inventario/articulo'
 import Marcas from '@/features/almacen/inventarios/marcas'
 import Proveedores from '@/features/almacen/inventarios/proveedores'
 // Almacen
@@ -105,6 +107,8 @@ export function AppRoutes() {
           <Route path='proveedores' element={<Proveedores />} />
         </Route>
         <Route path='/almacen/inventarios/:id' element={<Inventario />} />
+        <Route path='/almacen/inventarios/:id/movimientos' element={<MovimientosInventario />} />
+        <Route path='/almacen/inventarios/:inventarioId/articulo/:id' element={<ArticuloPage />} />
         {/* Coordinacion */}
         <Route path='/coordinacion/brigadas' element={<Brigadas />} />
         <Route path='/soporte/tickets' element={<Tickets />} />

@@ -14,6 +14,7 @@ import {
   getDocs,
 } from 'firebase/firestore'
 import { Articulo } from 'shared-types'
+import { validateSalida, validateTransfer, findDuplicateArticle } from '../utils/inventarioValidations'
 
 interface SalidaArticuloParams {
   articuloId: string
@@ -57,25 +58,25 @@ export function useSalidaArticulo() {
 
       const articulo = articuloSnap.data() as Articulo
 
-      // Para materiales verificar cantidad, para equipos verificar que el serial exista
-      if (
-        articulo.tipo === TipoArticulo.MATERIAL &&
-        articulo.cantidad < params.cantidad
-      ) {
-        const errorMsg = `No hay suficiente cantidad disponible. Disponible: ${articulo.cantidad}`
-        setError(errorMsg)
+      // Validar salida/transferencia
+      const salidaValidation = validateSalida(articulo, params.cantidad)
+      if (!salidaValidation.isValid) {
+        setError(salidaValidation.error || 'Error de validación')
         return {
           success: false,
-          message: errorMsg,
+          message: salidaValidation.error || 'Error de validación',
         }
       }
 
-      // Para equipos, solo permitir transferencia de unidades completas (cantidad = 1)
-      if (articulo.tipo === TipoArticulo.EQUIPO && params.cantidad !== 1) {
-        setError('Los equipos deben transferirse de uno en uno')
-        return {
-          success: false,
-          message: 'Los equipos deben transferirse de uno en uno',
+      // Si es transferencia, validar que sea posible
+      if (params.inventarioDestinoId) {
+        const transferValidation = await validateTransfer(articulo, params.inventarioDestinoId)
+        if (!transferValidation.isValid) {
+          setError(transferValidation.error || 'Error de validación de transferencia')
+          return {
+            success: false,
+            message: transferValidation.error || 'Error de validación de transferencia',
+          }
         }
       }
 
@@ -84,77 +85,55 @@ export function useSalidaArticulo() {
         ? TipoMovimiento.TRANSFERENCIA
         : TipoMovimiento.SALIDA
 
-      // Crear el registro de movimiento
-      const movimientoData = {
-        idinventario_origen: params.inventarioOrigenId,
-        idinventario_destino: params.inventarioDestinoId || null,
-        idarticulo: params.articuloId,
-        idusuario: params.usuarioId,
-        cantidad: params.cantidad,
-        tipo: tipoMovimiento,
-        fecha: new Date(),
-        descripcion: params.descripcion,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+      // Validar que si es transferencia, el inventario destino existe
+      if (tipoMovimiento === TipoMovimiento.TRANSFERENCIA && !params.inventarioDestinoId) {
+        const errorMsg = 'Se requiere un inventario destino para realizar una transferencia'
+        setError(errorMsg)
+        return { success: false, message: errorMsg }
       }
 
-      const movimientoRef = await addDoc(
-        collection(database, 'movimientos'),
-        movimientoData
-      )
+      let movimientoRef: { id: string } | null = null
 
-      // Actualizar el documento recién creado para incluir su propio ID
-      await updateDoc(doc(database, 'movimientos', movimientoRef.id), {
-        id: movimientoRef.id,
-      })
-
-      // Si es una transferencia, manejar diferente según el tipo de artículo
+      // Si es una transferencia, manejar diferente según el tipo de artículo ANTES de crear el movimiento
       if (
         tipoMovimiento === TipoMovimiento.TRANSFERENCIA &&
         params.inventarioDestinoId
       ) {
         if (articulo.tipo === TipoArticulo.MATERIAL) {
-          // MATERIAL: Actualizar cantidad en origen
+          // MATERIAL: Actualizar cantidad en origen primero
           await updateDoc(articuloRef, {
             cantidad: articulo.cantidad - params.cantidad,
             updatedAt: serverTimestamp(),
           })
 
-          // Buscar material similar en destino por nombre, marca, modelo
-          const articulosRef = collection(database, 'articulos')
-          const q = query(
-            articulosRef,
-            where('idinventario', '==', params.inventarioDestinoId),
-            where('nombre', '==', articulo.nombre),
-            where('tipo', '==', TipoArticulo.MATERIAL),
-            where('marca', '==', articulo.marca),
-            where('modelo', '==', articulo.modelo)
-          )
+          // Buscar material en destino usando la clave completa (nombre + unidad + marca + modelo)
+          const materialDestino = await findDuplicateArticle(articulo, params.inventarioDestinoId)
 
-          const materialesDestino = await getDocs(q)
-
-          if (!materialesDestino.empty) {
-            // Si existe material similar, actualizar cantidad
-            const materialDestino = materialesDestino.docs[0].data() as Articulo
-            await updateDoc(doc(database, 'articulos', materialDestino.id), {
-              cantidad: materialDestino.cantidad + params.cantidad,
+          if (materialDestino) {
+            // Si existe material con la misma clave, actualizar cantidad
+            const cantidadActual = materialDestino.cantidad || 0
+            const nuevaCantidad = cantidadActual + params.cantidad
+            
+            await updateDoc(doc(database, 'articulos', materialDestino.id!), {
+              cantidad: nuevaCantidad,
               updatedAt: serverTimestamp(),
-              ubicacion: params.ubicacionDestino || materialDestino.ubicacion,
+              ubicacion: params.ubicacionDestino || materialDestino.ubicacion || articulo.ubicacion || 'Almacén principal',
             })
           } else {
             // Si no existe, crear nuevo material en destino
-            const nuevoMaterialData = {
+            const nuevoMaterialData: Partial<Articulo> = {
               nombre: articulo.nombre,
-              descripcion: articulo.descripcion,
+              descripcion: articulo.descripcion || '',
               tipo: TipoArticulo.MATERIAL,
               idinventario: params.inventarioDestinoId,
               cantidad: params.cantidad,
-              costo: articulo.costo,
+              costo: articulo.costo || 0,
               unidad: articulo.unidad,
-              marca: articulo.marca,
-              modelo: articulo.modelo,
+              marca: articulo.marca || '',
+              modelo: articulo.modelo || '',
               serial: '', // Materiales no tienen serial
-              ubicacion: params.ubicacionDestino || 'Almacén principal',
+              ubicacion: params.ubicacionDestino || articulo.ubicacion || 'Almacén principal',
+              cantidad_minima: articulo.cantidad_minima,
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
             }
@@ -178,12 +157,60 @@ export function useSalidaArticulo() {
             updatedAt: serverTimestamp(),
           })
         }
+
+        // Crear el registro de movimiento DESPUÉS de procesar la transferencia
+        const movimientoData = {
+          idinventario_origen: params.inventarioOrigenId,
+          idinventario_destino: params.inventarioDestinoId || null,
+          idarticulo: params.articuloId,
+          idusuario: params.usuarioId,
+          cantidad: params.cantidad,
+          tipo: tipoMovimiento,
+          fecha: new Date(),
+          descripcion: params.descripcion,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }
+
+        movimientoRef = await addDoc(
+          collection(database, 'movimientos'),
+          movimientoData
+        )
+
+        // Actualizar el documento recién creado para incluir su propio ID
+        await updateDoc(doc(database, 'movimientos', movimientoRef.id), {
+          id: movimientoRef.id,
+        })
       } else {
         // Si es solo salida (no transferencia), actualizar cantidad
         const nuevaCantidad = articulo.cantidad - params.cantidad
         await updateDoc(articuloRef, {
           cantidad: nuevaCantidad,
           updatedAt: serverTimestamp(),
+        })
+
+        // Crear el registro de movimiento para la salida
+        const movimientoData = {
+          idinventario_origen: params.inventarioOrigenId,
+          idinventario_destino: null,
+          idarticulo: params.articuloId,
+          idusuario: params.usuarioId,
+          cantidad: params.cantidad,
+          tipo: TipoMovimiento.SALIDA,
+          fecha: new Date(),
+          descripcion: params.descripcion,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }
+
+        movimientoRef = await addDoc(
+          collection(database, 'movimientos'),
+          movimientoData
+        )
+
+        // Actualizar el documento recién creado para incluir su propio ID
+        await updateDoc(doc(database, 'movimientos', movimientoRef.id), {
+          id: movimientoRef.id,
         })
       }
 

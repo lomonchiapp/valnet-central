@@ -14,6 +14,8 @@ import {
   DollarSign,
   MapPin,
   Zap,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAlmacenState } from '@/context/global/useAlmacenState'
@@ -126,15 +128,20 @@ function InventarioDashboard() {
     }
   }, [inventarios, articulos, movimientos])
 
-  // Obtener movimientos recientes (últimos 8)
-  const movimientosRecientes = useMemo(() => {
+  // Estado para paginación de movimientos recientes
+  const [currentPageMovimientos, setCurrentPageMovimientos] = useState(1)
+  const ITEMS_PER_PAGE = 3
+  const MAX_PAGES = 5
+
+  // Obtener movimientos recientes (máximo 15 para 5 páginas)
+  const todosMovimientosRecientes = useMemo(() => {
     return movimientos
       .sort((a, b) => {
         const fechaA = convertFirestoreDate(a.fecha) || new Date(0)
         const fechaB = convertFirestoreDate(b.fecha) || new Date(0)
         return fechaB.getTime() - fechaA.getTime()
       })
-      .slice(0, 8)
+      .slice(0, MAX_PAGES * ITEMS_PER_PAGE) // Máximo 15 movimientos
       .map(mov => {
         const articulo = articulos.find(art => art.id === mov.idarticulo)
         const inventarioOrigen = inventarios.find(inv => inv.id === mov.idinventario_origen)
@@ -157,6 +164,12 @@ function InventarioDashboard() {
         }
       })
   }, [movimientos, articulos, inventarios])
+
+  // Calcular paginación
+  const totalPagesMovimientos = Math.min(Math.ceil(todosMovimientosRecientes.length / ITEMS_PER_PAGE), MAX_PAGES)
+  const startIndexMovimientos = (currentPageMovimientos - 1) * ITEMS_PER_PAGE
+  const endIndexMovimientos = startIndexMovimientos + ITEMS_PER_PAGE
+  const movimientosRecientes = todosMovimientosRecientes.slice(startIndexMovimientos, endIndexMovimientos)
 
   // Obtener artículos con stock bajo
   const articulosBajoStock = useMemo(() => {
@@ -441,27 +454,62 @@ function InventarioDashboard() {
           <CardContent>
             <div className="space-y-3">
               {movimientosRecientes.length > 0 ? (
-                movimientosRecientes.map((movement) => (
-                  <div
-                    key={movement.id}
-                    className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
-                    onClick={() => navigate('/almacen/inventarios')}
-                  >
-                    <div className={`p-1 rounded-full ${getMovimientoColor(movement.tipo)}`}>
-                      {getMovimientoIcon(movement.tipo)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{movement.articulo}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium">{movement.cantidad} unidades</span>
-                        {movement.inventarioOrigen && movement.inventarioDestino && (
-                          <span>• {movement.inventarioOrigen} → {movement.inventarioDestino}</span>
-                        )}
+                <>
+                  {movimientosRecientes.map((movement) => (
+                    <div
+                      key={movement.id}
+                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => navigate('/almacen/inventarios')}
+                    >
+                      <div className={`p-1 rounded-full ${getMovimientoColor(movement.tipo)}`}>
+                        {getMovimientoIcon(movement.tipo)}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{movement.fecha}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{movement.articulo}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="font-medium">{movement.cantidad} unidades</span>
+                          {movement.inventarioOrigen && movement.inventarioDestino && (
+                            <span>• {movement.inventarioOrigen} → {movement.inventarioDestino}</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{movement.fecha}</p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+                  
+                  {/* Paginación */}
+                  {totalPagesMovimientos > 1 && (
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setCurrentPageMovimientos(prev => Math.max(1, prev - 1))
+                        }}
+                        disabled={currentPageMovimientos === 1}
+                        className="h-8"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-xs text-muted-foreground">
+                        Página {currentPageMovimientos} de {totalPagesMovimientos}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setCurrentPageMovimientos(prev => Math.min(totalPagesMovimientos, prev + 1))
+                        }}
+                        disabled={currentPageMovimientos === totalPagesMovimientos}
+                        className="h-8"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <History className="h-12 w-12 mx-auto mb-3 text-gray-400" />
